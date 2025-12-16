@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Korean Grammar: N(noun) + (이)든지/도</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; touch-action: manipulation; }
+        .no-select { -webkit-user-select: none; user-select: none; }
+        .scroll-hidden::-webkit-scrollbar { display: none; }
+        .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-indigo-50 text-gray-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const questions = [
+            {
+                id: 1,
+                prefix: "배가 너무 고파요. 무슨",
+                sentence_end: "다 좋아요.",
+                hint: "Tôi đói quá. (Bất cứ món ăn nào) cũng được.",
+                noun: "음식",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 2,
+                prefix: "너무 늦은 시간이라서 거리에 어떤",
+                sentence_end: "없었어요.",
+                hint: "Đã quá muộn nên trên đường (không có người nào).",
+                noun: "사람",
+                suffix: "도",
+                type: "negative"
+            },
+            {
+                id: 3,
+                prefix: "저는 영화를 정말 좋아해요. 무슨",
+                sentence_end: "재미있게 봐요.",
+                hint: "Tôi rất thích phim. (Bất cứ phim nào) tôi cũng xem một cách thú vị.",
+                noun: "영화",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 4,
+                prefix: "몸이 너무 아파서 무슨",
+                sentence_end: "할 수 없어요.",
+                hint: "Tôi đau người quá nên (không thể làm việc gì).",
+                noun: "일",
+                suffix: "도",
+                type: "negative"
+            },
+            {
+                id: 5,
+                prefix: "우리 학교 도서관에는 무슨",
+                sentence_end: "다 있어요.",
+                hint: "Thư viện trường tôi có (bất cứ sách gì).",
+                noun: "책",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 6,
+                prefix: "휴일이라서 문을 연",
+                sentence_end: "하나도 없어요.",
+                hint: "Vì là ngày nghỉ nên (không có cửa hàng nào) mở cửa.",
+                noun: "가게", // 문맥상 '어떤 가게도' -> '문을 연 가게가...어떤 가게도' (x) -> '문을 연 가게(noun)가(context)' 
+                // 수정: 문장을 자연스럽게 만들기 위해 prefix 조정
+                // "휴일이라서 어떤 ____ 문을 열지 않았어요."가 더 자연스러운 '도' 문장임.
+                full_sentence_structure: true, 
+                override_prefix: "휴일이라서 어떤",
+                override_end: "문을 열지 않았어요.",
+                noun: "가게",
+                suffix: "도",
+                type: "negative"
+            },
+            {
+                id: 7,
+                prefix: "지민 씨는 노래를 잘 해요. 무슨",
+                sentence_end: "잘 불러요.",
+                hint: "Jimin hát hay. (Bất cứ bài hát nào) cậu ấy cũng hát tốt.",
+                noun: "노래",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 8,
+                prefix: "그 수학 문제는 너무 어려워서 어떤",
+                sentence_end: "풀지 못했어요.",
+                hint: "Bài toán đó quá khó nên (không học sinh nào) giải được.",
+                noun: "학생",
+                suffix: "도",
+                type: "negative"
+            },
+            {
+                id: 9,
+                prefix: "저는 과일을 좋아해서 무슨",
+                sentence_end: "잘 먹어요.",
+                hint: "Tôi thích hoa quả nên (bất cứ loại quả nào) cũng ăn ngon lành.",
+                noun: "과일",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 10,
+                prefix: "완벽하게 준비를 해서 어떤",
+                sentence_end: "없었어요.",
+                hint: "Đã chuẩn bị hoàn hảo nên (không có vấn đề nào) xảy ra.",
+                noun: "문제",
+                suffix: "도",
+                type: "negative"
+            },
+            {
+                id: 11,
+                prefix: "우리는 시간이 많아요. 무슨",
+                sentence_end: "만날 수 있어요.",
+                hint: "Chúng tôi có nhiều thời gian. Có thể gặp nhau (bất cứ thứ mấy/ngày nào).",
+                noun: "요일",
+                suffix: "든지",
+                type: "positive"
+            },
+            {
+                id: 12,
+                prefix: "마음에 드는 것이 없어서 어떤",
+                sentence_end: "사지 않았어요.",
+                hint: "Không có cái nào ưng ý nên tôi đã (không mua món quà nào).",
+                noun: "선물",
+                suffix: "도",
+                type: "negative"
+            }
+        ];
+
+        function App() {
+            const [view, setView] = React.useState('home');
+            const [currentQIndex, setCurrentQIndex] = React.useState(0);
+            const [selectedNoun, setSelectedNoun] = React.useState(null);
+            const [selectedSuffix, setSelectedSuffix] = React.useState(null);
+            const [status, setStatus] = React.useState("waiting"); 
+            const [score, setScore] = React.useState(0);
+            const [quizLog, setQuizLog] = React.useState([]); 
+            const [history, setHistory] = React.useState(() => {
+                const saved = localStorage.getItem('korean_grammar_noun_history');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            // Noun List for the current question (Distractors + Answer)
+            // To make it interesting, we should show a mix of nouns, or just specific categories?
+            // Let's show a fixed set of nouns for simplicity, or subsets.
+            // For this UI, showing all 8-12 nouns might be too crowded on mobile.
+            // Let's show a random subset including the answer, or grouped by meaning?
+            // To keep it simple and consistent, let's show categories or a 4x2 grid of relevant nouns.
+            // We will use a pool of nouns from the questions.
+            
+            const allNouns = ["음식", "사람", "영화", "일", "책", "가게", "노래", "학생", "과일", "문제", "요일", "선물"];
+            
+            // Suffix List
+            const suffixList = [
+                { text: "든지", label: "(이)든지", desc: "Bất cứ... (Tất cả)", type: "positive" },
+                { text: "도", label: "도", desc: "Không... (Phủ định)", type: "negative" }
+            ];
+
+            const currentQ = questions[currentQIndex];
+
+            // Helper: Check Batchim (받침)
+            const hasBatchim = (word) => {
+                if (!word) return false;
+                const lastChar = word.charCodeAt(word.length - 1);
+                return (lastChar - 44032) % 28 > 0;
+            };
+
+            // Helper: Combine Noun + Suffix
+            const getCombinedText = (noun, suffixKey) => {
+                if (!noun || !suffixKey) return "______";
+                
+                if (suffixKey === "든지") {
+                    return hasBatchim(noun) ? `${noun}이든지` : `${noun}든지`;
+                } else {
+                    return `${noun}도`;
+                }
+            };
+
+            const startQuiz = () => {
+                setCurrentQIndex(0);
+                setScore(0);
+                setQuizLog([]);
+                setStatus("waiting");
+                setSelectedNoun(null);
+                setSelectedSuffix(null);
+                setView('quiz');
+            };
+
+            const handleCheck = () => {
+                if (!selectedNoun || !selectedSuffix) return;
+
+                const userAnswer = getCombinedText(selectedNoun, selectedSuffix.text);
+                const correctAnswer = getCombinedText(currentQ.noun, currentQ.suffix);
+                const isCorrect = selectedNoun === currentQ.noun && selectedSuffix.text === currentQ.suffix;
+
+                if (isCorrect) {
+                    setStatus("correct");
+                    setScore(s => s + 1);
+                } else {
+                    setStatus("incorrect");
+                }
+
+                if (status === 'waiting') {
+                    setQuizLog(prev => [...prev, {
+                        qId: currentQ.id,
+                        qIndex: currentQIndex + 1,
+                        isCorrect: isCorrect,
+                        userAnswer: userAnswer,
+                        correctAnswer: correctAnswer
+                    }]);
+                }
+            };
+
+            const handleNext = () => {
+                if (currentQIndex < questions.length - 1) {
+                    setCurrentQIndex(prev => prev + 1);
+                    setSelectedNoun(null);
+                    setSelectedSuffix(null);
+                    setStatus("waiting");
+                } else {
+                    finishQuiz();
+                }
+            };
+
+            const finishQuiz = () => {
+                const newRecord = {
+                    id: Date.now(),
+                    date: new Date().toLocaleString('ko-KR'),
+                    score: score,
+                    total: questions.length,
+                    details: quizLog
+                };
+                
+                const updatedHistory = [newRecord, ...history];
+                setHistory(updatedHistory);
+                localStorage.setItem('korean_grammar_noun_history', JSON.stringify(updatedHistory));
+                setView('result');
+            };
+
+            const goHome = () => {
+                setView('home');
+            };
+
+            const clearHistory = () => {
+                if(confirm("정말로 모든 기록을 삭제하시겠습니까? (Bạn có chắc chắn muốn xóa tất cả lịch sử không?)")) {
+                    setHistory([]);
+                    localStorage.removeItem('korean_grammar_noun_history');
+                }
+            };
+
+            // -- UI Components --
+
+            // Generate Noun Grid
+            // We want to make sure the user finds the correct noun among distractors.
+            // Let's display all 12 nouns but highlighted clearly.
+            // Or maybe just 6 nouns per question (Correct + 5 Random).
+            // Let's use 8 items (2 rows of 4) to ensure it fits mobile.
+            const getCurrentNouns = () => {
+                const answer = currentQ.noun;
+                // Simple deterministic shuffle or fixed list could work. 
+                // Let's just show all 12 in a 3x4 grid for consistency so users learn position? 
+                // No, 12 is too many buttons for small screens if text is large.
+                // Let's show 6 relevant nouns.
+                // For simplicity in this code, let's just show all 12 in a scrollable or compact grid.
+                return allNouns;
+            };
+
+            // --- VIEW: HOME ---
+            if (view === 'home') {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-indigo-50 no-select">
+                        <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
+                            <div className="text-5xl mb-4">🇰🇷📝</div>
+                            <h1 className="text-2xl font-bold text-indigo-900 mb-2">한국어 문법 연습</h1>
+                            <p className="text-gray-500 mb-8 font-medium">
+                                무슨/어떤 N(명사) + 이든지/도<br/>
+                                <span className="text-sm text-indigo-400">(N + any / N + no)</span>
+                            </p>
+                            
+                            <button onClick={startQuiz} className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 shadow-md mb-4 transition transform active:scale-95">
+                                시작하기 (Bắt đầu)
+                            </button>
+                            
+                            {history.length > 0 && (
+                                <button onClick={() => setView('history')} className="w-full bg-white text-indigo-600 border-2 border-indigo-100 py-4 rounded-xl font-bold text-lg hover:bg-indigo-50 shadow-sm transition transform active:scale-95">
+                                    기록 보기 (Lịch sử)
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- VIEW: HISTORY ---
+            if (view === 'history') {
+                return (
+                    <div className="min-h-screen flex flex-col p-4 bg-indigo-50 no-select">
+                        <div className="w-full max-w-md mx-auto flex-1 flex flex-col">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold text-gray-800">나의 기록 (Lịch sử)</h2>
+                                <button onClick={goHome} className="text-sm bg-white px-3 py-1.5 rounded-lg border shadow-sm">
+                                    🏠 홈 (Home)
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto space-y-3 pb-4 scroll-hidden">
+                                {history.map((record) => (
+                                    <div key={record.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <span className="text-xs text-gray-400 font-mono">{record.date}</span>
+                                            <span className={`font-bold text-lg ${record.score >= 10 ? 'text-green-600' : 'text-indigo-600'}`}>
+                                                {record.score} / {record.total}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-6 gap-1">
+                                            {record.details && record.details.map((log) => (
+                                                <div key={log.qId} className={`h-1.5 rounded-full ${log.isCorrect ? 'bg-green-400' : 'bg-red-300'}`}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={clearHistory} className="mt-4 w-full py-3 text-red-400 text-sm font-medium hover:text-red-600">
+                                기록 삭제 (Xóa lịch sử)
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- VIEW: RESULT ---
+            if (view === 'result') {
+                return (
+                    <div className="min-h-screen bg-indigo-50 p-4 overflow-y-auto">
+                        <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+                            <div className="bg-indigo-600 p-6 text-center text-white">
+                                <h2 className="text-2xl font-bold mb-1">결과 (Kết quả)</h2>
+                                <p className="text-indigo-100 text-sm mb-4">수고했습니다! (Vất vả rồi!)</p>
+                                <div className="text-6xl font-bold mb-2">{score} <span className="text-2xl font-normal opacity-70">/ {questions.length}</span></div>
+                            </div>
+                            <div className="bg-yellow-50 border-b border-yellow-100 p-4 text-center">
+                                <p className="text-red-600 font-bold text-sm leading-relaxed">
+                                    ⚠️ 선생님 확인용 (Dành cho giáo viên)<br/>
+                                    <span className="text-gray-800 text-lg">"Sau khi làm xong, hãy đưa màn hình này cho giáo viên xem."</span>
+                                </p>
+                            </div>
+                            <div className="p-4">
+                                <h3 className="font-bold text-gray-700 mb-3 text-sm">상세 결과 (Chi tiết)</h3>
+                                <div className="border rounded-xl overflow-hidden text-sm">
+                                    <div className="grid grid-cols-12 bg-gray-100 border-b p-2 font-bold text-gray-600 text-center">
+                                        <div className="col-span-2">#</div>
+                                        <div className="col-span-7">답안 (Trả lời)</div>
+                                        <div className="col-span-3">O/X</div>
+                                    </div>
+                                    {quizLog.map((log, idx) => (
+                                        <div key={idx} className={`grid grid-cols-12 p-3 border-b last:border-0 items-center ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                            <div className="col-span-2 text-center font-bold text-gray-500">{log.qIndex}</div>
+                                            <div className="col-span-7 pl-2">
+                                                <span className={`${log.isCorrect ? 'text-gray-800' : 'text-red-500 line-through'}`}>
+                                                    {log.userAnswer}
+                                                </span>
+                                                {!log.isCorrect && (
+                                                    <div className="text-xs text-green-600 mt-1">
+                                                        → {log.correctAnswer}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="col-span-3 text-center">
+                                                {log.isCorrect 
+                                                    ? <span className="text-green-500 font-bold text-lg">⭕</span> 
+                                                    : <span className="text-red-500 font-bold text-lg">❌</span>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="p-4 bg-gray-50 border-t">
+                                <button onClick={goHome} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">
+                                    처음으로 (Về trang chủ)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- VIEW: QUIZ ---
+            const prefix = currentQ.override_prefix || currentQ.prefix;
+            const sentenceEnd = currentQ.override_end || currentQ.sentence_end;
+
+            return (
+                <div className="min-h-screen flex flex-col py-4 px-3 max-w-md mx-auto no-select">
+                    {/* Header */}
+                    <header className="flex justify-between items-center mb-4 px-1">
+                        <button onClick={goHome} className="text-gray-400 text-sm hover:text-gray-600">← Home</button>
+                        <div className="bg-white px-3 py-1 rounded-lg shadow-sm border border-indigo-100">
+                            <span className="text-xs text-gray-400 mr-2">Score</span>
+                            <span className="text-lg font-bold text-indigo-600">{score}/{questions.length}</span>
+                        </div>
+                    </header>
+
+                    {/* Progress */}
+                    <div className="w-full bg-indigo-100 rounded-full h-2 mb-6">
+                        <div className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${((currentQIndex + 1) / questions.length) * 100}%` }}></div>
+                    </div>
+
+                    {/* Question Card */}
+                    <div className="bg-white rounded-2xl shadow-lg p-5 w-full mb-4 relative border-l-4 border-indigo-500 flex flex-col justify-center min-h-[160px]">
+                        <div className="absolute top-3 right-3 text-xs font-bold text-gray-300">Q.{currentQIndex + 1}</div>
+                        
+                        <div className="text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed text-center mb-3 break-keep">
+                            {prefix}
+                            <span className={`inline-block border-b-2 px-1 mx-1 transition-colors duration-300 min-w-[80px] text-center font-bold
+                                ${status === 'correct' ? 'border-green-500 text-green-600 bg-green-50 rounded' : 
+                                  status === 'incorrect' ? 'border-red-500 text-red-600 bg-red-50 rounded' : 'border-indigo-300 text-indigo-600'}
+                            `}>
+                                {status === 'waiting' 
+                                    ? getCombinedText(selectedNoun, selectedSuffix?.text) 
+                                    : getCombinedText(currentQ.noun, currentQ.suffix)}
+                            </span>
+                            {sentenceEnd}
+                        </div>
+
+                        <div className="text-center">
+                            <span className="inline-block bg-indigo-50 text-indigo-600 text-xs sm:text-sm px-3 py-1.5 rounded-full font-medium">
+                                🇻🇳 {currentQ.hint}
+                            </span>
+                        </div>
+                        
+                        {status === 'incorrect' && (
+                             <div className="mt-3 text-center text-xs text-red-500 font-medium bg-red-50 p-2 rounded">
+                                정답: <strong>{getCombinedText(currentQ.noun, currentQ.suffix)}</strong>
+                                <br/>
+                                {currentQ.type === 'positive' ? "'-(이)든지': bất cứ (All/Any)" : "'-도': cũng không (No/None)"}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Controls */}
+                    <div className="flex-1 flex flex-col justify-end space-y-3 pb-2">
+                        {/* Step 1: Nouns */}
+                        <div>
+                            <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center">
+                                <span className="bg-gray-200 text-gray-600 rounded-full w-5 h-5 inline-flex items-center justify-center mr-1.5">1</span>
+                                명사 (Danh từ)
+                            </p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {getCurrentNouns().map(noun => (
+                                    <button
+                                        key={noun}
+                                        disabled={status !== 'waiting'}
+                                        onClick={() => setSelectedNoun(noun)}
+                                        className={`py-2 rounded-lg font-bold text-sm sm:text-base transition-all touch-manipulation
+                                            ${selectedNoun === noun 
+                                                ? 'bg-indigo-600 text-white shadow-md transform scale-105' 
+                                                : 'bg-white text-gray-600 border border-gray-200 active:bg-gray-50'}
+                                            ${status !== 'waiting' && noun !== currentQ.noun ? 'opacity-30' : ''}
+                                        `}
+                                    >
+                                        {noun}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Step 2: Suffixes */}
+                        <div>
+                            <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center">
+                                <span className="bg-gray-200 text-gray-600 rounded-full w-5 h-5 inline-flex items-center justify-center mr-1.5">2</span>
+                                조사 (Tiểu từ)
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                                {suffixList.map(suf => (
+                                    <button
+                                        key={suf.text}
+                                        disabled={status !== 'waiting'}
+                                        onClick={() => setSelectedSuffix(suf)}
+                                        className={`py-3 px-3 rounded-xl flex items-center justify-between transition-all touch-manipulation border-2
+                                            ${selectedSuffix?.text === suf.text 
+                                                ? 'bg-purple-600 text-white shadow-md border-purple-600' 
+                                                : 'bg-white text-gray-600 border-gray-100 active:bg-gray-50'}
+                                            ${status !== 'waiting' && suf.text !== currentQ.suffix ? 'opacity-30' : ''}
+                                        `}
+                                    >
+                                        <div className="flex flex-col text-left">
+                                            <span className="text-lg font-bold">-{suf.label}</span>
+                                            <span className={`text-[10px] ${selectedSuffix?.text === suf.text ? 'text-purple-200' : 'text-gray-400'}`}>
+                                                {suf.desc}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="h-14 mt-2">
+                            {status === 'waiting' ? (
+                                <button 
+                                    onClick={handleCheck}
+                                    disabled={!selectedNoun || !selectedSuffix}
+                                    className={`w-full h-full rounded-xl font-bold text-lg transition-all shadow-md flex items-center justify-center
+                                        ${(!selectedNoun || !selectedSuffix) 
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                                            : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'}
+                                    `}
+                                >
+                                    확인 (Kiểm tra)
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={handleNext}
+                                    className={`w-full h-full rounded-xl font-bold text-lg text-white shadow-md flex items-center justify-center active:scale-95 transition-all
+                                        ${status === 'correct' ? 'bg-blue-600' : 'bg-gray-700'}
+                                    `}
+                                >
+                                    {currentQIndex < questions.length - 1 ? '다음 문제 (Tiếp theo) →' : '결과 보기 (Xem kết quả)'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
