@@ -2,393 +2,612 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>한국어 읽기 연습: 직장에서 성공하는 법</title>
+    <!-- 구글 폰트 로드 (Noto Sans KR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4a90e2;
-            --bg-color: #f5f7fa;
-            --text-color: #333;
-            --correct-color: #2ecc71;
-            --wrong-color: #e74c3c;
+            --primary: #4f46e5; /* Indigo */
+            --primary-light: #eef2ff;
+            --success: #10b981; /* Green */
+            --error: #ef4444; /* Red */
+            --text: #1f2937;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --header-height: 60px;
+            --tab-height: 50px;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            text-align: center;
-            color: var(--primary-color);
-        }
-        .tab-menu {
+            padding: 0; /* 모바일 풀스크린을 위해 패딩 제거 */
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .tab-btn {
-            padding: 10px 20px;
-            border: none;
-            background: #e0e0e0;
-            cursor: pointer;
-            border-radius: 20px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            font-weight: bold;
-        }
-        .content-section {
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-        .content-section.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Reading Section */
-        .reading-text {
-            font-size: 1.1rem;
-            background-color: #fff9db;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid var(--primary-color);
-        }
-        .reading-text strong {
-            color: #d35400;
+            height: 100vh; /* 뷰포트 높이 고정 */
+            overflow: hidden; /* 전체 페이지 스크롤 방지 */
         }
 
-        /* Vocab Section */
-        table {
+        .container {
+            width: 100%;
+            max-width: 900px; /* PC에서는 적당한 폭 유지 */
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 0 20px;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-board {
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            height: var(--tab-height);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-btn:hover {
+            background-color: #f3f4f6;
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background-color: white;
+            font-weight: 700;
+        }
+
+        /* Content Areas */
+        .content-area {
+            flex: 1;
+            overflow: hidden; /* 내부 스크롤을 위해 숨김 */
+            position: relative;
+            display: none; /* 기본 숨김 */
+            background: #fff;
+        }
+
+        .content-area.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Standard Scroll View (Reading & Vocab Tabs) */
+        .scroll-view {
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+            height: 100%;
+        }
+
+        /* Split View (Quiz Tab) */
+        .split-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .split-top {
+            flex: 0 0 40%; /* 화면의 40% 차지 */
+            overflow-y: auto;
+            border-bottom: 4px solid #e5e7eb;
+            background-color: #fcfcfc;
+            padding: 20px;
+            position: relative;
+        }
+
+        .split-top::after {
+            content: '지문 (Đoạn văn)';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: #999;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .split-bottom {
+            flex: 1; /* 나머지 공간 차지 */
+            overflow-y: auto;
+            background-color: #f3f4f6;
+            padding: 20px;
+        }
+
+        /* Reading Content Styling */
+        .reading-text {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .reading-text h3 {
+            color: var(--primary);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .highlight {
+            background-color: rgba(253, 224, 71, 0.4);
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* Tables */
+        .vocab-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 0.95rem;
         }
-        th, td {
-            border: 1px solid #ddd;
+
+        .vocab-table th, .vocab-table td {
             padding: 12px;
             text-align: left;
-        }
-        th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        /* Quiz Section */
-        .quiz-item {
-            margin-bottom: 30px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 10px;
+        .vocab-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            position: sticky;
+            top: 0;
         }
-        .quiz-question {
+
+        .vocab-word {
             font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            color: var(--primary);
         }
+
+        /* Quiz Styling */
+        .quiz-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .quiz-q {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .q-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
         .options label {
             display: block;
+            padding: 12px;
             margin: 8px 0;
+            background: #f9fafb;
+            border-radius: 8px;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 5px;
+            border: 1px solid transparent;
+            /* 터치 영역 확보 */
+            min-height: 44px;
+            display: flex;
+            align-items: center;
         }
-        .options label:hover {
-            background-color: #f0f8ff;
+
+        .options label:active {
+            background: #e0e7ff;
         }
-        .feedback {
+
+        .options input {
+            margin-right: 12px;
+            transform: scale(1.2); /* 모바일 체크박스 크기 확대 */
+        }
+
+        .ox-group {
+            display: flex;
+            gap: 10px;
             margin-top: 10px;
-            font-weight: bold;
-            display: none;
         }
-        .correct { color: var(--correct-color); }
-        .wrong { color: var(--wrong-color); }
 
-        /* OX Quiz */
-        .ox-btns button {
-            width: 80px;
-            height: 40px;
-            font-size: 1.2rem;
-            margin-right: 10px;
-            cursor: pointer;
-            border: 2px solid #ddd;
+        .ox-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
             background: white;
-            border-radius: 5px;
-        }
-        .ox-btns button:hover {
-            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        /* Blank Quiz */
-        .blank-input {
-            border: none;
-            border-bottom: 2px solid var(--primary-color);
-            padding: 5px;
-            width: 100px;
-            text-align: center;
-            font-size: 1rem;
-            outline: none;
+        .blank-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
         }
+
+        .blank-field {
+            border: none;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 8px;
+            font-size: 1rem;
+            width: 120px;
+            text-align: center;
+            background: #f8fafc;
+        }
+
         .check-btn {
-            background-color: var(--primary-color);
+            background: var(--text);
             color: white;
             border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-left: 10px;
+            font-size: 0.9rem;
+            width: 100%; /* 모바일에서는 꽉 찬 버튼 */
+            margin-top: 10px;
         }
+
+        .feedback-msg {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            display: none;
+            line-height: 1.4;
+        }
+        .feedback-msg.correct { background-color: #d1fae5; color: #065f46; display: block; }
+        .feedback-msg.wrong { background-color: #fee2e2; color: #991b1b; display: block; }
+
+        /* Animation */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .pop-anim { animation: pop 0.3s ease-out; }
 
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>직장에서 성공하는 법</h1>
+    <header>
+        <h1>직장에서 성공하는 법</h1>
+        <div class="score-board">점수: <span id="currentScore">0</span></div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('reading')">📖 읽기</button>
+        <button class="tab-btn" onclick="switchTab('vocab')">📝 단어</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">✅ 퀴즈</button>
+    </div>
+
+    <!-- 1. 읽기 탭 (일반 스크롤) -->
+    <div id="tab-reading" class="content-area active">
+        <div class="scroll-view">
+            <div class="reading-text" style="background: var(--primary-light); padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary);">
+                <p>직장인이라면 누구든지 회사에서 꼭 필요한 사람이 되고 싶을 것이다. 그런 사람이 되려면 어떤 노력을 해야 할까? 만약 회사에서 성공하고 싶다면 항상 <span class="highlight">'친절'</span>과 <span class="highlight">'독서'</span>를 실천해야 한다.</p>
+                
+                <h3>I. 친절한 사람이 성공한다.</h3>
+                <p>회사에는 일을 맡기면 다른 사람보다 빨리 잘 해결하는 사람이 있다. 그 사람은 어려운 일이 생겼을 때도 누군가의 도움을 받아 문제를 쉽게 해결한다. 사람들은 그가 운이 좋다고 말한다. 그런데 왜 그 사람에게는 그런 운 좋은 일이 자주 일어날까? 그것은 그가 평소에 한 작은 친절 때문이다.</p>
+                <p>복사기가 고장 났을 때 함께 걱정하고 수리 기사를 불러 주거나, 혼자서 많은 서류를 옮겨야 할 때 함께 들어 주는 일, 갑자기 소나기가 내릴 때 우산을 빌려주는 것은 아주 작은 일이다. 하지만 사람들은 이런 작은 친절을 생각보다 오래 기억하며, 그 사람이 어려울 때 도와주게 된다. 그렇기 때문에 친절한 사람이 그렇지 않은 사람보다 성공할 가능성이 훨씬 높은 것이다.</p>
     
-    <div class="tab-menu">
-        <button class="tab-btn active" onclick="openTab('reading')">📖 지문 읽기</button>
-        <button class="tab-btn" onclick="openTab('vocab')">📝 주요 어휘</button>
-        <button class="tab-btn" onclick="openTab('quiz-main')">✅ 내용 확인</button>
-        <button class="tab-btn" onclick="openTab('quiz-ox')">⭕❌ 퀴즈</button>
-        <button class="tab-btn" onclick="openTab('quiz-blank')">✍️ 빈칸 채우기</button>
-    </div>
-
-    <div id="reading" class="content-section active">
-        <div class="reading-text">
-            <p>직장인이라면 누구든지 회사에서 꼭 필요한 사람이 되고 싶을 것이다. 그런 사람이 되려면 어떤 노력을 해야 할까? 만약 회사에서 성공하고 싶다면 항상 <strong>'친절'</strong>과 <strong>'독서'</strong>를 실천해야 한다.</p>
-            
-            <h3>I. 친절한 사람이 성공한다.</h3>
-            <p>회사에는 일을 맡기면 다른 사람보다 빨리 잘 해결하는 사람이 있다. 그 사람은 어려운 일이 생겼을 때도 누군가의 도움을 받아 문제를 쉽게 해결한다. 사람들은 그가 운이 좋다고 말한다. 그런데 왜 그 사람에게는 그런 운 좋은 일이 자주 일어날까? 그것은 그가 평소에 한 작은 친절 때문이다.</p>
-            <p>복사기가 고장 났을 때 함께 걱정하고 수리 기사를 불러 주거나, 혼자서 많은 서류를 옮겨야 할 때 함께 들어 주는 일, 갑자기 소나기가 내릴 때 우산을 빌려주는 것은 아주 작은 일이다. 하지만 사람들은 이런 작은 친절을 생각보다 오래 기억하며, 그 사람이 어려울 때 도와주게 된다. 그렇기 때문에 친절한 사람이 그렇지 않은 사람보다 성공할 가능성이 훨씬 높은 것이다.</p>
-
-            <h3>II. ( &nbsp;&nbsp;&nbsp;&nbsp; ㉠ &nbsp;&nbsp;&nbsp;&nbsp; )</h3>
-            <p>한국의 직장인들은 1년에 평균 16권의 책을 읽는다고 한다. 가장 많이 읽는 책의 종류는 경제 경영 서적과 소설이다. 경제 경영 서적을 읽으면…….</p>
+                <h3>II. ( &nbsp;&nbsp;&nbsp;&nbsp; ㉠ &nbsp;&nbsp;&nbsp;&nbsp; )</h3>
+                <p>한국의 직장인들은 1년에 평균 16권의 책을 읽는다고 한다. 가장 많이 읽는 책의 종류는 경제 경영 서적과 소설이다. 경제 경영 서적을 읽으면…….</p>
+            </div>
+            <button class="check-btn" style="background: var(--primary); margin-top: 20px;" onclick="switchTab('vocab')">단어 공부하러 가기 👉</button>
+            <div style="height: 50px;"></div> <!-- 하단 여백 -->
         </div>
     </div>
 
-    <div id="vocab" class="content-section">
-        <h2>주요 어휘 단어장</h2>
-        <p>※ 학생들에게 단어를 소리 내어 읽게 하세요.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>단어</th>
-                    <th>의미 (Meaning)</th>
-                    <th>예문</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>실천하다</td>
-                    <td>생각한 것을 실제로 행동하다</td>
-                    <td>계획을 <strong>실천하는</strong> 것이 중요하다.</td>
-                </tr>
-                <tr>
-                    <td>맡기다</td>
-                    <td>어떤 일이나 물건을 다른 사람에게 부탁하다</td>
-                    <td>동료에게 일을 <strong>맡기고</strong> 퇴근했다.</td>
-                </tr>
-                <tr>
-                    <td>해결하다</td>
-                    <td>문제를 풀거나 처리하다</td>
-                    <td>어려운 문제를 스스로 <strong>해결했다</strong>.</td>
-                </tr>
-                <tr>
-                    <td>수리 기사</td>
-                    <td>고장 난 물건을 고쳐 주는 사람</td>
-                    <td>컴퓨터가 고장 나서 <strong>수리 기사</strong>를 불렀다.</td>
-                </tr>
-                <tr>
-                    <td>소나기</td>
-                    <td>갑자기 세게 내리는 비</td>
-                    <td>오후에 <strong>소나기</strong>가 내릴 예정이다.</td>
-                </tr>
-                <tr>
-                    <td>가능성</td>
-                    <td>일이 이루어질 수 있는 성질</td>
-                    <td>성공할 <strong>가능성</strong>이 높다.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="quiz-main" class="content-section">
-        <h2>내용 확인 퀴즈</h2>
-
-        <div class="quiz-item" id="q1">
-            <div class="quiz-question">1) 이 글의 제목으로 알맞은 것은 무엇입니까?</div>
-            <div class="options">
-                <label><input type="radio" name="q1" value="1" onclick="checkAnswer('q1', '1', '정답입니다! 친절과 독서를 통해 회사에서 성공하는 방법을 설명하고 있습니다.')"> ① 직장에서 성공하는 법</label>
-                <label><input type="radio" name="q1" value="2" onclick="checkAnswer('q1', '1', '오답입니다. 운 좋은 사람에 대한 이야기가 나오지만, 전체 주제는 아닙니다.')"> ② 운 좋은 사람을 만나는 법</label>
-                <label><input type="radio" name="q1" value="3" onclick="checkAnswer('q1', '1', '오답입니다. 어려운 일 해결은 성공하는 사람의 특징 중 하나입니다.')"> ③ 직장에서 어려운 일을 해결하는 법</label>
-            </div>
-            <div class="feedback"></div>
-        </div>
-
-        <div class="quiz-item" id="q2">
-            <div class="quiz-question">2) 이 글의 내용과 같은 것을 고르세요.</div>
-            <div class="options">
-                <label><input type="radio" name="q2" value="1" onclick="checkAnswer('q2', '3', '오답입니다. 일을 맡으면 해결을 잘 한다고 했습니다.')"> ① 회사에서 어려운 일을 맡으면 대인 관계가 원만해진다.</label>
-                <label><input type="radio" name="q2" value="2" onclick="checkAnswer('q2', '3', '오답입니다. 큰 도움이 아니라 작은 친절이라고 했습니다.')"> ② 평소에 다른 사람에게 큰 도움을 주면 운이 좋아진다.</label>
-                <label><input type="radio" name="q2" value="3" onclick="checkAnswer('q2', '3', '정답입니다! 평소에 베푼 친절 덕분에 어려울 때 도움을 받게 됩니다.')"> ③ 친절한 사람은 어려운 일이 생겼을 때 도와주는 사람이 많다.</label>
-            </div>
-            <div class="feedback"></div>
-        </div>
-
-        <div class="quiz-item" id="q3">
-            <div class="quiz-question">3) ㉠에 들어갈 말을 써 보세요. (힌트: I의 제목을 참고하세요)</div>
-            <div style="display:flex; align-items:center;">
-                <input type="text" id="input-q3" class="blank-input" placeholder="정답 입력" style="width: 300px; text-align: left;">
-                <button class="check-btn" onclick="checkTextAnswer('input-q3', ['책을 많이 읽는 사람이 성공한다', '독서하는 사람이 성공한다', '독서를 하면 성공한다'], 'q3-feedback')">확인</button>
-            </div>
-            <div class="feedback" id="q3-feedback"></div>
+    <!-- 2. 단어 탭 (일반 스크롤) -->
+    <div id="tab-vocab" class="content-area">
+        <div class="scroll-view">
+            <h3 style="margin-top:0;">주요 어휘 (Từ vựng)</h3>
+            <table class="vocab-table">
+                <thead>
+                    <tr>
+                        <th width="25%">단어</th>
+                        <th>의미 (KOR / VIE)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="vocab-word">실천하다</td>
+                        <td>행동으로 옮기다<br><span style="color:#666; font-size:0.85rem;">thực hành</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">맡기다</td>
+                        <td>부탁하다<br><span style="color:#666; font-size:0.85rem;">giao phó</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">해결하다</td>
+                        <td>문제를 풀다<br><span style="color:#666; font-size:0.85rem;">giải quyết</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">수리 기사</td>
+                        <td>고쳐 주는 사람<br><span style="color:#666; font-size:0.85rem;">thợ sửa chữa</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">소나기</td>
+                        <td>갑자기 오는 비<br><span style="color:#666; font-size:0.85rem;">mưa rào</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">가능성</td>
+                        <td>실현될 성질<br><span style="color:#666; font-size:0.85rem;">khả năng</span></td>
+                    </tr>
+                    <tr>
+                        <td class="vocab-word">서적</td>
+                        <td>책<br><span style="color:#666; font-size:0.85rem;">sách vở</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="check-btn" style="background: var(--primary); margin-top: 20px;" onclick="switchTab('quiz')">퀴즈 풀러 가기 👉</button>
+            <div style="height: 50px;"></div>
         </div>
     </div>
 
-    <div id="quiz-ox" class="content-section">
-        <h2>O / X 퀴즈</h2>
-        
-        <div class="quiz-item">
-            <div class="quiz-question">Q1. 사람들은 일을 잘 해결하는 사람이 단지 운이 좋다고 생각한다.</div>
-            <div class="ox-btns">
-                <button onclick="checkOX(this, true, '정답입니다! 본문에 \'사람들은 그가 운이 좋다고 말한다\'라고 나와 있습니다.')">O</button>
-                <button onclick="checkOX(this, false, '틀렸습니다. 본문을 다시 읽어보세요.')">X</button>
+    <!-- 3. 퀴즈 탭 (스플릿 뷰: 상단 지문 / 하단 문제) -->
+    <div id="tab-quiz" class="content-area">
+        <div class="split-container">
+            <!-- 상단: 지문 (Scrollable) -->
+            <div class="split-top">
+                <div class="reading-text" style="font-size: 0.95rem;">
+                    <p>직장인이라면 누구든지 회사에서 꼭 필요한 사람이 되고 싶을 것이다. 만약 회사에서 성공하고 싶다면 항상 <span class="highlight">'친절'</span>과 <span class="highlight">'독서'</span>를 실천해야 한다.</p>
+                    <h3>I. 친절한 사람이 성공한다.</h3>
+                    <p>회사에는 일을 맡기면 다른 사람보다 빨리 잘 해결하는 사람이 있다. 그 사람은 어려운 일이 생겼을 때도 누군가의 도움을 받아 문제를 쉽게 해결한다. 사람들은 그가 운이 좋다고 말한다. 그런데 왜 그 사람에게는 그런 운 좋은 일이 자주 일어날까? 그것은 그가 평소에 한 작은 친절 때문이다.</p>
+                    <p>복사기가 고장 났을 때 함께 걱정하고 수리 기사를 불러 주거나, 혼자서 많은 서류를 옮겨야 할 때 함께 들어 주는 일, 갑자기 소나기가 내릴 때 우산을 빌려주는 것은 아주 작은 일이다. 하지만 사람들은 이런 작은 친절을 생각보다 오래 기억하며, 그 사람이 어려울 때 도와주게 된다. 그렇기 때문에 친절한 사람이 그렇지 않은 사람보다 성공할 가능성이 훨씬 높은 것이다.</p>
+                    <h3>II. ( &nbsp;&nbsp;&nbsp;&nbsp; ㉠ &nbsp;&nbsp;&nbsp;&nbsp; )</h3>
+                    <p>한국의 직장인들은 1년에 평균 16권의 책을 읽는다고 한다. 가장 많이 읽는 책의 종류는 경제 경영 서적과 소설이다.</p>
+                </div>
             </div>
-            <div class="feedback"></div>
-        </div>
 
-        <div class="quiz-item">
-            <div class="quiz-question">Q2. 다른 사람에게 기억에 남는 도움을 주려면 아주 큰 일을 도와줘야 한다.</div>
-            <div class="ox-btns">
-                <button onclick="checkOX(this, false, '틀렸습니다. 큰 일이 아니라 아주 작은 친절도 오래 기억한다고 했습니다.')">O</button>
-                <button onclick="checkOX(this, true, '정답입니다! 우산을 빌려주거나 서류를 들어주는 작은 일도 중요합니다.')">X</button>
-            </div>
-            <div class="feedback"></div>
-        </div>
+            <!-- 하단: 문제 (Scrollable) -->
+            <div class="split-bottom">
+                
+                <!-- 문제 1 -->
+                <div class="quiz-card" id="q1">
+                    <div class="quiz-q"><span class="q-badge">객관식</span> 1. 이 글의 제목으로 알맞은 것은?</div>
+                    <div class="options">
+                        <label><input type="radio" name="q1" value="w"> ① 운 좋은 사람을 만나는 법</label>
+                        <label><input type="radio" name="q1" value="c"> ② 직장에서 성공하는 법</label>
+                        <label><input type="radio" name="q1" value="w"> ③ 직장에서 어려운 일을 해결하는 법</label>
+                    </div>
+                    <button class="check-btn" onclick="checkChoice('q1', 10)">정답 확인</button>
+                    <div class="feedback-msg"></div>
+                </div>
 
-        <div class="quiz-item">
-            <div class="quiz-question">Q3. 한국의 직장인들은 1년에 평균 60권의 책을 읽는다.</div>
-            <div class="ox-btns">
-                <button onclick="checkOX(this, false, '틀렸습니다. 본문에는 16권이라고 나와 있습니다.')">O</button>
-                <button onclick="checkOX(this, true, '정답입니다! 평균 16권입니다.')">X</button>
+                <!-- 문제 2 -->
+                <div class="quiz-card" id="q2">
+                    <div class="quiz-q"><span class="q-badge">객관식</span> 2. 이 글의 내용과 같은 것은?</div>
+                    <div class="options">
+                        <label><input type="radio" name="q2" value="w"> ① 일을 맡으면 해결을 잘 못하는 사람이 있다.</label>
+                        <label><input type="radio" name="q2" value="c"> ② 평소에 친절하면 어려울 때 도움을 받는다.</label>
+                        <label><input type="radio" name="q2" value="w"> ③ 큰 도움을 줘야 사람들이 오래 기억한다.</label>
+                    </div>
+                    <button class="check-btn" onclick="checkChoice('q2', 10)">정답 확인</button>
+                    <div class="feedback-msg"></div>
+                </div>
+
+                <!-- 문제 3 (OX) -->
+                <div class="quiz-card" id="q3">
+                    <div class="quiz-q"><span class="q-badge">O/X</span> 3. 사람들은 일을 잘 해결하는 사람을 보고 '운이 좋다'고 말한다.</div>
+                    <div class="ox-group">
+                        <button class="ox-btn" onclick="checkOX(this, true, 10)">O</button>
+                        <button class="ox-btn" onclick="checkOX(this, false, 10)">X</button>
+                    </div>
+                    <div class="feedback-msg"></div>
+                </div>
+
+                <!-- 문제 4 (OX) -->
+                <div class="quiz-card" id="q4">
+                    <div class="quiz-q"><span class="q-badge">O/X</span> 4. 한국 직장인들은 1년에 평균 60권의 책을 읽는다.</div>
+                    <div class="ox-group">
+                        <button class="ox-btn" onclick="checkOX(this, false, 10)">O</button>
+                        <button class="ox-btn" onclick="checkOX(this, true, 10)">X</button>
+                    </div>
+                    <div class="feedback-msg"></div>
+                </div>
+
+                <!-- 문제 5 (빈칸) -->
+                <div class="quiz-card" id="q5">
+                    <div class="quiz-q"><span class="q-badge">빈칸</span> 5. ㉠에 들어갈 소제목 완성하기</div>
+                    <p style="font-size:0.9rem; color:#666; margin-bottom:10px;">(힌트: '책을 읽는 것'과 관련된 단어)</p>
+                    <div class="blank-input-group">
+                        <input type="text" class="blank-field" placeholder="정답 입력" id="input-q5">
+                        <span>하는 사람이 성공한다.</span>
+                    </div>
+                    <button class="check-btn" onclick="checkText('q5', ['독서'], 20)">정답 확인</button>
+                    <div class="feedback-msg"></div>
+                </div>
+
+                <div style="height: 50px;"></div>
             </div>
-            <div class="feedback"></div>
         </div>
     </div>
-
-    <div id="quiz-blank" class="content-section">
-        <h2>빈칸 채우기 연습</h2>
-        <p>다음 문장의 빈칸에 들어갈 알맞은 말을 본문에서 찾아 쓰세요.</p>
-        
-        <div class="quiz-item">
-            <p>1. 회사에서 성공하고 싶다면 항상 '친절'과 <input type="text" class="blank-input" id="blank1">를 실천해야 한다.</p>
-            <button class="check-btn" onclick="checkTextAnswer('blank1', ['독서'], 'fb-b1')">정답 확인</button>
-            <div class="feedback" id="fb-b1"></div>
-        </div>
-
-        <div class="quiz-item">
-            <p>2. 갑자기 <input type="text" class="blank-input" id="blank2">가 내릴 때 우산을 빌려주는 것은 아주 작은 일이다.</p>
-            <button class="check-btn" onclick="checkTextAnswer('blank2', ['소나기'], 'fb-b2')">정답 확인</button>
-            <div class="feedback" id="fb-b2"></div>
-        </div>
-
-        <div class="quiz-item">
-            <p>3. 가장 많이 읽는 책의 종류는 <input type="text" class="blank-input" id="blank3"> 경영 서적과 소설이다.</p>
-            <button class="check-btn" onclick="checkTextAnswer('blank3', ['경제'], 'fb-b3')">정답 확인</button>
-            <div class="feedback" id="fb-b3"></div>
-        </div>
-    </div>
-
 </div>
 
 <script>
-    function openTab(tabName) {
-        var i;
-        var x = document.getElementsByClassName("content-section");
-        var tabs = document.getElementsByClassName("tab-btn");
+    let score = 0;
+    const solvedQuestions = new Set();
+
+    function switchTab(tabName) {
+        // 모든 탭 숨김
+        document.querySelectorAll('.content-area').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         
-        for (i = 0; i < x.length; i++) {
-            x[i].classList.remove("active");
-        }
-        for (i = 0; i < tabs.length; i++) {
-            tabs[i].classList.remove("active");
-        }
+        // 선택 탭 활성화
+        document.getElementById('tab-' + tabName).classList.add('active');
         
-        document.getElementById(tabName).classList.add("active");
-        event.currentTarget.classList.add("active");
+        // 버튼 활성화 (순서 찾기)
+        const tabs = ['reading', 'vocab', 'quiz'];
+        const index = tabs.indexOf(tabName);
+        if(index >= 0) {
+            document.querySelectorAll('.tab-btn')[index].classList.add('active');
+        }
     }
 
-    // 객관식 정답 체크
-    function checkAnswer(questionId, correctValue, msg) {
-        const feedback = document.querySelector(`#${questionId} .feedback`);
-        const selected = document.querySelector(`input[name="${questionId}"]:checked`).value;
-        
+    function updateScore(points, qId) {
+        if (!solvedQuestions.has(qId)) {
+            score += points;
+            const scoreEl = document.getElementById('currentScore');
+            scoreEl.innerText = score;
+            solvedQuestions.add(qId);
+            
+            // 점수판 애니메이션
+            const board = document.querySelector('.score-board');
+            board.classList.remove('pop-anim');
+            void board.offsetWidth; // 리플로우 트리거
+            board.classList.add('pop-anim');
+            board.style.backgroundColor = "#fbbf24";
+            board.style.color = "#000";
+            
+            setTimeout(() => {
+                board.style.backgroundColor = "rgba(255,255,255,0.2)";
+                board.style.color = "white";
+            }, 300);
+        }
+    }
+
+    // 객관식
+    function checkChoice(qId, points) {
+        const container = document.getElementById(qId);
+        const selected = container.querySelector('input:checked');
+        const feedback = container.querySelector('.feedback-msg');
+
+        if (!selected) {
+            alert("답을 선택해주세요! (Vui lòng chọn đáp án)");
+            return;
+        }
+
         feedback.style.display = 'block';
-        if (selected === correctValue) {
-            feedback.className = 'feedback correct';
-            feedback.innerHTML = "⭕ " + msg;
+        if (selected.value === 'c') {
+            feedback.innerHTML = "⭕ 정답입니다! (Chính xác!)";
+            feedback.className = "feedback-msg correct";
+            updateScore(points, qId);
         } else {
-            feedback.className = 'feedback wrong';
-            feedback.innerHTML = "❌ " + msg;
+            feedback.innerHTML = "❌ 틀렸습니다. (Sai rồi)";
+            feedback.className = "feedback-msg wrong";
         }
     }
 
-    // 주관식 정답 체크
-    function checkTextAnswer(inputId, correctAnswers, feedbackId) {
-        const input = document.getElementById(inputId);
-        const feedback = document.getElementById(feedbackId);
-        const userVal = input.value.trim().replace(/\s+/g, ''); // 공백 제거 후 비교
+    // OX
+    function checkOX(btn, isCorrect, points) {
+        const container = btn.closest('.quiz-card');
+        const feedback = container.querySelector('.feedback-msg');
         
-        // 정답 배열 중 하나라도 포함되면 정답 처리 (유연성)
-        let isCorrect = false;
-        correctAnswers.forEach(ans => {
-            if(userVal.includes(ans.replace(/\s+/g, ''))) isCorrect = true;
+        container.querySelectorAll('.ox-btn').forEach(b => {
+            b.style.background = 'white';
+            b.style.borderColor = '#e5e7eb';
+            b.style.color = 'black';
         });
 
         feedback.style.display = 'block';
         if (isCorrect) {
-            feedback.className = 'feedback correct';
-            feedback.innerText = "⭕ 정답입니다!";
+            btn.style.background = '#d1fae5';
+            btn.style.borderColor = '#10b981';
+            btn.style.color = '#065f46';
+            feedback.innerHTML = "⭕ 정답입니다! (Chính xác!)";
+            feedback.className = "feedback-msg correct";
+            updateScore(points, container.id);
         } else {
-            feedback.className = 'feedback wrong';
-            feedback.innerText = "❌ 다시 생각해보세요. 정답: " + correctAnswers[0];
+            btn.style.background = '#fee2e2';
+            btn.style.borderColor = '#ef4444';
+            btn.style.color = '#991b1b';
+            feedback.innerHTML = "❌ 틀렸습니다. (Sai rồi)";
+            feedback.className = "feedback-msg wrong";
         }
     }
 
-    // OX 퀴즈 체크
-    function checkOX(btn, isCorrect, msg) {
-        const feedback = btn.parentElement.nextElementSibling;
-        feedback.style.display = 'block';
+    // 주관식
+    function checkText(qId, answers, points) {
+        const input = document.getElementById('input-' + qId);
+        const val = input.value.trim();
+        const feedback = container = document.querySelector(`#${qId} .feedback-msg`);
         
-        if (isCorrect) {
-            feedback.className = 'feedback correct';
-            feedback.innerText = "⭕ " + msg;
+        let isMatch = false;
+        answers.forEach(ans => {
+            if (val.includes(ans)) isMatch = true;
+        });
+
+        feedback.style.display = 'block';
+        if (isMatch) {
+            feedback.innerHTML = "⭕ 정답입니다! (Chính xác!)";
+            feedback.className = "feedback-msg correct";
+            updateScore(points, qId);
         } else {
-            feedback.className = 'feedback wrong';
-            feedback.innerText = "❌ " + msg;
+            feedback.innerHTML = `❌ 정답: ${answers[0]} (Đáp án: ${answers[0]})`;
+            feedback.className = "feedback-msg wrong";
         }
     }
 </script>
