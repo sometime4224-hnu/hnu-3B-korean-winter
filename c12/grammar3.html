@@ -2,337 +2,576 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>한국어 문법 학습: -(으)ㄴ/는 모양이다</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            -webkit-tap-highlight-color: transparent;
         }
-        .slide {
-            display: none;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .slide.active {
-            display: block;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
         }
-        .lang-btn.active {
-            background-color: #1d4ed8;
-            color: white;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
         }
         .tab-btn.active {
-            border-bottom: 2px solid #1d4ed8;
-            color: #1d4ed8;
+            color: #2563eb;
+            border-bottom-color: #2563eb;
             font-weight: 700;
+        }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Speak Button Animation */
+        .speak-btn:active {
+            transform: scale(0.9);
+            color: #2563eb;
+        }
+        
+        /* Quiz Option Animation */
+        .quiz-option {
+            transition: all 0.2s;
+        }
+        .quiz-option:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="min-h-screen flex flex-col">
 
-    <div id="app" class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 md:p-8 m-4">
-        
-        <!-- Header: Title and Language Switcher -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b">
-            <h1 id="app-title" class="text-2xl font-bold text-gray-800 mb-4 md:mb-0"></h1>
-            <div class="flex space-x-2">
-                <button data-lang="ko" class="lang-btn px-3 py-1 text-sm rounded-md transition-colors duration-200">한국어</button>
-                <button data-lang="vi" class="lang-btn px-3 py-1 text-sm rounded-md transition-colors duration-200">베트남어</button>
-                <button data-lang="ja" class="lang-btn px-3 py-1 text-sm rounded-md transition-colors duration-200">일본어</button>
-                <button data-lang="zh" class="lang-btn px-3 py-1 text-sm rounded-md transition-colors duration-200">중국어</button>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white p-2 rounded-lg shadow-sm">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <h1 class="text-lg md:text-xl font-bold text-gray-800 tracking-tight line-clamp-1" id="app-title">문법 학습</h1>
             </div>
-        </header>
-
-        <!-- Tab Navigation -->
-        <nav class="flex justify-center border-b mb-6">
-            <button data-slide="explanation" id="explanation-tab" class="tab-btn text-lg px-6 py-2 text-gray-600"></button>
-            <button data-slide="practice" id="practice-tab" class="tab-btn text-lg px-6 py-2 text-gray-600"></button>
+            
+            <div class="relative">
+                <select id="language-selector" class="appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <nav class="flex border-b border-gray-200 bg-white">
+            <button data-tab="explanation" class="tab-btn flex-1 py-3 text-gray-500 font-medium text-center focus:outline-none" id="explanation-tab-btn">
+                <i class="fas fa-chalkboard-teacher mr-1"></i> <span class="tab-text">설명</span>
+            </button>
+            <button data-tab="practice" class="tab-btn flex-1 py-3 text-gray-500 font-medium text-center focus:outline-none" id="practice-tab-btn">
+                <i class="fas fa-pencil-alt mr-1"></i> <span class="tab-text">연습</span>
+            </button>
         </nav>
+    </header>
 
-        <!-- Main Content: Slides -->
-        <main>
-            <!-- Explanation Slide -->
-            <div id="explanation-slide" class="slide space-y-6">
-                <div class="p-5 bg-blue-50 rounded-lg">
-                    <h2 id="exp-title" class="text-xl font-bold text-blue-800 mb-2"></h2>
-                    <p id="exp-intro" class="text-gray-700"></p>
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-6 max-w-5xl mx-auto w-full">
+        
+        <!-- Explanation Section -->
+        <section id="explanation-section" class="space-y-6">
+            <!-- Intro Card -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 md:p-6 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
+                    <div>
+                        <h2 id="exp-title" class="text-xl md:text-2xl font-bold text-blue-800 mb-2">-(으)ㄴ/는 모양이다</h2>
+                        <p id="exp-intro" class="text-gray-700 leading-relaxed">상황을 보고 추측할 때 사용해요.</p>
+                        <!-- Tip Box -->
+                        <div class="mt-4 bg-white/60 p-3 rounded-lg border border-blue-100 text-sm text-gray-600">
+                            <strong class="text-blue-700">Tip!</strong> <span id="exp-tip">'-(으)ㄹ 것 같다'와 비슷하지만, '-(으)ㄴ/는 모양이다'는 직접 보거나 들은 근거가 있을 때 더 자연스러워요.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rules Grid (Tablet: 2 Columns) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Adjective Card -->
+                <div class="card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
+                        <span class="bg-pink-100 text-pink-600 p-1.5 rounded-md text-xs"><i class="fas fa-star"></i></span>
+                        <h3 id="exp-adjective-title" class="font-bold text-gray-800">형용사 (Adjective)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">받침 X / ㄹ</span>
+                                <span class="font-bold text-pink-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-ㄴ 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>바쁘다 → 바쁜 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('바쁜 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">받침 O</span>
+                                <span class="font-bold text-pink-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-은 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>작다 → 작은 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('작은 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                        <li class="bg-red-50 p-2.5 rounded-lg border border-red-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-red-500 text-xs font-bold">Exception (있다/없다)</span>
+                                <span class="font-bold text-red-600 bg-white px-2 py-0.5 rounded shadow-sm border border-red-100">-는 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>맛있다 → 맛있는 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('맛있는 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Verb Card -->
+                <div class="card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
+                        <span class="bg-green-100 text-green-600 p-1.5 rounded-md text-xs"><i class="fas fa-running"></i></span>
+                        <h3 id="exp-verb-title" class="font-bold text-gray-800">동사 (Verb)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">Present (현재)</span>
+                                <span class="font-bold text-green-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-는 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>가다 → 가는 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('가는 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1 mt-1 border-t border-gray-200 pt-1">
+                                <span>먹다 → 먹는 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('먹는 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 
-                <div class="space-y-4">
-                    <div>
-                        <h3 id="exp-adjective-title" class="text-lg font-semibold text-gray-800 mb-2"></h3>
-                        <ul class="list-disc list-inside space-y-1 text-gray-600 bg-gray-50 p-4 rounded-md">
-                            <li id="exp-adjective-rule1"></li>
-                            <li id="exp-adjective-rule2"></li>
-                            <li id="exp-adjective-rule3" class="font-semibold text-red-600"></li>
-                        </ul>
+                <!-- Noun Card -->
+                <div class="card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
+                        <span class="bg-purple-100 text-purple-600 p-1.5 rounded-md text-xs"><i class="fas fa-user-tag"></i></span>
+                        <h3 id="exp-noun-title" class="font-bold text-gray-800">명사 (Noun)</h3>
                     </div>
-                    <div>
-                        <h3 id="exp-verb-title" class="text-lg font-semibold text-gray-800 mb-2"></h3>
-                         <ul class="list-disc list-inside space-y-1 text-gray-600 bg-gray-50 p-4 rounded-md">
-                            <li id="exp-verb-rule"></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 id="exp-noun-title" class="text-lg font-semibold text-gray-800 mb-2"></h3>
-                         <ul class="list-disc list-inside space-y-1 text-gray-600 bg-gray-50 p-4 rounded-md">
-                            <li id="exp-noun-rule"></li>
-                        </ul>
-                    </div>
-                     <div>
-                        <h3 id="exp-tense-title" class="text-lg font-semibold text-gray-800 mb-2"></h3>
-                         <ul class="list-disc list-inside space-y-1 text-gray-600 bg-gray-50 p-4 rounded-md">
-                            <li id="exp-past"></li>
-                            <li id="exp-future"></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Practice Slide -->
-            <div id="practice-slide" class="slide">
-                <div class="p-5 bg-green-50 rounded-lg mb-6">
-                    <h2 id="quiz-title" class="text-xl font-bold text-green-800 mb-2"></h2>
-                    <p id="quiz-instruction" class="text-gray-700"></p>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">Present (현재)</span>
+                                <span class="font-bold text-purple-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-인 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>학생 → 학생인 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('학생인 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
 
-                <div id="quiz-container" class="space-y-6">
-                    <!-- Quiz questions will be inserted here by JavaScript -->
+                <!-- Tense Card -->
+                <div class="card bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
+                        <span class="bg-amber-100 text-amber-600 p-1.5 rounded-md text-xs"><i class="fas fa-clock"></i></span>
+                        <h3 id="exp-tense-title" class="font-bold text-gray-800">시제 (Tense)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">Past (과거)</span>
+                                <span class="font-bold text-amber-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-았/었던 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>비가 많이 왔던 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('비가 많이 왔던 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                        <li class="bg-gray-50 p-2.5 rounded-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-gray-500 text-xs">Future (미래)</span>
+                                <span class="font-bold text-amber-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100">-(으)ㄹ 모양이다</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-700 pl-1">
+                                <span>비가 올 모양이다</span>
+                                <button class="speak-btn text-gray-400 hover:text-blue-500" onclick="speak('비가 올 모양이다')"><i class="fas fa-volume-up"></i></button>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
+
             </div>
-        </main>
-    </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice-section" class="hidden space-y-6">
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 shadow-sm text-center">
+                <h2 id="quiz-title" class="text-xl font-bold text-indigo-800 mb-1">연습 문제</h2>
+                <p id="quiz-instruction" class="text-gray-600 text-sm">상황을 보고 알맞은 말을 고르세요.</p>
+            </div>
+
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Quiz items injected here -->
+            </div>
+        </section>
+
+    </main>
 
     <script>
+        // Data & Translations
         const translations = {
             ko: {
                 title: "문법 학습: -(으)ㄴ/는 모양이다",
-                explanationTab: "문법 설명",
-                practiceTab: "연습 문제",
-                expTitle: "A/V-(으)ㄴ/는 모양이다, N인 모양이다",
-                expIntro: "어떤 상황을 보고 그 이유나 상태를 추측할 때 사용해요. '...것 같다'와 비슷한 의미예요.",
-                expAdjectiveTitle: "1. 형용사 (Adjective)",
-                expAdjectiveRule1: "받침이 없거나 'ㄹ' 받침: -ㄴ 모양이다 (예: 바쁘다 → 바쁜 모양이다, 멀다 → 먼 모양이다)",
-                expAdjectiveRule2: "받침이 있을 때: -은 모양이다 (예: 좋다 → 좋은 모양이다, 작다 → 작은 모양이다)",
-                expAdjectiveRule3: "예외: '있다/없다'로 끝나면 '-는'을 써요. (예: 맛있다 → 맛있는 모양이다, 재미없다 → 재미없는 모양이다)",
-                expVerbTitle: "2. 동사 (Verb)",
-                expVerbRule: "받침과 상관없이: -는 모양이다 (예: 가다 → 가는 모양이다, 먹다 → 먹는 모양이다)",
-                expNounTitle: "3. 명사 (Noun)",
-                expNounRule: "받침과 상관없이: -인 모양이다 (예: 학생 → 학생인 모양이다, 의사 → 의사인 모양이다)",
-                expTenseTitle: "💡 시제 (Tense) 알아보기",
-                expPast: "과거 (Past): -았/었던 모양이다 (예: 어젯밤에 비가 많이 왔던 모양이에요.)",
-                expFuture: "미래 (Future): -(으)ㄹ 모양이다 (예: 하늘이 흐려요. 곧 비가 올 모양이에요.)",
+                tabExp: "설명",
+                tabPrac: "연습",
+                expTitle: "-(으)ㄴ/는 모양이다",
+                expIntro: "어떤 상황을 보고 그 이유나 상태를 추측할 때 사용해요. (근거가 있는 추측)",
+                expTip: "'-(으)ㄹ 것 같다'와 비슷하지만, 직접 보거나 들은 근거가 있을 때 더 자연스러워요.",
+                titles: { adj: "형용사 (Adjective)", verb: "동사 (Verb)", noun: "명사 (Noun)", tense: "시제 (Tense)" },
+                rules: {
+                    adj1: "받침 X / ㄹ 받침", adj1_ex: "바쁘다 → 바쁜 모양이다",
+                    adj2: "받침 O", adj2_ex: "작다 → 작은 모양이다",
+                    adj3: "예외 (있다/없다)", adj3_ex: "맛있다 → 맛있는 모양이다",
+                    verb1: "현재 (Present)", verb1_ex1: "가다 → 가는 모양이다", verb1_ex2: "먹다 → 먹는 모양이다",
+                    noun1: "현재 (Present)", noun1_ex: "학생 → 학생인 모양이다",
+                    past: "과거 (Past)", past_ex: "비가 많이 왔던 모양이다",
+                    future: "미래 (Future)", future_ex: "곧 비가 올 모양이다"
+                },
                 quizTitle: "연습 문제",
-                quizInstruction: "상황을 보고 빈칸에 알맞은 말을 고르세요.",
-                q1_situation: "1. (밖에서 즐거운 웃음소리가 들려요) 재미있는 TV 프로그램을 ____ 모양이에요.",
-                q2_situation: "2. (친구가 하품을 계속해요) 어젯밤에 잠을 잘 ____ 모양이에요.",
-                q3_situation: "3. (식당 앞에 사람들이 줄을 서 있어요) 저 식당은 음식이 아주 ____ 모양이에요.",
-                q4_situation: "4. (친구가 갑자기 뛰기 시작해요) 약속 시간에 ____ 모양이에요.",
-                correct: "정답입니다! молодец!",
-                incorrect: "다시 시도해보세요.",
+                quizInst: "상황을 보고 빈칸에 알맞은 말을 고르세요.",
+                quizzes: [
+                    { situation: "밖에서 즐거운 웃음소리가 들려요.", context: "재미있는 TV 프로그램을 ____ 모양이에요.", options: ["보는", "본", "볼"], answer: "보는" },
+                    { situation: "친구가 하품을 계속해요.", context: "어젯밤에 잠을 잘 ____ 모양이에요.", options: ["못 자는", "못 잔", "못 잘"], answer: "못 잔" },
+                    { situation: "식당 앞에 사람들이 줄을 서 있어요.", context: "저 식당은 음식이 아주 ____ 모양이에요.", options: ["맛있는", "맛있고", "맛있은"], answer: "맛있는" },
+                    { situation: "친구가 갑자기 뛰기 시작해요.", context: "약속 시간에 ____ 모양이에요.", options: ["늦는", "늦은", "늦을"], answer: "늦는" }
+                ],
+                feedback: { correct: "정답입니다! 잘했어요.", incorrect: "다시 시도해보세요." }
             },
             vi: {
                 title: "Học ngữ pháp: -(으)ㄴ/는 모양이다",
-                explanationTab: "Giải thích",
-                practiceTab: "Luyện tập",
-                expTitle: "A/V-(으)ㄴ/는 모양이다, N인 모양이다",
-                expIntro: "Sử dụng khi bạn đoán một lý do hoặc tình trạng sau khi quan sát một tình huống. Tương tự như 'có vẻ là...', 'hình như là...'.",
-                expAdjectiveTitle: "1. Tính từ (Adjective)",
-                expAdjectiveRule1: "Không có patchim hoặc patchim 'ㄹ': -ㄴ 모양이다 (VD: 바쁘다 → 바쁜 모양이다)",
-                expAdjectiveRule2: "Có patchim: -은 모양이다 (VD: 좋다 → 좋은 모양이다)",
-                expAdjectiveRule3: "Ngoại lệ: kết thúc bằng '있다/없다' thì dùng '-는'. (VD: 맛있다 → 맛있는 모양이다)",
-                expVerbTitle: "2. Động từ (Verb)",
-                expVerbRule: "Không phân biệt patchim: -는 모양이다 (VD: 가다 → 가는 모양이다)",
-                expNounTitle: "3. Danh từ (Noun)",
-                expNounRule: "Không phân biệt patchim: -인 모양이다 (VD: 학생 → 학생인 모양이다)",
-                expTenseTitle: "💡 Tìm hiểu về thì (Tense)",
-                expPast: "Quá khứ (Past): -았/었던 모양이다 (VD: Hình như tối qua trời đã mưa to.)",
-                expFuture: "Tương lai (Future): -(으)ㄹ 모양이다 (VD: Trời nhiều mây. Có vẻ như sắp mưa.)",
+                tabExp: "Giải thích",
+                tabPrac: "Luyện tập",
+                expTitle: "-(으)ㄴ/는 모양이다",
+                expIntro: "Sử dụng khi phỏng đoán dựa trên tình huống quan sát được. (Phỏng đoán có căn cứ)",
+                expTip: "Giống '-(으)ㄹ 것 같다', nhưng tự nhiên hơn khi có căn cứ trực tiếp.",
+                titles: { adj: "Tính từ", verb: "Động từ", noun: "Danh từ", tense: "Thì (Thời gian)" },
+                rules: {
+                    adj1: "Không patchim / ㄹ", adj1_ex: "바쁘다 → 바쁜 모양이다",
+                    adj2: "Có patchim", adj2_ex: "작다 → 작은 모양이다",
+                    adj3: "Ngoại lệ (있다/없다)", adj3_ex: "맛있다 → 맛있는 모양이다",
+                    verb1: "Hiện tại", verb1_ex1: "가다 → 가는 모양이다", verb1_ex2: "먹다 → 먹는 모양이다",
+                    noun1: "Hiện tại", noun1_ex: "학생 → 학생인 모양이다",
+                    past: "Quá khứ", past_ex: "비가 많이 왔던 모양이다 (Đã mưa)",
+                    future: "Tương lai", future_ex: "비가 올 모양이다 (Sắp mưa)"
+                },
                 quizTitle: "Bài tập luyện tập",
-                quizInstruction: "Hãy xem tình huống và chọn từ đúng điền vào chỗ trống.",
-                q1_situation: "1. (Nghe thấy tiếng cười vui vẻ từ bên ngoài) Hình như họ đang xem một chương trình TV thú vị.",
-                q2_situation: "2. (Bạn tôi cứ ngáp liên tục) Có vẻ như tối qua bạn ấy không ngủ ngon.",
-                q3_situation: "3. (Mọi người đang xếp hàng trước nhà hàng) Có vẻ như đồ ăn ở nhà hàng đó rất ngon.",
-                q4_situation: "4. (Bạn tôi đột nhiên bắt đầu chạy) Có vẻ như bạn ấy sắp muộn giờ hẹn.",
-                correct: "Chính xác!",
-                incorrect: "Hãy thử lại.",
+                quizInst: "Chọn từ đúng dựa trên tình huống.",
+                quizzes: [
+                    { situation: "Nghe thấy tiếng cười vui vẻ bên ngoài.", context: "Hình như họ đang ____ chương trình TV thú vị.", options: ["보는", "본", "볼"], answer: "보는" },
+                    { situation: "Bạn tôi ngáp liên tục.", context: "Hình như tối qua ____ ngủ ngon.", options: ["못 자는", "못 잔", "못 잘"], answer: "못 잔" },
+                    { situation: "Người ta xếp hàng trước quán ăn.", context: "Hình như đồ ăn ở đó ____ lắm.", options: ["맛있는", "맛있고", "맛있은"], answer: "맛있는" },
+                    { situation: "Bạn tôi đột nhiên chạy đi.", context: "Hình như ____ giờ hẹn.", options: ["늦는", "늦은", "늦을"], answer: "늦는" }
+                ],
+                feedback: { correct: "Chính xác!", incorrect: "Thử lại nhé." }
             },
             ja: {
                 title: "文法学習: -(으)ㄴ/는 모양이다",
-                explanationTab: "文法説明",
-                practiceTab: "練習問題",
-                expTitle: "A/V-(으)ㄴ/는 모양이다, N인 모양이다",
-                expIntro: "ある状況を見て、その理由や状態を推測する時に使います。「〜みたいだ」「〜ようだ」と似た意味です。",
-                expAdjectiveTitle: "1. 形容詞 (Adjective)",
-                expAdjectiveRule1: "パッチムがない、または 'ㄹ' パッチム: -ㄴ 모양이다 (例: 바쁘다 → 바쁜 모양이다)",
-                expAdjectiveRule2: "パッチムがある場合: -은 모양이다 (例: 좋다 → 좋은 모양이다)",
-                expAdjectiveRule3: "例外: '있다/없다'で終わる形容詞は '-는' を使います。(例: 맛있다 → 맛있는 모양이다)",
-                expVerbTitle: "2. 動詞 (Verb)",
-                expVerbRule: "パッチムに関係なく: -는 모양이다 (例: 가다 → 가는 모양이다)",
-                expNounTitle: "3. 名詞 (Noun)",
-                expNounRule: "パッチムに関係なく: -인 모양이다 (例: 학생 → 학생인 모양이다)",
-                expTenseTitle: "💡 時制 (Tense) について",
-                expPast: "過去 (Past): -았/었던 모양이다 (例: 昨夜、雨がたくさん降ったようです。)",
-                expFuture: "未来 (Future): -(으)ㄹ 모양이다 (例: 空が曇っています。もうすぐ雨が降るようです。)",
+                tabExp: "説明",
+                tabPrac: "練習",
+                expTitle: "-(으)ㄴ/는 모양이다",
+                expIntro: "状況を見て推測する時に使います。(根拠のある推測)",
+                expTip: "'-(으)ㄹ 것 같다'と似ていますが、直接見たり聞いたりした根拠がある時によく使います。",
+                titles: { adj: "形容詞", verb: "動詞", noun: "名詞", tense: "時制" },
+                rules: {
+                    adj1: "パッチム無 / ㄹ", adj1_ex: "바쁘다 → 바쁜 모양이다",
+                    adj2: "パッチム有", adj2_ex: "작다 → 작은 모양이다",
+                    adj3: "例外 (있다/없다)", adj3_ex: "맛있다 → 맛있는 모양이다",
+                    verb1: "現在", verb1_ex1: "가다 → 가는 모양이다", verb1_ex2: "먹다 → 먹는 모양이다",
+                    noun1: "現在", noun1_ex: "학생 → 학생인 모양이다",
+                    past: "過去", past_ex: "비가 많이 왔던 모양이다 (雨が降ったようだ)",
+                    future: "未来", future_ex: "비가 올 모양이다 (雨が降るようだ)"
+                },
                 quizTitle: "練習問題",
-                quizInstruction: "状況を見て、空欄に最も適切なものを選んでください。",
-                q1_situation: "1. (外から楽しそうな笑い声が聞こえます) 面白いテレビ番組を ____ ようです。",
-                q2_situation: "2. (友達がずっとあくびをしています) 昨夜、よく眠れなかったようです。",
-                q3_situation: "3. (レストランの前に人が並んでいます) あの食堂は料理がとても ____ ようです。",
-                q4_situation: "4. (友達が急に走り出しました) 約束の時間に ____ ようです。",
-                correct: "正解です！",
-                incorrect: "もう一度試してください。",
+                quizInst: "状況を見て適切な言葉を選んでください。",
+                quizzes: [
+                    { situation: "外から笑い声が聞こえます。", context: "面白いテレビ番組を ____ ようです。", options: ["보는", "본", "볼"], answer: "보는" },
+                    { situation: "友達があくびをしています。", context: "昨夜、よく ____ ようです。", options: ["못 자는", "못 잔", "못 잘"], answer: "못 잔" },
+                    { situation: "店の前に行列ができています。", context: "あの店は料理が ____ ようです。", options: ["맛있는", "맛있고", "맛있은"], answer: "맛있는" },
+                    { situation: "友達が急に走り出しました。", context: "約束の時間に ____ ようです。", options: ["늦는", "늦은", "늦を"], answer: "늦는" }
+                ],
+                feedback: { correct: "正解です！", incorrect: "もう一度試してください。" }
             },
             zh: {
                 title: "语法学习: -(으)ㄴ/는 모양이다",
-                explanationTab: "语法说明",
-                practiceTab: "练习题",
-                expTitle: "A/V-(으)ㄴ/는 모양이다, N인 모양이다",
-                expIntro: "用于根据观察到的情况推测原因或状态。与 “...것 같다 (好像...)” 意思相似。",
-                expAdjectiveTitle: "1. 形容词 (Adjective)",
-                expAdjectiveRule1: "没有收音或以 'ㄹ' 收音结尾: -ㄴ 모양이다 (例: 바쁘다 → 바쁜 모양이다)",
-                expAdjectiveRule2: "有收音时: -은 모양이다 (例: 좋다 → 좋은 모양이다)",
-                expAdjectiveRule3: "例外: 以 '있다/없다' 结尾时，使用 '-는'。(例: 맛있다 → 맛있는 모양이다)",
-                expVerbTitle: "2. 动词 (Verb)",
-                expVerbRule: "不论是否有收音: -는 모양이다 (例: 가다 → 가는 모양이다)",
-                expNounTitle: "3. 名词 (Noun)",
-                expNounRule: "不论是否有收音: -인 모양이다 (例: 학생 → 학생인 모양이다)",
-                expTenseTitle: "💡 了解时态 (Tense)",
-                expPast: "过去 (Past): -았/었던 모양이다 (例: 看来昨天晚上下了很大的雨。)",
-                expFuture: "未来 (Future): -(으)ㄹ 모양이다 (例: 天阴了，看样子马上要下雨了。)",
+                tabExp: "说明",
+                tabPrac: "练习",
+                expTitle: "-(으)ㄴ/는 모양이다",
+                expIntro: "根据观察到的情况进行推测时使用。（有根据的推测）",
+                expTip: "虽然和 '-(으)ㄹ 것 같다' 相似，但在有亲眼看到或听到的根据时使用更自然。",
+                titles: { adj: "形容词", verb: "动词", noun: "名词", tense: "时态" },
+                rules: {
+                    adj1: "无收音 / ㄹ收音", adj1_ex: "바쁘다 → 바쁜 모양이다",
+                    adj2: "有收音", adj2_ex: "작다 → 작은 모양이다",
+                    adj3: "例外 (있다/없다)", adj3_ex: "맛있다 → 맛있는 모양이다",
+                    verb1: "现在", verb1_ex1: "가다 → 가는 모양이다", verb1_ex2: "먹다 → 먹는 모양이다",
+                    noun1: "现在", noun1_ex: "학생 → 학생인 모양이다",
+                    past: "过去", past_ex: "비가 많이 왔던 모양이다 (好像下过雨)",
+                    future: "未来", future_ex: "비가 올 모양이다 (好像要下雨)"
+                },
                 quizTitle: "练习题",
-                quizInstruction: "请根据情况，在空格处选择最恰当的选项。",
-                q1_situation: "1. (外面传来愉快的笑声) 他们好像在看有趣的电视节目。",
-                q2_situation: "2. (朋友一直在打哈欠) 他昨天晚上好像没睡好觉。",
-                q3_situation: "3. (餐厅前人们在排队) 那家餐厅的菜好像非常好吃。",
-                q4_situation: "4. (朋友突然跑了起来) 他好像约会要迟到了。",
-                correct: "回答正确！",
-                incorrect: "请再试一次。",
+                quizInst: "请根据情况选择正确的词。",
+                quizzes: [
+                    { situation: "外面传来笑声。", context: "好像在 ____ 有趣的电视节目。", options: ["보는", "본", "볼"], answer: "보는" },
+                    { situation: "朋友一直在打哈欠。", context: "昨晚好像没 ____ 觉。", options: ["못 자는", "못 잔", "못 잘"], answer: "못 잔" },
+                    { situation: "餐厅前排着队。", context: "那家餐厅的菜好像很 ____ 。", options: ["맛있는", "맛있고", "맛있은"], answer: "맛있는" },
+                    { situation: "朋友突然跑了起来。", context: "约会好像要 ____ 。", options: ["늦는", "늦은", "늦을"], answer: "늦는" }
+                ],
+                feedback: { correct: "回答正确！", incorrect: "请再试一次。" }
             }
         };
 
-        const quizData = [
-            { id: 'q1', situation: 'q1_situation', options: ['보는', '본', '볼'], answer: '보는' },
-            { id: 'q2', situation: 'q2_situation', options: ['못 자는', '못 잔', '못 잘'], answer: '못 잔' },
-            { id: 'q3', situation: 'q3_situation', options: ['맛있는', '맛있고', '맛있은'], answer: '맛있는' },
-            { id: 'q4', situation: 'q4_situation', options: ['늦는', '늦은', '늦을'], answer: '늦는' }
-        ];
+        // State
+        let currentLang = 'ko';
 
-        let currentLanguage = 'ko';
-        let currentSlide = 'explanation';
+        // Elements
+        const langSelector = document.getElementById('language-selector');
+        const tabs = document.querySelectorAll('.tab-btn');
+        const sections = {
+            explanation: document.getElementById('explanation-section'),
+            practice: document.getElementById('practice-section')
+        };
+        const appTitle = document.getElementById('app-title');
 
-        const render = () => {
-            // Update text based on language
-            const t = translations[currentLanguage];
-            document.getElementById('app-title').textContent = t.title;
-            document.getElementById('explanation-tab').textContent = t.explanationTab;
-            document.getElementById('practice-tab').textContent = t.practiceTab;
+        // Functions
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                // Clean text for TTS (remove arrows, explanations in parens)
+                const cleanText = text.replace(/→.*$/, '').replace(/\(.*\)/, '').trim();
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'ko-KR';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function renderContent() {
+            const t = translations[currentLang];
             
-            // Explanation slide
+            // App Title & Tabs
+            appTitle.textContent = t.title;
+            document.querySelector('#explanation-tab-btn .tab-text').textContent = t.tabExp;
+            document.querySelector('#practice-tab-btn .tab-text').textContent = t.tabPrac;
+
+            // Explanation Content
             document.getElementById('exp-title').textContent = t.expTitle;
             document.getElementById('exp-intro').textContent = t.expIntro;
-            document.getElementById('exp-adjective-title').textContent = t.expAdjectiveTitle;
-            document.getElementById('exp-adjective-rule1').textContent = t.expAdjectiveRule1;
-            document.getElementById('exp-adjective-rule2').textContent = t.expAdjectiveRule2;
-            document.getElementById('exp-adjective-rule3').textContent = t.expAdjectiveRule3;
-            document.getElementById('exp-verb-title').textContent = t.expVerbTitle;
-            document.getElementById('exp-verb-rule').textContent = t.expVerbRule;
-            document.getElementById('exp-noun-title').textContent = t.expNounTitle;
-            document.getElementById('exp-noun-rule').textContent = t.expNounRule;
-            document.getElementById('exp-tense-title').textContent = t.expTenseTitle;
-            document.getElementById('exp-past').textContent = t.expPast;
-            document.getElementById('exp-future').textContent = t.expFuture;
+            document.getElementById('exp-tip').textContent = t.expTip;
+            document.getElementById('exp-adjective-title').textContent = t.titles.adj;
+            document.getElementById('exp-verb-title').textContent = t.titles.verb;
+            document.getElementById('exp-noun-title').textContent = t.titles.noun;
+            document.getElementById('exp-tense-title').textContent = t.titles.tense;
 
-            // Practice slide
-            document.getElementById('quiz-title').textContent = t.quizTitle;
-            document.getElementById('quiz-instruction').textContent = t.quizInstruction;
+            // --- FIXED LOGIC FOR UPDATING CARDS ---
             
-            // Render Quiz Questions
-            const quizContainer = document.getElementById('quiz-container');
-            quizContainer.innerHTML = ''; // Clear previous questions
-            quizData.forEach(q => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'p-4 border rounded-lg';
-                questionDiv.innerHTML = `
-                    <p class="text-gray-700 mb-4">${t[q.situation]}</p>
-                    <div class="flex flex-wrap gap-2" id="options-${q.id}">
-                        ${q.options.map(opt => `<button data-question="${q.id}" data-answer="${opt}" class="quiz-option-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">${opt}</button>`).join('')}
-                    </div>
-                    <p id="feedback-${q.id}" class="mt-3 text-sm font-semibold"></p>
-                `;
-                quizContainer.appendChild(questionDiv);
-            });
+            // Adjective Card
+            const adjCard = document.querySelectorAll('.card')[0];
+            updateRuleList(adjCard, [
+                { label: t.rules.adj1, ex: t.rules.adj1_ex },
+                { label: t.rules.adj2, ex: t.rules.adj2_ex },
+                { label: t.rules.adj3, ex: t.rules.adj3_ex }
+            ]);
 
-            // Update active states
-            updateActiveButtons();
-            showSlide(currentSlide);
-        };
-        
-        const updateActiveButtons = () => {
-             // Language buttons
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
-            });
-             // Tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.slide === currentSlide);
+            // Verb Card (Manual Update due to unique structure)
+            const verbCard = document.querySelectorAll('.card')[1];
+            const verbItem = verbCard.querySelector('li');
+            if (verbItem) {
+                // Header is the first child div
+                const headerDiv = verbItem.children[0];
+                if(headerDiv) {
+                    const labelSpan = headerDiv.querySelector('span:first-child');
+                    if(labelSpan) labelSpan.textContent = t.rules.verb1; // "Present (현재)"
+                }
+
+                // Example 1 is the second child div
+                const ex1Div = verbItem.children[1];
+                if(ex1Div) {
+                    const exSpan = ex1Div.querySelector('span');
+                    const btn = ex1Div.querySelector('button');
+                    if(exSpan) exSpan.textContent = t.rules.verb1_ex1;
+                    if(btn) btn.onclick = () => speak(t.rules.verb1_ex1.split('→')[1] || t.rules.verb1_ex1);
+                }
+
+                // Example 2 is the third child div
+                const ex2Div = verbItem.children[2];
+                if(ex2Div) {
+                    const exSpan = ex2Div.querySelector('span');
+                    const btn = ex2Div.querySelector('button');
+                    if(exSpan) exSpan.textContent = t.rules.verb1_ex2;
+                    if(btn) btn.onclick = () => speak(t.rules.verb1_ex2.split('→')[1] || t.rules.verb1_ex2);
+                }
+            }
+
+            // Noun Card
+            const nounCard = document.querySelectorAll('.card')[2];
+            updateRuleList(nounCard, [
+                { label: t.rules.noun1, ex: t.rules.noun1_ex }
+            ]);
+
+            // Tense Card
+            const tenseCard = document.querySelectorAll('.card')[3];
+            updateRuleList(tenseCard, [
+                { label: t.rules.past, ex: t.rules.past_ex },
+                { label: t.rules.future, ex: t.rules.future_ex }
+            ]);
+
+            // Quiz Section
+            document.getElementById('quiz-title').textContent = t.quizTitle;
+            document.getElementById('quiz-instruction').textContent = t.quizInst;
+            renderQuiz();
+        }
+
+        function updateRuleList(card, data) {
+            const listItems = card.querySelectorAll('li');
+            data.forEach((d, i) => {
+                const item = listItems[i];
+                if(item) {
+                    // Header Div is the first child
+                    const headerDiv = item.children[0];
+                    if(headerDiv) {
+                        const labelSpan = headerDiv.querySelector('span:first-child');
+                        if(labelSpan) labelSpan.textContent = d.label;
+                    }
+                    
+                    // Example Div is the second child
+                    const exDiv = item.children[1];
+                    if(exDiv) {
+                        const exSpan = exDiv.querySelector('span');
+                        const btn = exDiv.querySelector('button');
+                        
+                        if(exSpan) exSpan.textContent = d.ex;
+                        // Clean text for speech
+                        const speakTextStr = d.ex.split('→')[1] || d.ex.split('(')[0];
+                        if(btn) btn.onclick = () => speak(speakTextStr);
+                    }
+                }
             });
         }
 
-        const showSlide = (slideId) => {
-            document.querySelectorAll('.slide').forEach(slide => {
-                slide.classList.remove('active');
+        function renderQuiz() {
+            const t = translations[currentLang];
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+
+            t.quizzes.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-xl p-5 shadow-sm';
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <div class="text-xs font-bold text-indigo-500 mb-1">Situation</div>
+                        <p class="text-gray-600 italic mb-3 bg-gray-50 p-2 rounded border-l-2 border-indigo-200">"${q.situation}"</p>
+                        <p class="text-lg font-medium text-gray-800">${q.context}</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 options-container" id="q-${idx}">
+                        ${q.options.map(opt => `
+                            <button onclick="checkAnswer(${idx}, '${opt}', this)" class="quiz-option bg-white border-2 border-gray-200 text-gray-600 font-bold py-2 rounded-lg hover:border-indigo-300 hover:text-indigo-600 focus:outline-none">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="mt-3 text-sm font-bold hidden feedback-msg"></div>
+                `;
+                container.appendChild(card);
             });
-            document.getElementById(`${slideId}-slide`).classList.add('active');
+        }
+
+        window.checkAnswer = function(qIdx, selected, btn) {
+            const t = translations[currentLang];
+            const q = t.quizzes[qIdx];
+            const card = btn.closest('.bg-white');
+            const feedback = card.querySelector('.feedback-msg');
+            const allBtns = card.querySelectorAll('.quiz-option');
+
+            // Reset buttons
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('border-green-500', 'text-green-600', 'bg-green-50', 'border-red-500', 'text-red-600', 'bg-red-50');
+                if (b.innerText.trim() === q.answer) {
+                    b.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                }
+            });
+
+            feedback.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            
+            if(selected === q.answer) {
+                btn.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                feedback.textContent = t.feedback.correct;
+                feedback.classList.add('text-green-600');
+                speak(q.context.replace('____', selected));
+            } else {
+                btn.classList.add('border-red-500', 'text-red-600', 'bg-red-50');
+                feedback.textContent = t.feedback.incorrect;
+                feedback.classList.add('text-red-600');
+            }
         };
 
         // Event Listeners
-        document.querySelector('.flex.space-x-2').addEventListener('click', (e) => {
-            if (e.target.matches('.lang-btn')) {
-                currentLanguage = e.target.dataset.lang;
-                render();
-            }
+        langSelector.addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            renderContent();
         });
 
-        document.querySelector('nav').addEventListener('click', (e) => {
-            if (e.target.matches('.tab-btn')) {
-                currentSlide = e.target.dataset.slide;
-                render();
-            }
-        });
-
-        document.getElementById('quiz-container').addEventListener('click', (e) => {
-            if (e.target.matches('.quiz-option-btn')) {
-                const qId = e.target.dataset.question;
-                const selectedAnswer = e.target.dataset.answer;
-                const correctAnswer = quizData.find(q => q.id === qId).answer;
-
-                const feedbackEl = document.getElementById(`feedback-${qId}`);
-                const optionsContainer = document.getElementById(`options-${qId}`);
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
                 
-                // Reset styles
-                optionsContainer.querySelectorAll('.quiz-option-btn').forEach(btn => {
-                    btn.className = 'quiz-option-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors';
-                });
-
-                if (selectedAnswer === correctAnswer) {
-                    feedbackEl.textContent = translations[currentLanguage].correct;
-                    feedbackEl.className = 'mt-3 text-sm font-semibold text-green-600';
-                    e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                    e.target.classList.add('bg-green-500', 'text-white');
-                } else {
-                    feedbackEl.textContent = translations[currentLanguage].incorrect;
-                    feedbackEl.className = 'mt-3 text-sm font-semibold text-red-600';
-                    e.target.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                    e.target.classList.add('bg-red-500', 'text-white');
-                }
-            }
+                const target = tab.dataset.tab;
+                Object.values(sections).forEach(s => s.classList.add('hidden'));
+                sections[target].classList.remove('hidden');
+            });
         });
 
-        // Initial Render
-        render();
-    </script>
+        // Initialize
+        document.querySelector('[data-tab="explanation"]').classList.add('active');
+        renderContent();
 
+    </script>
 </body>
 </html>
