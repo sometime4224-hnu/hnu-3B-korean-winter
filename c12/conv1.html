@@ -2,193 +2,489 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>한국어 말하기 연습: 친구에게 권유하기</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f9ff;
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
         }
-        .card {
-            transition: all 0.3s ease-in-out;
-            transform-style: preserve-3d;
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .card-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .chat-bubble {
+            position: relative;
+            max-width: 90%;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .card.flipped {
-            transform: rotateY(180deg);
+        .chat-bubble.friend {
+            background-color: #ffffff;
+            border-bottom-left-radius: 0.25rem;
+            margin-right: auto;
+            border: 1px solid #e2e8f0;
         }
-        .card-face {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+        .chat-bubble.me {
+            background-color: #dbeafe; /* Blue-100 */
+            border-bottom-right-radius: 0.25rem;
+            margin-left: auto;
+            color: #1e40af;
         }
-        .card-back {
-            transform: rotateY(180deg);
+
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        .speak-btn:active { transform: scale(0.9); color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="min-h-screen flex flex-col">
 
-    <div class="w-full max-w-md mx-auto p-4">
-        <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-            
-            <div id="app-content">
-                <!-- 이모지 및 힌트 -->
-                <div class="mb-6 min-h-[120px] flex flex-col items-center justify-center">
-                    <p id="emoji" class="text-6xl mb-3"></p>
-                    <p id="hint" class="text-lg text-gray-700 font-medium"></p>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-sky-500 text-white p-2 rounded-lg shadow-sm">
+                    <i class="fas fa-comments"></i>
                 </div>
-
-                <!-- 질문 및 권유 힌트 -->
-                <div class="bg-sky-50 rounded-lg p-6 min-h-[150px] flex flex-col justify-center">
-                    <h2 id="question" class="text-xl font-bold text-sky-800 mb-3"></h2>
-                    <p id="suggestion" class="text-gray-600 text-base font-medium h-0 opacity-0 transition-all duration-500"></p>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold text-slate-800 tracking-tight leading-none" id="app-title">말하기 연습</h1>
+                    <p class="text-xs text-slate-500 mt-0.5" data-key="subtitle">친구에게 권유하기</p>
                 </div>
             </div>
-
-            <!-- 완료 메시지 -->
-            <div id="completion-message" class="hidden text-center">
-                 <p class="text-6xl mb-4">🎉</p>
-                 <h2 class="text-2xl font-bold text-gray-800 mb-2">참 잘했어요!</h2>
-                 <p class="text-gray-600">모든 말하기 연습을 완료했습니다.</p>
-            </div>
-
-
-            <!-- 네비게이션 버튼 -->
-            <div class="mt-8">
-                <button id="next-btn" class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
-                    다음
-                </button>
-            </div>
             
-            <!-- 진행 상태 바 -->
-            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-6">
-              <div id="progress-bar" class="bg-sky-400 h-2.5 rounded-full" style="width: 0%"></div>
+            <div class="relative">
+                <select id="language-selector" class="appearance-none bg-slate-100 border border-slate-200 text-slate-700 py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer hover:bg-slate-200 transition-colors">
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
             </div>
-
         </div>
-    </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-5xl mx-auto p-4 md:p-6 pb-24 flex flex-col md:justify-center">
+        
+        <!-- Scenario Container (Grid for Tablet) -->
+        <div id="scenario-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            
+            <!-- Left Column: Situation (Friend's Status) -->
+            <div class="flex flex-col gap-4">
+                <!-- Progress Indicator -->
+                <div class="flex justify-between items-end px-1">
+                    <span class="text-sm font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                        Scenario <span id="current-index">1</span>/<span id="total-count">5</span>
+                    </span>
+                    <div class="flex gap-1">
+                        <span class="w-2 h-2 rounded-full bg-slate-300 active-dot"></span>
+                        <!-- Dots generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Friend's Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex-grow flex flex-col justify-center items-center text-center card-transition relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-sky-300 to-indigo-300"></div>
+                    
+                    <div class="mb-6 relative">
+                        <div class="text-7xl md:text-8xl animate-bounce-slow transform hover:scale-110 transition-transform duration-300 cursor-default select-none" id="emoji">😩</div>
+                        <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-md border border-slate-100">
+                            <i class="fas fa-user-friends text-sky-500 text-lg"></i>
+                        </div>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-2" data-key="friend_status_title">친구의 상태</h2>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4 w-full mb-4 border border-slate-100">
+                        <p id="hint" class="text-lg text-slate-700 font-medium break-keep">기운이 없고 몸이 무거워요.</p>
+                        <button class="mt-2 text-slate-400 hover:text-sky-500 transition-colors speak-btn" onclick="speakContent('hint')">
+                            <i class="fas fa-volume-high mr-1"></i> <span class="text-xs" data-key="listen">듣기</span>
+                        </button>
+                    </div>
+
+                    <div class="text-sm text-slate-500 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100 inline-flex items-center">
+                        <i class="fas fa-question-circle text-yellow-500 mr-2"></i>
+                        <span id="question-text" data-key="question_prompt">친구에게 뭐라고 말할까요?</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: My Response (Interaction) -->
+            <div class="flex flex-col gap-4">
+                <!-- Grammar Tip Card -->
+                <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100 shadow-sm flex items-start gap-3">
+                    <div class="bg-indigo-100 text-indigo-600 rounded-lg p-2 shrink-0">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-indigo-800 mb-1" data-key="grammar_tip_title">유용한 표현</h3>
+                        <p class="text-sm text-indigo-700 font-medium">-는 게 어때요? / -도록 하세요</p>
+                    </div>
+                </div>
+
+                <!-- Interaction Area -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex-grow flex flex-col gap-4 relative">
+                    
+                    <!-- Step 1: User Thinking/Input Area -->
+                    <div id="step-thinking" class="flex-grow flex flex-col justify-center">
+                        <p class="text-slate-600 mb-4 text-center text-sm md:text-base" data-key="instruction_think">
+                            친구를 위해 해줄 수 있는 말을 생각해보세요.
+                        </p>
+                        <div class="relative group">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-sky-400 to-indigo-400 rounded-xl opacity-30 group-hover:opacity-60 transition duration-500 blur"></div>
+                            <div class="relative bg-white rounded-xl p-4 border border-slate-200">
+                                <textarea id="user-input" rows="3" class="w-full resize-none border-none focus:ring-0 p-0 text-slate-700 text-lg text-center bg-transparent placeholder-slate-300" placeholder="..." data-placeholder="placeholder_input"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Model Answer (Hidden initially) -->
+                    <div id="step-answer" class="hidden flex-col gap-3 fade-in-up">
+                        <div class="text-center">
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded border border-green-100 uppercase" data-key="model_answer_label">모범 답안</span>
+                        </div>
+                        <div class="chat-bubble me w-full">
+                            <p id="suggestion" class="text-lg font-bold leading-relaxed">가볍게 스트레칭을 하는 게 어때요?</p>
+                        </div>
+                        <div class="flex justify-end mt-1">
+                            <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-2 speak-btn" onclick="speakContent('suggestion')">
+                                <i class="fas fa-volume-high"></i> <span data-key="listen_answer">답안 듣기</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-auto pt-4 border-t border-slate-100">
+                        <button id="show-answer-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <i class="far fa-eye"></i> <span data-key="btn_check">확인하기</span>
+                        </button>
+                        <button id="next-btn" class="hidden w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-sky-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span data-key="btn_next">다음 문제</span> <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion View -->
+        <div id="completion-view" class="hidden flex-col items-center justify-center text-center py-10 fade-in-up">
+            <div class="mb-6 relative">
+                <div class="text-8xl animate-bounce">🎉</div>
+                <div class="absolute -top-4 -right-4 text-4xl animate-pulse">✨</div>
+                <div class="absolute -bottom-2 -left-4 text-4xl animate-pulse" style="animation-delay: 0.5s">✨</div>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-2" data-key="complete_title">참 잘했어요!</h2>
+            <p class="text-slate-500 mb-8" data-key="complete_desc">모든 대화 연습을 완료했습니다.</p>
+            <button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-green-200 transition-transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                <i class="fas fa-redo"></i> <span data-key="btn_restart">다시 시작하기</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer Progress -->
+    <footer class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 p-4 md:hidden z-20">
+        <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+            <div id="mobile-progress-bar" class="bg-sky-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="text-center text-xs text-slate-400 font-mono">
+            <span id="mobile-current">1</span> / <span id="mobile-total">5</span>
+        </div>
+    </footer>
 
     <script>
+        // --- DATA ---
         const scenarios = [
             {
                 emoji: '😩',
                 hint: '기운이 없고 몸이 무거워요.',
-                question1: '친구의 상태가 어떤가요?',
-                question2: '어떻게 하는 것이 좋아요? 권유해봅시다.',
-                suggestion: '예시) 가볍게 스트레칭을 하는 게 어때요?'
+                suggestion: '가볍게 스트레칭을 하는 게 어때요?',
+                tip: '-는 게 어때요?'
             },
             {
                 emoji: '🤧',
                 hint: '재채기가 나고 콧물이 흘러요.',
-                question1: '친구의 상태가 어떤가요?',
-                question2: '어떻게 하는 것이 좋아요? 권유해봅시다.',
-                suggestion: '예시) 감기에 걸린 것 같네요. 따뜻한 물을 많이 드세요.'
+                suggestion: '따뜻한 물을 많이 드세요.',
+                tip: '-으세요 (권유)'
             },
             {
                 emoji: '🤯',
                 hint: '시험 때문에 스트레스를 많이 받아요.',
-                question1: '친구의 상태가 어떤가요?',
-                question2: '어떻게 하는 것이 좋아요? 권유해봅시다.',
-                suggestion: '예시) 너무 걱정하지 마세요. 잠깐 쉬는 게 좋겠어요.'
+                suggestion: '너무 걱정하지 말고 잠깐 쉬는 게 좋겠어요.',
+                tip: '-는 게 좋다'
             },
             {
                 emoji: '🤕',
                 hint: '머리가 너무 아파요.',
-                question1: '친구의 상태가 어떤가요?',
-                question2: '어떻게 하는 것이 좋아요? 권유해봅시다.',
-                suggestion: '예시) 약을 먹고 좀 쉬세요. 계속 아프면 병원에 가보세요.'
+                suggestion: '약을 먹고 좀 쉬도록 하세요.',
+                tip: '-도록 하다'
             },
             {
                 emoji: '☕️😵',
                 hint: '커피를 많이 마셔서 잠을 못 잤어요.',
-                question1: '친구의 상태가 어떤가요?',
-                question2: '어떻게 하는 것이 좋아요? 권유해봅시다.',
-                suggestion: '예시) 오늘은 커피를 마시지 말고 일찍 자는 게 어때요?'
+                suggestion: '오늘은 커피를 마시지 말고 일찍 자요.',
+                tip: '-지 말고'
             }
         ];
 
-        let currentScenarioIndex = 0;
-        let currentStep = 1; // 1: question1, 2: question2
-
-        const emojiEl = document.getElementById('emoji');
-        const hintEl = document.getElementById('hint');
-        const questionEl = document.getElementById('question');
-        const suggestionEl = document.getElementById('suggestion');
-        const nextBtn = document.getElementById('next-btn');
-        const progressBar = document.getElementById('progress-bar');
-        const appContentEl = document.getElementById('app-content');
-        const completionMessageEl = document.getElementById('completion-message');
-
-        function displayScenario() {
-            if (currentScenarioIndex >= scenarios.length) {
-                showCompletion();
-                return;
+        const translations = {
+            ko: {
+                subtitle: "친구에게 권유하기",
+                friend_status_title: "친구의 상태",
+                listen: "듣기",
+                question_prompt: "친구에게 뭐라고 말할까요?",
+                grammar_tip_title: "유용한 표현",
+                instruction_think: "친구를 위해 해줄 수 있는 말을 입력하거나 생각해보세요.",
+                placeholder_input: "여기에 입력하세요...",
+                model_answer_label: "모범 답안",
+                listen_answer: "답안 듣기",
+                btn_check: "확인하기",
+                btn_next: "다음 문제",
+                complete_title: "참 잘했어요!",
+                complete_desc: "모든 연습을 완료했습니다.",
+                btn_restart: "다시 시작하기"
+            },
+            en: {
+                subtitle: "Suggesting to a Friend",
+                friend_status_title: "Friend's Status",
+                listen: "Listen",
+                question_prompt: "What should you say?",
+                grammar_tip_title: "Key Expressions",
+                instruction_think: "Think about or type what you can suggest.",
+                placeholder_input: "Type here...",
+                model_answer_label: "Model Answer",
+                listen_answer: "Listen",
+                btn_check: "Check Answer",
+                btn_next: "Next",
+                complete_title: "Great Job!",
+                complete_desc: "You have completed all exercises.",
+                btn_restart: "Restart"
+            },
+            vi: {
+                subtitle: "Đưa ra lời khuyên cho bạn",
+                friend_status_title: "Tình trạng của bạn",
+                listen: "Nghe",
+                question_prompt: "Bạn nên nói gì?",
+                grammar_tip_title: "Biểu hiện hữu ích",
+                instruction_think: "Hãy suy nghĩ hoặc nhập lời khuyên của bạn.",
+                placeholder_input: "Nhập vào đây...",
+                model_answer_label: "Đáp án mẫu",
+                listen_answer: "Nghe đáp án",
+                btn_check: "Kiểm tra",
+                btn_next: "Tiếp theo",
+                complete_title: "Làm tốt lắm!",
+                complete_desc: "Bạn đã hoàn thành bài tập.",
+                btn_restart: "Bắt đầu lại"
+            },
+            ja: {
+                subtitle: "友達に勧める",
+                friend_status_title: "友達の状態",
+                listen: "聞く",
+                question_prompt: "友達になんと言いますか？",
+                grammar_tip_title: "役に立つ表現",
+                instruction_think: "友達に勧めたい言葉を考えたり入力したりしてください。",
+                placeholder_input: "ここに入力...",
+                model_answer_label: "模範解答",
+                listen_answer: "解答を聞く",
+                btn_check: "確認する",
+                btn_next: "次の問題",
+                complete_title: "よくできました！",
+                complete_desc: "すべての練習が完了しました。",
+                btn_restart: "もう一度"
+            },
+            zh: {
+                subtitle: "向朋友建议",
+                friend_status_title: "朋友的状态",
+                listen: "听",
+                question_prompt: "该对朋友说什么？",
+                grammar_tip_title: "常用表达",
+                instruction_think: "想一想或输入你能给出的建议。",
+                placeholder_input: "在此输入...",
+                model_answer_label: "参考答案",
+                listen_answer: "听答案",
+                btn_check: "确认",
+                btn_next: "下一题",
+                complete_title: "做得好！",
+                complete_desc: "练习已完成。",
+                btn_restart: "重新开始"
             }
+        };
 
-            const scenario = scenarios[currentScenarioIndex];
-            
-            emojiEl.textContent = scenario.emoji;
-            hintEl.textContent = scenario.hint;
-            suggestionEl.textContent = scenario.suggestion;
+        // --- STATE ---
+        let currentIndex = 0;
+        let currentLang = 'ko';
 
-            if (currentStep === 1) {
-                questionEl.textContent = scenario.question1;
-                suggestionEl.classList.add('h-0', 'opacity-0');
-                suggestionEl.classList.remove('mt-2');
-                nextBtn.textContent = '다음';
-            } else { // currentStep === 2
-                questionEl.textContent = scenario.question2;
-                suggestionEl.classList.remove('h-0', 'opacity-0');
-                suggestionEl.classList.add('mt-2');
-                nextBtn.textContent = '다음 상태 보기';
-            }
-            
-            updateProgressBar();
+        // --- DOM ELEMENTS ---
+        const els = {
+            scenarioContainer: document.getElementById('scenario-container'),
+            completionView: document.getElementById('completion-view'),
+            currentIndex: document.getElementById('current-index'),
+            totalCount: document.getElementById('total-count'),
+            emoji: document.getElementById('emoji'),
+            hint: document.getElementById('hint'),
+            suggestion: document.getElementById('suggestion'),
+            userInput: document.getElementById('user-input'),
+            stepThinking: document.getElementById('step-thinking'),
+            stepAnswer: document.getElementById('step-answer'),
+            showAnswerBtn: document.getElementById('show-answer-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            restartBtn: document.getElementById('restart-btn'),
+            mobileProgressBar: document.getElementById('mobile-progress-bar'),
+            mobileCurrent: document.getElementById('mobile-current'),
+            mobileTotal: document.getElementById('mobile-total'),
+            langSelector: document.getElementById('language-selector'),
+            grammarTip: document.querySelector('.bg-indigo-50 p'), // Tip text
+            dotsContainer: document.querySelector('.flex.gap-1') // Pagination dots
+        };
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            els.totalCount.textContent = scenarios.length;
+            els.mobileTotal.textContent = scenarios.length;
+            renderPaginationDots();
+            updateUI();
+            updateLanguage();
         }
 
-        function updateProgressBar() {
-            const progress = ((currentScenarioIndex) / scenarios.length) * 100;
-            progressBar.style.width = `${progress}%`;
+        function renderPaginationDots() {
+            els.dotsContainer.innerHTML = scenarios.map((_, i) => 
+                `<span class="w-2 h-2 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-sky-500 w-4' : 'bg-slate-300'}"></span>`
+            ).join('');
+        }
+
+        function updatePaginationDots() {
+            const dots = els.dotsContainer.children;
+            for(let i=0; i<dots.length; i++) {
+                if (i === currentIndex) {
+                    dots[i].classList.remove('bg-slate-300', 'w-2');
+                    dots[i].classList.add('bg-sky-500', 'w-4');
+                } else {
+                    dots[i].classList.remove('bg-sky-500', 'w-4');
+                    dots[i].classList.add('bg-slate-300', 'w-2');
+                }
+            }
+        }
+
+        function updateUI() {
+            const scenario = scenarios[currentIndex];
+            
+            // Content
+            els.emoji.textContent = scenario.emoji;
+            els.hint.textContent = scenario.hint;
+            els.suggestion.textContent = scenario.suggestion;
+            els.grammarTip.textContent = scenario.tip;
+            els.userInput.value = '';
+
+            // Reset View State
+            els.stepThinking.classList.remove('hidden');
+            els.stepAnswer.classList.add('hidden');
+            els.showAnswerBtn.classList.remove('hidden');
+            els.nextBtn.classList.add('hidden');
+            
+            // Progress
+            els.currentIndex.textContent = currentIndex + 1;
+            els.mobileCurrent.textContent = currentIndex + 1;
+            const progress = ((currentIndex + 1) / scenarios.length) * 100;
+            els.mobileProgressBar.style.width = `${progress}%`;
+            
+            updatePaginationDots();
+        }
+
+        function showAnswer() {
+            els.stepThinking.classList.add('hidden');
+            els.stepAnswer.classList.remove('hidden');
+            els.stepAnswer.classList.add('fade-in-up');
+            
+            els.showAnswerBtn.classList.add('hidden');
+            els.nextBtn.classList.remove('hidden');
+            els.nextBtn.classList.add('fade-in-up');
+            
+            // Auto play audio (optional, maybe too intrusive)
+            // speakContent('suggestion'); 
+        }
+
+        function nextScenario() {
+            if (currentIndex < scenarios.length - 1) {
+                currentIndex++;
+                // Slight fade out effect could go here
+                updateUI();
+            } else {
+                showCompletion();
+            }
         }
 
         function showCompletion() {
-            appContentEl.classList.add('hidden');
-            completionMessageEl.classList.remove('hidden');
-            progressBar.style.width = '100%';
-            progressBar.classList.add('bg-green-500');
-            nextBtn.textContent = '다시 시작하기';
-            nextBtn.classList.remove('bg-sky-500', 'hover:bg-sky-600');
-            nextBtn.classList.add('bg-green-500', 'hover:bg-green-600');
-            currentScenarioIndex = scenarios.length; // Lock index
+            els.scenarioContainer.classList.add('hidden');
+            els.completionView.classList.remove('hidden');
         }
 
-        nextBtn.addEventListener('click', () => {
-            if (currentScenarioIndex >= scenarios.length) {
-                // Restart logic
-                currentScenarioIndex = 0;
-                currentStep = 1;
-                appContentEl.classList.remove('hidden');
-                completionMessageEl.classList.add('hidden');
-                progressBar.classList.remove('bg-green-500');
-                nextBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
-                nextBtn.classList.add('bg-sky-500', 'hover:bg-sky-600');
-                displayScenario();
-                return;
-            }
+        function restart() {
+            currentIndex = 0;
+            els.completionView.classList.add('hidden');
+            els.scenarioContainer.classList.remove('hidden');
+            updateUI();
+        }
 
-            if (currentStep === 1) {
-                currentStep = 2;
-            } else {
-                currentStep = 1;
-                currentScenarioIndex++;
-            }
-            displayScenario();
+        function updateLanguage() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-key]').forEach(el => {
+                el.textContent = t[el.dataset.key];
+            });
+            document.querySelectorAll('[data-placeholder]').forEach(el => {
+                el.placeholder = t[el.dataset.placeholder];
+            });
+        }
+
+        function speakContent(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 0.9;
+            
+            // Try to set a Korean voice if available
+            const voices = window.speechSynthesis.getVoices();
+            const korVoice = voices.find(v => v.lang.includes('ko'));
+            if (korVoice) utterance.voice = korVoice;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- EVENT LISTENERS ---
+        els.showAnswerBtn.addEventListener('click', showAnswer);
+        els.nextBtn.addEventListener('click', nextScenario);
+        els.restartBtn.addEventListener('click', restart);
+        
+        els.langSelector.addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            updateLanguage();
         });
 
-        // 초기 화면 표시
-        displayScenario();
+        // Initialize Voices
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
+        // Start
+        init();
+
     </script>
 </body>
 </html>
