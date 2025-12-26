@@ -1,0 +1,451 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  BookOpen, 
+  PenTool, 
+  Layout, 
+  ChevronRight, 
+  ChevronLeft, 
+  Copy, 
+  Check, 
+  Download,
+  Trash2,
+  AlertCircle,
+  Lightbulb
+} from 'lucide-react';
+
+const KoreanWritingApp = () => {
+  // --- States ---
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState(null);
+  
+  // Data State
+  const [data, setData] = useState({
+    q1: '', // Why exercise is needed
+    q2: '', // Easy methods
+    keywords: '',
+    outline: {
+      intro: '',
+      body: '',
+      conclusion: ''
+    },
+    finalText: ''
+  });
+
+  // --- Constants ---
+  const STORAGE_KEY = 'korean_writing_exercise_v1';
+
+  const steps = [
+    { id: 'analyze', titleKR: '내용 구상', titleVN: 'Tìm ý tưởng', icon: <BookOpen className="w-5 h-5" /> },
+    { id: 'vocab', titleKR: '표현 익히기', titleVN: 'Học từ vựng & Biểu hiện', icon: <Lightbulb className="w-5 h-5" /> },
+    { id: 'outline', titleKR: '개요 작성', titleVN: 'Lập dàn ý', icon: <Layout className="w-5 h-5" /> },
+    { id: 'write', titleKR: '글쓰기', titleVN: 'Luyện viết', icon: <PenTool className="w-5 h-5" /> }
+  ];
+
+  // Specific Vocabulary for "Exercise"
+  const vocabulary = {
+    topicWords: [
+      { kr: '건강을 유지하다', vn: 'Duy trì sức khỏe' },
+      { kr: '체력을 기르다', vn: 'Rèn luyện thể lực' },
+      { kr: '스트레스를 해소하다', vn: 'Giải tỏa căng thẳng' },
+      { kr: '비만을 예방하다', vn: 'Phòng ngừa béo phì' },
+      { kr: '계단을 이용하다', vn: 'Sử dụng cầu thang' },
+      { kr: '가까운 거리는 걷다', vn: 'Đi bộ ở khoảng cách gần' }
+    ],
+    grammar: [
+      { kr: '-는 것이 좋다', vn: 'Tốt hơn là nên... (Khuyên nhủ)' },
+      { kr: '-아/어야 한다', vn: 'Phải... (Sự cần thiết)' },
+      { kr: '-기 위해서', vn: 'Để... (Mục đích)' },
+      { kr: '-뿐만 아니라', vn: 'Không những... mà còn' }
+    ]
+  };
+
+  // --- Effects ---
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        setData(JSON.parse(savedData));
+        setLastSavedTime(new Date());
+      } catch (e) {
+        console.error("Failed to load save data", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setLastSavedTime(new Date());
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [data]);
+
+  useEffect(() => {
+    if (currentStep === 3 && data.finalText === '') {
+      const combined = `${data.outline.intro}\n\n${data.outline.body}\n\n${data.outline.conclusion}`;
+      if (combined.trim().length > 0) {
+        handleChange('finalText', null, combined.trim());
+      }
+    }
+  }, [currentStep]);
+
+  // --- Handlers ---
+  const handleChange = (field, subField, value) => {
+    setData(prev => {
+      if (subField) {
+        return { ...prev, [field]: { ...prev[field], [subField]: value } };
+      }
+      return { ...prev, [field]: value };
+    });
+  };
+
+  const handleReset = () => {
+    if (window.confirm('모든 내용이 삭제됩니다. 계속하시겠습니까? (Tất cả nội dung sẽ bị xóa?)')) {
+      setData({
+        q1: '', q2: '', keywords: '',
+        outline: { intro: '', body: '', conclusion: '' },
+        finalText: ''
+      });
+      localStorage.removeItem(STORAGE_KEY);
+      setCurrentStep(0);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(data.finalText).then(() => {
+      setShowSaveNotification(true);
+      setTimeout(() => setShowSaveNotification(false), 3000);
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) setCurrentStep(prev => prev + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 0) setCurrentStep(prev => prev - 1);
+  };
+
+  // --- Components ---
+  const SectionHeader = ({ kr, vn }) => (
+    <div className="border-b pb-3 mb-6">
+      <h2 className="text-2xl font-bold text-gray-900">{kr}</h2>
+      <p className="text-sm text-gray-500 mt-1">{vn}</p>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100 font-sans print:bg-white">
+      {/* Header */}
+      <header className="bg-emerald-600 text-white p-4 shadow-md print:hidden">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <PenTool className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold">주제: 생활 속의 운동</h1>
+              <p className="text-xs text-emerald-100">Chủ đề: Thể dục trong đời sống</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {lastSavedTime && (
+              <div className="hidden md:flex flex-col items-end text-xs text-emerald-100">
+                <span className="flex items-center gap-1"><Check className="w-3 h-3" /> 저장됨 (Đã lưu)</span>
+              </div>
+            )}
+            <button onClick={handleReset} className="p-2 hover:bg-emerald-700 rounded-full transition-colors text-emerald-100 hover:text-white">
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto p-4 md:p-6 print:p-0 print:max-w-none">
+        
+        {/* Progress Steps */}
+        <div className="mb-8 print:hidden">
+          <div className="grid grid-cols-4 gap-2">
+            {steps.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => setCurrentStep(index)}
+                className={`flex flex-col items-center p-2 rounded-lg transition-all ${
+                  index === currentStep
+                    ? 'bg-white shadow-md border-b-4 border-emerald-600'
+                    : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                }`}
+              >
+                <div className={`${index === currentStep ? 'text-emerald-600' : 'text-gray-400'}`}>{step.icon}</div>
+                <span className={`text-sm font-bold mt-1 ${index === currentStep ? 'text-gray-800' : 'text-gray-400'}`}>{step.titleKR}</span>
+                <span className="text-[10px] hidden sm:block truncate w-full text-center">{step.titleVN}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content Card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 min-h-[500px] transition-all duration-300 print:shadow-none print:p-0">
+          
+          {/* STEP 1: SPECIFIC GUIDED QUESTIONS */}
+          {currentStep === 0 && (
+            <div className="animate-fadeIn">
+              <SectionHeader kr="1. 내용 구상하기" vn="Tìm ý tưởng cho bài viết" />
+              
+              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 mb-6 flex gap-3">
+                <AlertCircle className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+                <div>
+                  <h4 className="font-bold text-emerald-900 text-sm">가이드 (Hướng dẫn)</h4>
+                  <p className="text-sm text-emerald-800 mt-1">
+                    질문에 답하면서 글의 핵심 내용을 한국어로 간단히 메모해보세요.
+                    <br/>
+                    <span className="text-xs opacity-75">(Hãy trả lời các câu hỏi để ghi lại nội dung chính bằng tiếng Hàn.)</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block mb-2">
+                    <span className="font-bold text-gray-800">Q1. 우리는 왜 운동을 해야 할까요?</span>
+                    <span className="block text-xs text-gray-500">Tại sao chúng ta phải tập thể dục? (Sức khỏe, Căng thẳng...)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={data.q1}
+                    onChange={(e) => handleChange('q1', null, e.target.value)}
+                    placeholder="예: 건강을 유지하기 위해서, 스트레스를 풀기 위해서..." 
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors" 
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2">
+                    <span className="font-bold text-gray-800">Q2. 생활 속에서 쉽게 할 수 있는 운동은 무엇인가요?</span>
+                    <span className="block text-xs text-gray-500">Những bài tập nào dễ dàng thực hiện trong đời sống?</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={data.q2}
+                    onChange={(e) => handleChange('q2', null, e.target.value)}
+                    placeholder="예: 엘리베이터 대신 계단 이용하기, 가까운 곳은 걷기..." 
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors" 
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2">
+                    <span className="font-bold text-gray-800">메모장 (필요한 단어 적기)</span>
+                    <span className="block text-xs text-gray-500">Ghi chú từ vựng cần thiết</span>
+                  </label>
+                  <textarea 
+                    value={data.keywords}
+                    onChange={(e) => handleChange('keywords', null, e.target.value)}
+                    className="w-full p-3 border rounded-lg h-20 resize-none focus:ring-2 focus:ring-emerald-500 outline-none"
+                    placeholder="사용하고 싶은 단어나 표현을 자유롭게 적으세요."
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: TOPIC SPECIFIC VOCABULARY */}
+          {currentStep === 1 && (
+            <div className="animate-fadeIn">
+              <SectionHeader kr="2. 주제 관련 표현 익히기" vn="Học từ vựng và ngữ pháp liên quan" />
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="border rounded-xl overflow-hidden shadow-sm">
+                  <div className="bg-blue-50 p-3 border-b border-blue-100 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-blue-600" />
+                    <h3 className="font-bold text-blue-900">운동 관련 어휘 (Từ vựng)</h3>
+                  </div>
+                  <ul className="divide-y divide-gray-100 bg-white">
+                    {vocabulary.topicWords.map((item, idx) => (
+                      <li key={idx} className="p-3 hover:bg-gray-50 flex justify-between items-center group cursor-default">
+                        <span className="font-bold text-gray-800">{item.kr}</span>
+                        <span className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">{item.vn}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="border rounded-xl overflow-hidden shadow-sm">
+                  <div className="bg-orange-50 p-3 border-b border-orange-100 flex items-center gap-2">
+                    <Check className="w-4 h-4 text-orange-600" />
+                    <h3 className="font-bold text-orange-900">추천/이유 표현 (Ngữ pháp)</h3>
+                  </div>
+                  <ul className="divide-y divide-gray-100 bg-white">
+                    {vocabulary.grammar.map((item, idx) => (
+                      <li key={idx} className="p-3 hover:bg-gray-50 flex flex-col group cursor-default">
+                        <span className="font-bold text-gray-800">{item.kr}</span>
+                        <span className="text-xs text-gray-500 mt-1 group-hover:text-orange-600 transition-colors">{item.vn}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="mt-6 bg-gray-50 p-4 rounded-lg text-sm text-gray-600">
+                <p className="font-bold mb-2">💡 활용 예시 (Ví dụ):</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>건강을 <span className="text-blue-600 font-bold">유지하기 위해서</span> 매일 운동을 <span className="text-orange-600 font-bold">해야 합니다</span>.</li>
+                  <li>엘리베이터 대신 <span className="text-blue-600 font-bold">계단을 이용하는 것이 좋습니다</span>.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: STRUCTURED OUTLINE */}
+          {currentStep === 2 && (
+            <div className="animate-fadeIn">
+              <SectionHeader kr="3. 개요 작성 (문장 만들기)" vn="Lập dàn ý chi tiết" />
+
+              <div className="space-y-8">
+                {/* Intro */}
+                <div className="relative pl-6 border-l-4 border-emerald-200">
+                  <h3 className="font-bold text-lg text-emerald-800 mb-1">서론: 문제 제기</h3>
+                  <p className="text-sm text-gray-500 mb-3">Mở bài: Nêu vấn đề (Sự thiếu vận động của người hiện đại)</p>
+                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
+                    Tip: "요즘 현대인들은 바쁜 생활 때문에 운동할 시간이 부족합니다."로 시작해보세요.
+                  </p>
+                  <textarea 
+                    value={data.outline.intro}
+                    onChange={(e) => handleChange('outline', 'intro', e.target.value)}
+                    className="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
+                    placeholder="서론을 작성하세요."
+                  ></textarea>
+                </div>
+
+                {/* Body */}
+                <div className="relative pl-6 border-l-4 border-emerald-400">
+                  <h3 className="font-bold text-lg text-emerald-800 mb-1">본론: 운동의 필요성 & 방법</h3>
+                  <p className="text-sm text-gray-500 mb-3">Thân bài: Tại sao cần tập & Cách tập đơn giản</p>
+                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
+                    Tip: "첫째, 운동을 하면 건강을 지킬 수 있습니다.", "생활 속에서 계단을 이용하거나..."
+                  </p>
+                  <textarea 
+                    value={data.outline.body}
+                    onChange={(e) => handleChange('outline', 'body', e.target.value)}
+                    className="w-full h-40 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
+                    placeholder="운동이 필요한 이유와 구체적인 방법을 쓰세요."
+                  ></textarea>
+                </div>
+
+                {/* Conclusion */}
+                <div className="relative pl-6 border-l-4 border-emerald-600">
+                  <h3 className="font-bold text-lg text-emerald-800 mb-1">결론: 권유 및 다짐</h3>
+                  <p className="text-sm text-gray-500 mb-3">Kết bài: Khuyên nhủ và khẳng định</p>
+                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
+                    Tip: "따라서 우리 모두 건강을 위해 꾸준히 운동을 하는 것이 좋습니다."
+                  </p>
+                  <textarea 
+                    value={data.outline.conclusion}
+                    onChange={(e) => handleChange('outline', 'conclusion', e.target.value)}
+                    className="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
+                    placeholder="결론을 작성하세요."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: FINAL WRITING */}
+          {currentStep === 3 && (
+            <div className="animate-fadeIn h-full flex flex-col">
+              <div className="flex justify-between items-end border-b pb-4 mb-4 print:hidden">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">4. 글쓰기 완성</h2>
+                  <p className="text-sm text-gray-500">Viết bài hoàn chỉnh</p>
+                </div>
+                <div className={`px-3 py-1 rounded-full text-sm font-mono font-bold ${data.finalText.length > 700 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                  {data.finalText.length}자 (chữ)
+                </div>
+              </div>
+
+              {/* Editor */}
+              <div className="flex-grow relative print:hidden">
+                <textarea
+                  value={data.finalText}
+                  onChange={(e) => handleChange('finalText', null, e.target.value)}
+                  className="w-full h-[500px] p-6 border rounded-lg bg-white shadow-inner focus:ring-2 focus:ring-emerald-500 outline-none leading-loose font-medium text-lg resize-none text-gray-800"
+                  placeholder="개요에서 작성한 내용을 바탕으로 글을 완성하세요..."
+                  spellCheck="false"
+                ></textarea>
+              </div>
+
+              {/* Print View */}
+              <div className="hidden print:block print:w-full">
+                <div className="text-center mb-10 border-b-2 border-black pb-4">
+                  <h1 className="text-3xl font-serif font-bold mb-2">생활 속의 운동</h1>
+                  <p className="text-gray-500">한국어 쓰기 과제</p>
+                </div>
+                <div className="text-lg leading-loose font-serif text-justify whitespace-pre-wrap px-8">
+                  {data.finalText}
+                </div>
+                <div className="mt-20 pt-4 border-t flex justify-between text-sm text-gray-500">
+                  <span>작성자 서명: ________________</span>
+                  <span>작성일: {new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 print:hidden">
+                 <button 
+                  onClick={copyToClipboard}
+                  className="flex-1 flex items-center justify-center px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors shadow-sm"
+                >
+                  {showSaveNotification ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {showSaveNotification ? '복사 완료!' : '클립보드 복사 (Sao chép)'}
+                </button>
+
+                <button 
+                  onClick={handlePrint}
+                  className="flex-1 flex items-center justify-center px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  이미지/PDF 저장 (Lưu ảnh/PDF)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Navigation */}
+        <div className="flex justify-between mt-6 print:hidden">
+          <button
+            onClick={handlePrev}
+            disabled={currentStep === 0}
+            className={`flex items-center px-5 py-2.5 rounded-lg font-bold transition-colors ${
+              currentStep === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm'
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            이전 (Trước)
+          </button>
+
+          {currentStep < steps.length - 1 && (
+            <button
+              onClick={handleNext}
+              className="flex items-center px-5 py-2.5 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg transition-transform active:scale-95"
+            >
+              다음 (Tiếp theo)
+              <ChevronRight className="w-5 h-5 ml-1" />
+            </button>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default KoreanWritingApp;
+
