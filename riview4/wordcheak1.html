@@ -2,338 +2,538 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>한국어 어휘 학습: 빈칸 채우기</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
-        }
-        .draggable {
-            cursor: grab;
-            user-select: none;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s;
-        }
-        .dragging {
-            opacity: 0.5;
-            border: 2px dashed #cbd5e0;
-        }
-        .drop-zone {
-            transition: background-color 0.3s, border-color 0.3s;
-            min-width: 120px;
-            min-height: 40px;
-            cursor: pointer;
-        }
-        .drop-hover {
-            background-color: #e2e8f0;
-            border-color: #4299e1;
-        }
-        .correct {
-            border-color: #48bb78 !important;
-            background-color: #f0fff4;
-            color: #2f855a;
-        }
-        .incorrect {
-            border-color: #f56565 !important;
-            background-color: #fff5f5;
-            color: #c53030;
-        }
-        .correct .draggable, .incorrect .draggable {
-            cursor: not-allowed;
+            -webkit-tap-highlight-color: transparent; /* 모바일 탭 하이라이트 제거 */
         }
         
-        /* 활성화된 단어의 '맥박' 애니메이션 효과 */
-        @keyframes pulse-blue {
-            0% {
-                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-            }
+        /* 드래그 앤 드롭 & 선택 스타일 */
+        .draggable-item {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+        }
+        
+        .draggable-item:active {
+            transform: scale(0.95);
         }
 
-        /* 터치/클릭으로 선택된 단어 스타일 */
-        .selected {
+        .drop-zone {
+            transition: all 0.3s ease;
+            min-width: 100px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin: 0 4px;
+            border-bottom-width: 3px;
+            cursor: pointer;
+        }
+
+        /* 상태별 스타일 */
+        .selected-word {
+            background-color: #3b82f6 !important; /* Blue-500 */
+            color: white !important;
+            border-color: #2563eb !important;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            animation: pulse-ring 2s infinite;
+        }
+
+        .drop-zone.active-target {
+            background-color: #eff6ff; /* Blue-50 */
             border-color: #3b82f6;
-            background-color: #eff6ff;
-            transform: translateY(-2px);
-            animation: pulse-blue 2s infinite;
+            border-style: dashed;
+        }
+
+        .drop-zone.correct {
+            border-color: #22c55e !important; /* Green-500 */
+            background-color: #dcfce7;
+            color: #15803d;
+            border-style: solid;
+            pointer-events: none;
+        }
+
+        .drop-zone.incorrect {
+            border-color: #ef4444 !important; /* Red-500 */
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-style: solid;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* 애니메이션 */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .pop-in-animation {
+            animation: pop-in 0.3s ease-out forwards;
+        }
+
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <div id="app" class="w-full max-w-4xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800">한국어 어휘 학습</h1>
-                <p class="text-gray-500 mt-2">알맞은 말을 드래그하거나 터치하여 빈칸에 넣어 문장을 완성하세요.</p>
+    <!-- 상단 헤더 & 진행률 -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+                    <span class="text-blue-600">한국어</span> 어휘 학습
+                </h1>
+                <span id="progress-text" class="text-sm font-bold text-slate-500">0% 완료</span>
             </div>
-
-            <!-- 문제 목록 (Questions) -->
-            <div id="questions-container" class="space-y-4">
-                <!-- Questions will be inserted here by JS -->
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
             </div>
+        </div>
+    </header>
 
-            <!-- 컨트롤 버튼 (Controls) -->
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                     <button id="save-button" class="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                        <span>수동 저장</span>
-                    </button>
-                    <p id="save-status" class="text-sm text-gray-500 transition-opacity duration-300 opacity-0"></p>
+    <!-- 메인 콘텐츠 -->
+    <main class="flex-grow w-full max-w-4xl mx-auto p-4 md:p-6 pb-40">
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+            
+            <!-- 안내 메시지 -->
+            <div class="p-6 bg-blue-50 border-b border-blue-100">
+                <div class="flex items-start gap-3">
+                    <div class="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0">
+                        <i class="fas fa-info-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-800">학습 방법</h2>
+                        <p class="text-slate-600 text-sm md:text-base mt-1 leading-relaxed">
+                            아래 단어 목록에서 알맞은 말을 선택(터치)한 후, 문장의 빈칸을 눌러 완성하세요.
+                        </p>
+                    </div>
                 </div>
-                <button id="check-answers" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md">
-                    결과 확인
+            </div>
+
+            <!-- 문제 목록 -->
+            <div id="questions-container" class="divide-y divide-slate-100">
+                <!-- 자바스크립트로 문제 생성 -->
+            </div>
+
+            <!-- 하단 컨트롤 버튼 영역 -->
+            <div class="p-6 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button id="reset-button" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition font-medium text-sm">
+                        <i class="fas fa-rotate-right"></i> 초기화
+                    </button>
+                    <button id="save-button" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition font-medium text-sm shadow-sm">
+                        <i class="fas fa-save"></i> 저장
+                    </button>
+                </div>
+
+                <button id="check-answers" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-200 transition-transform transform hover:-translate-y-0.5 active:translate-y-0 text-base flex items-center justify-center gap-2">
+                    <i class="fas fa-check"></i> 결과 확인
                 </button>
             </div>
-             <div id="result-message" class="text-center mt-4 font-semibold text-lg"></div>
+            
+            <!-- 결과 메시지 및 토스트 -->
+            <div id="result-message" class="hidden p-4 bg-slate-800 text-white text-center font-bold text-lg animate-fade-in"></div>
+        </div>
+    </main>
+
+    <!-- 단어 선택 영역 (Floating Bottom Sheet) -->
+    <div id="word-bank-wrapper" class="fixed bottom-0 left-0 w-full z-50 transition-transform duration-300">
+        <!-- 그림자 그라데이션 -->
+        <div class="h-8 w-full bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
+        
+        <div id="word-bank" class="bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 pb-6 md:pb-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Word Bank</span>
+                    <span id="selection-hint" class="text-xs text-blue-500 font-medium animate-pulse hidden">빈칸을 선택하세요</span>
+                </div>
+                <div id="word-list" class="flex flex-wrap justify-center gap-2 md:gap-3 max-h-[35vh] overflow-y-auto overscroll-contain px-1 py-1">
+                    <!-- 단어들이 여기에 생성됨 -->
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- 보기 목록 (Word Bank) - 화면 하단 오버레이 -->
-    <div id="word-bank" class="fixed bottom-0 left-0 w-full z-50 bg-white p-4 border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] flex flex-wrap justify-center items-center gap-3">
-        <!-- Draggable words will be inserted here by JS -->
+
+    <!-- 토스트 메시지 -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-info-circle"></i> <span id="toast-msg">메시지</span>
     </div>
 
-    <script type="module">
-        const LOCAL_STORAGE_KEY = 'korean-vocab-progress';
-
+    <script>
+        // 데이터
         const allWords = [
             '중소기업', '소개팅을 하다', '몸이 가벼워지다', '청혼을 받다', '부하 직원', 
             '연애결혼', '직장 상사', '첫눈에 반하다', '쥐가 나다', '대기업'
         ];
 
         const allQuestions = [
-            { id: 1, sentence_start: '저는', sentence_end: '에서 일하고 싶어요. 크고 유명한 회사에 다니면 배울 점이 많을 거라고 생각해요.', answer: '대기업' },
-            { id: 2, sentence_start: '남자 친구에게', sentence_end: '. 작년 봄에 결혼하자고 해서 그러자고 했어요.', answer: '청혼을 받다' },
-            { id: 3, sentence_start: '꾸준히 요가를 했더니', sentence_end: '고 자세도 좋아졌어요.', answer: '몸이 가벼워지다' },
-            { id: 4, sentence_start: '오랜만에 친구들과 축구를 하다가 다리에', sentence_end: '. 운동 전에 준비 운동을 충분히 할걸 그랬어요.', answer: '쥐가 나다' },
-            { id: 5, sentence_start: '저는', sentence_end: '을 했어요. 동아리 모임에서 알게 된 학교 선배와 졸업하자마자 결혼했어요.', answer: '연애결혼' },
-            { id: 6, sentence_start: '새로 들어온', sentence_end: '때문에 속상해요. 지각을 자주 해서 야단을 쳤는데도 계속 늦게 오고 실수를 해요.', answer: '부하 직원' },
-            { id: 7, sentence_start: '저는 큰 회사보다는 발전 가능성이 많은', sentence_end: '에서 경험을 쌓고 싶어요.', answer: '중소기업' },
-            { id: 8, sentence_start: '친구가 좋은 사람을 소개해 준다고 해서 주말에', sentence_end: '로 했어요.', answer: '소개팅을 하다' },
-            { id: 9, sentence_start: '새로 오신', sentence_end: '는 아주 꼼꼼하고 엄격해서 일하기가 조금 힘들어요.', answer: '직장 상사' },
-            { id: 10, sentence_start: '영화 속 남자 주인공은 여자 주인공을 보자마자', sentence_end: '.', answer: '첫눈에 반하다' },
+            { id: 1, pre: '저는', post: '에서 일하고 싶어요. 크고 유명한 회사에 다니면 배울 점이 많을 거라고 생각해요.', answer: '대기업' },
+            { id: 2, pre: '남자 친구에게', post: '. 작년 봄에 결혼하자고 해서 그러자고 했어요.', answer: '청혼을 받다' },
+            { id: 3, pre: '꾸준히 요가를 했더니', post: '고 자세도 좋아졌어요.', answer: '몸이 가벼워지다' },
+            { id: 4, pre: '오랜만에 친구들과 축구를 하다가 다리에', post: '. 운동 전에 준비 운동을 충분히 할걸 그랬어요.', answer: '쥐가 나다' },
+            { id: 5, pre: '저는', post: '을 했어요. 동아리 모임에서 알게 된 학교 선배와 졸업하자마자 결혼했어요.', answer: '연애결혼' },
+            { id: 6, pre: '새로 들어온', post: '때문에 속상해요. 지각을 자주 해서 야단을 쳤는데도 계속 늦게 오고 실수를 해요.', answer: '부하 직원' },
+            { id: 7, pre: '저는 큰 회사보다는 발전 가능성이 많은', post: '에서 경험을 쌓고 싶어요.', answer: '중소기업' },
+            { id: 8, pre: '친구가 좋은 사람을 소개해 준다고 해서 주말에', post: '로 했어요.', answer: '소개팅을 하다' },
+            { id: 9, pre: '새로 오신', post: '는 아주 꼼꼼하고 엄격해서 일하기가 조금 힘들어요.', answer: '직장 상사' },
+            { id: 10, pre: '영화 속 남자 주인공은 여자 주인공을 보자마자', post: '.', answer: '첫눈에 반하다' },
         ];
-        
-        let questions = [];
-        let autoSaveTimer;
-        let selectedWordEl = null; // 터치/클릭으로 선택된 단어를 추적
 
-        const wordBank = document.getElementById('word-bank');
-        const questionsContainer = document.getElementById('questions-container');
-        const checkButton = document.getElementById('check-answers');
-        const saveButton = document.getElementById('save-button');
-        const saveStatus = document.getElementById('save-status');
-        const resultMessage = document.getElementById('result-message');
-        const mainContent = document.querySelector('#app > div');
-        
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        // 상태 관리
+        let selectedWord = null;
+        const LOCAL_STORAGE_KEY = 'korean-vocab-v2';
+
+        // DOM 요소 (Null 안전 접근을 위해 수정)
+        let elements = {};
+
+        function initElements() {
+            elements = {
+                questionsContainer: document.getElementById('questions-container'),
+                wordList: document.getElementById('word-list'),
+                checkBtn: document.getElementById('check-answers'),
+                saveBtn: document.getElementById('save-button'),
+                resetBtn: document.getElementById('reset-button'),
+                progressBar: document.getElementById('progress-bar'),
+                progressText: document.getElementById('progress-text'),
+                wordBankWrapper: document.getElementById('word-bank-wrapper'),
+                mainContent: document.querySelector('main'),
+                selectionHint: document.getElementById('selection-hint'),
+                toast: document.getElementById('toast'),
+                toastMsg: document.getElementById('toast-msg')
+            };
+        }
+
+        // 유틸리티 함수
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function showToast(msg, isError = false) {
+            if (!elements.toast || !elements.toastMsg) return;
+            elements.toastMsg.textContent = msg;
+            elements.toast.classList.remove('opacity-0');
+            elements.toast.style.backgroundColor = isError ? '#ef4444' : '#1e293b';
+            setTimeout(() => elements.toast?.classList.add('opacity-0'), 2500);
+        }
+
+        // 초기화 및 렌더링
+        function init() {
+            initElements();
+            if (!elements.questionsContainer) {
+                console.error("Critical: DOM elements not found.");
+                return;
             }
-            return array;
+            renderQuestions();
+            renderWordBank();
+            loadProgress();
+            setupEventListeners();
+            updateLayout();
         }
 
-        async function saveData(data) {
-            try {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-                return true;
-            } catch (error) { console.error("Error saving data:", error); return false; }
-        }
-        
-        async function loadData() {
-            try {
-                const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-                return savedData ? JSON.parse(savedData) : null;
-            } catch (error) { console.error("Error loading data:", error); return null; }
-        }
-        
-        function adjustLayoutForWordBank() {
-            if (wordBank && mainContent) {
-                const wordBankHeight = wordBank.offsetHeight;
-                mainContent.style.paddingBottom = `${wordBankHeight + 24}px`;
-            }
-        }
-
-        function createDraggableWord(word) {
-            const wordEl = document.createElement('div');
-            wordEl.textContent = word;
-            wordEl.draggable = true;
-            wordEl.id = `word-${word.replace(/\s/g, '-')}`;
-            wordEl.className = 'draggable bg-white p-2 px-4 rounded-md shadow-sm border border-gray-300 text-gray-700 font-medium';
-            wordEl.addEventListener('dragstart', handleDragStart);
-            wordEl.addEventListener('click', handleWordClick); // 단어 클릭 이벤트 추가
-            return wordEl;
-        }
-
-        function createQuestion(question, index) {
-            const questionEl = document.createElement('div');
-            questionEl.className = 'flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg text-lg';
-            questionEl.dataset.questionId = question.id;
-            questionEl.innerHTML = `
-                <span class="font-semibold">${index + 1}.</span>
-                <span>${question.sentence_start}</span>
-                <div class="drop-zone inline-block bg-gray-200 border-2 border-dashed border-gray-400 rounded-md p-2 text-center" data-question-id="${question.id}"></div>
-                <span>${question.sentence_end}</span>`;
-            const dropZone = questionEl.querySelector('.drop-zone');
-            dropZone.addEventListener('dragover', handleDragOver);
-            dropZone.addEventListener('dragenter', handleDragEnter);
-            dropZone.addEventListener('dragleave', handleDragLeave);
-            dropZone.addEventListener('drop', handleDrop);
-            dropZone.addEventListener('click', handleDropZoneClick); // 빈칸 클릭 이벤트 추가
-            return questionEl;
-        }
-
-        async function renderUI() {
-            wordBank.innerHTML = '';
-            shuffleArray([...allWords]).forEach(word => wordBank.appendChild(createDraggableWord(word)));
-            questionsContainer.innerHTML = '';
-            questions = shuffleArray([...allQuestions]);
-            questions.forEach((q, index) => questionsContainer.appendChild(createQuestion(q, index)));
-            adjustLayoutForWordBank();
-            const savedAnswers = await loadData();
-            if (savedAnswers) {
-                applySavedState(savedAnswers);
-                showSaveStatus("진행 상황을 불러왔습니다.", 2000);
-            }
-        }
-        
-        function applySavedState(savedAnswers) {
-            Object.entries(savedAnswers).forEach(([questionId, wordText]) => {
-                if (!wordText) return;
-                const dropZone = document.querySelector(`.drop-zone[data-question-id='${questionId}']`);
-                const wordId = `word-${wordText.replace(/\s/g, '-')}`;
-                const wordEl = document.getElementById(wordId) || createDraggableWord(wordText);
-                if (dropZone) {
-                    if (wordBank.contains(wordEl)) wordBank.removeChild(wordEl);
-                    dropZone.innerHTML = ''; 
-                    dropZone.appendChild(wordEl);
-                }
+        function renderQuestions() {
+            if (!elements.questionsContainer) return;
+            elements.questionsContainer.innerHTML = '';
+            
+            allQuestions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'p-5 md:p-6 hover:bg-slate-50 transition-colors duration-200';
+                div.innerHTML = `
+                    <div class="flex flex-wrap items-center leading-loose text-base md:text-lg text-slate-700 font-medium">
+                        <span class="mr-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">${idx + 1}</span>
+                        <span>${q.pre}</span>
+                        <div class="drop-zone bg-white border-2 border-slate-300 border-dashed rounded-lg mx-2 text-slate-500 font-bold shadow-inner" 
+                             data-qid="${q.id}" role="button" aria-label="빈칸">
+                             <span class="placeholder opacity-30 text-sm">빈칸</span>
+                        </div>
+                        <span>${q.post}</span>
+                    </div>
+                `;
+                elements.questionsContainer.appendChild(div);
             });
         }
-        
-        function triggerAutoSave() {
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => handleSave(true), 2000);
+
+        function renderWordBank() {
+            if (!elements.wordList) return;
+            elements.wordList.innerHTML = '';
+            const words = shuffle([...allWords]);
+            words.forEach(word => {
+                createWordElement(word, elements.wordList);
+            });
         }
 
-        // --- Event Handlers ---
-        function handleDragStart(e) {
-            if (selectedWordEl) {
-                selectedWordEl.classList.remove('selected');
-                selectedWordEl = null;
+        function createWordElement(text, parent) {
+            const btn = document.createElement('div');
+            btn.className = 'draggable-item px-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm text-slate-700 font-bold text-sm md:text-base hover:bg-slate-50 hover:border-blue-300 hover:shadow-md';
+            btn.textContent = text;
+            btn.dataset.word = text;
+            
+            // 클릭 이벤트 (모바일/PC 공통)
+            btn.addEventListener('click', (e) => handleWordClick(e, btn));
+            parent.appendChild(btn);
+        }
+
+        // 이벤트 핸들러 로직 개선 (Null Check 추가)
+        function handleWordClick(e, wordEl) {
+            e.stopPropagation();
+
+            // 이미 선택된 단어 다시 클릭 시 선택 해제
+            if (selectedWord === wordEl) {
+                deselectWord();
+                return;
             }
-            e.dataTransfer.setData('text/plain', e.target.id);
-            setTimeout(() => e.target.classList.add('dragging'), 0);
-        }
 
-        function handleWordClick(e) {
-            const clickedWord = e.currentTarget;
-            if (clickedWord.parentElement.classList.contains('drop-zone')) return;
-
-            if (selectedWordEl === clickedWord) {
-                clickedWord.classList.remove('selected');
-                selectedWordEl = null;
-            } else {
-                if (selectedWordEl) selectedWordEl.classList.remove('selected');
-                clickedWord.classList.add('selected');
-                selectedWordEl = clickedWord;
+            // 다른 단어 선택
+            if (selectedWord) {
+                selectedWord.classList.remove('selected-word');
             }
+
+            selectedWord = wordEl;
+            wordEl.classList.add('selected-word');
+            
+            // 힌트 표시 및 빈칸 강조
+            if (elements.selectionHint) elements.selectionHint.classList.remove('hidden');
+            
+            document.querySelectorAll('.drop-zone:empty, .drop-zone .placeholder').forEach(zone => {
+                 const target = zone.closest('.drop-zone');
+                 if (target) target.classList.add('active-target');
+            });
         }
 
-        function handleDropZoneClick(e) {
-            const dropZone = e.currentTarget;
-            if (selectedWordEl) {
-                if (dropZone.children.length > 0) {
-                    wordBank.appendChild(dropZone.children[0]);
-                }
-                dropZone.innerHTML = '';
-                dropZone.appendChild(selectedWordEl);
-                selectedWordEl.classList.remove('selected');
-                selectedWordEl = null;
-                triggerAutoSave();
-            } else if (dropZone.children.length > 0) {
-                wordBank.appendChild(dropZone.children[0]);
-                triggerAutoSave();
+        function deselectWord() {
+            if (selectedWord) {
+                selectedWord.classList.remove('selected-word');
+                selectedWord = null;
             }
+            if (elements.selectionHint) elements.selectionHint.classList.add('hidden');
+            document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active-target'));
         }
 
-        function handleDragOver(e) { e.preventDefault(); }
-        function handleDragEnter(e) { e.preventDefault(); e.target.classList.add('drop-hover'); }
-        function handleDragLeave(e) { e.target.classList.remove('drop-hover'); }
-        
-        function handleDrop(e) {
-            e.preventDefault();
-            const dropZone = e.target.closest('.drop-zone');
-            if (!dropZone) return;
-            dropZone.classList.remove('drop-hover');
-            const id = e.dataTransfer.getData('text');
-            const draggable = document.getElementById(id);
-            if (draggable) {
-                draggable.classList.remove('dragging');
-                if (dropZone.children.length > 0) {
-                    wordBank.appendChild(dropZone.children[0]);
-                }
-                dropZone.innerHTML = '';
-                dropZone.appendChild(draggable);
-                triggerAutoSave();
-            }
-        }
-        
-        function handleCheckAnswers() {
-            let correctCount = 0;
+        function setupEventListeners() {
+            // 빈칸 클릭 이벤트
             document.querySelectorAll('.drop-zone').forEach(zone => {
-                const qId = zone.dataset.questionId;
-                const droppedEl = zone.querySelector('div');
-                const question = allQuestions.find(q => q.id == qId);
-                zone.classList.remove('correct', 'incorrect');
-                if (droppedEl && question && droppedEl.textContent === question.answer) {
+                zone.addEventListener('click', (e) => {
+                    const existingWord = zone.querySelector('.draggable-item');
+                    
+                    // 1. 단어가 선택된 상태에서 빈칸 클릭 -> 단어 이동
+                    if (selectedWord) {
+                        // 이미 빈칸에 다른 단어가 있다면? -> 교체 (기존 단어는 뱅크로)
+                        if (existingWord) {
+                            elements.wordList.appendChild(existingWord);
+                        }
+                        
+                        // Placeholder 제거
+                        const placeholder = zone.querySelector('.placeholder');
+                        if (placeholder) placeholder.remove();
+
+                        // 선택된 단어 이동
+                        zone.appendChild(selectedWord);
+                        selectedWord.classList.add('pop-in-animation');
+                        setTimeout(() => selectedWord?.classList.remove('pop-in-animation'), 300);
+                        
+                        deselectWord();
+                        autoSave();
+                        updateProgress();
+                    } 
+                    // 2. 빈칸에 있는 단어를 클릭 -> 단어장으로 반환
+                    else if (existingWord) {
+                        elements.wordList.appendChild(existingWord);
+                        
+                        // Placeholder 복구
+                        if (zone.children.length === 0) {
+                            zone.innerHTML = '<span class="placeholder opacity-30 text-sm">빈칸</span>';
+                        }
+                        autoSave();
+                        updateProgress();
+                    }
+                });
+            });
+
+            // 배경 클릭 시 선택 해제
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.draggable-item') && !e.target.closest('.drop-zone')) {
+                    deselectWord();
+                }
+            });
+
+            if (elements.checkBtn) elements.checkBtn.addEventListener('click', checkAnswers);
+            if (elements.saveBtn) elements.saveBtn.addEventListener('click', () => {
+                saveData();
+                showToast("학습 내용이 저장되었습니다.");
+            });
+            if (elements.resetBtn) elements.resetBtn.addEventListener('click', resetGame);
+            
+            // 화면 크기 변경 감지 (레이아웃 조정)
+            if (elements.wordBankWrapper) {
+                const resizeObserver = new ResizeObserver(() => updateLayout());
+                resizeObserver.observe(elements.wordBankWrapper);
+            }
+        }
+
+        // 레이아웃 조정 (단어장이 콘텐츠 가리지 않게)
+        function updateLayout() {
+            if (!elements.wordBankWrapper || !elements.mainContent) return;
+            const height = elements.wordBankWrapper.offsetHeight;
+            elements.mainContent.style.paddingBottom = `${height + 40}px`;
+        }
+
+        // 정답 확인
+        function checkAnswers() {
+            let correctCount = 0;
+            let total = allQuestions.length;
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const qId = parseInt(zone.dataset.qid);
+                const wordEl = zone.querySelector('.draggable-item');
+                const question = allQuestions.find(q => q.id === qId);
+                
+                // 초기화
+                zone.classList.remove('correct', 'incorrect', 'border-slate-300', 'border-dashed');
+                
+                if (wordEl && wordEl.textContent === question.answer) {
+                    // 정답
                     zone.classList.add('correct');
-                    droppedEl.draggable = false;
+                    // 아이콘 추가
+                    if(!zone.querySelector('.fa-check')) {
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-check ml-2 text-xs';
+                        zone.appendChild(icon);
+                    }
                     correctCount++;
                 } else {
+                    // 오답 또는 빈칸
                     zone.classList.add('incorrect');
                 }
             });
-            resultMessage.textContent = `총 ${allQuestions.length}문제 중 ${correctCount}개를 맞혔습니다!`;
+
+            // const score = Math.round((correctCount / total) * 100);
+            
+            if (correctCount === total) {
+                showToast(`축하합니다! 모든 문제를 맞혔습니다! 🎉`);
+                createConfetti();
+            } else {
+                showToast(`${total}문제 중 ${correctCount}개 정답입니다. 다시 확인해보세요.`, true);
+            }
         }
 
-        async function handleSave(isAuto = false) {
-             const userAnswers = {};
-             document.querySelectorAll('.drop-zone').forEach(zone => {
-                 const qId = zone.dataset.questionId;
-                 const wordEl = zone.querySelector('div');
-                 userAnswers[qId] = wordEl ? wordEl.textContent : null;
-             });
-             const success = await saveData(userAnswers);
-             if (!isAuto) showSaveStatus(success ? "저장되었습니다!" : "저장에 실패했습니다.", 2000, !success);
-             else if (success) showSaveStatus("자동 저장 완료", 1500);
+        // 데이터 저장/로드
+        function autoSave() {
+            saveData();
         }
 
-        function showSaveStatus(message, duration, isError = false) {
-            saveStatus.textContent = message;
-            saveStatus.style.color = isError ? '#c53030' : '#4a5568';
-            saveStatus.classList.remove('opacity-0');
-            setTimeout(() => saveStatus.classList.add('opacity-0'), duration);
+        function saveData() {
+            const data = {};
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const wordEl = zone.querySelector('.draggable-item');
+                if (wordEl) {
+                    data[zone.dataset.qid] = wordEl.textContent;
+                }
+            });
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
         }
 
-        function init() {
-            renderUI();
-            checkButton.addEventListener('click', handleCheckAnswers);
-            saveButton.addEventListener('click', () => handleSave(false));
-            window.addEventListener('resize', adjustLayoutForWordBank);
+        function loadProgress() {
+            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!saved) return;
+
+            try {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(qid => {
+                    const wordText = data[qid];
+                    // 단어장에서 해당 단어 찾기
+                    if (!elements.wordList) return;
+                    const wordEl = Array.from(elements.wordList.children).find(el => el.textContent === wordText);
+                    const zone = document.querySelector(`.drop-zone[data-qid="${qid}"]`);
+                    
+                    if (wordEl && zone) {
+                        zone.querySelector('.placeholder')?.remove();
+                        zone.appendChild(wordEl);
+                    }
+                });
+                updateProgress();
+            } catch (e) {
+                console.error("Load error", e);
+            }
         }
 
-        init();
+        function updateProgress() {
+            if (!elements.progressBar || !elements.progressText) return;
+            const total = allQuestions.length;
+            const filled = document.querySelectorAll('.drop-zone .draggable-item').length;
+            const percent = Math.round((filled / total) * 100);
+            
+            elements.progressBar.style.width = `${percent}%`;
+            elements.progressText.textContent = `${percent}% 완료`;
+        }
+
+        function resetGame() {
+            if(!confirm('모든 진행 상황을 초기화하시겠습니까?')) return;
+            
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            location.reload();
+        }
+
+        // 간단한 축하 효과
+        function createConfetti() {
+            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'];
+            for(let i=0; i<50; i++) {
+                const conf = document.createElement('div');
+                conf.style.position = 'fixed';
+                conf.style.top = '-10px';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.width = '10px';
+                conf.style.height = '10px';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.zIndex = '100';
+                conf.style.transition = 'top 2s ease-in, transform 2s linear';
+                document.body.appendChild(conf);
+
+                setTimeout(() => {
+                    conf.style.top = '100vh';
+                    conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }, 100);
+
+                setTimeout(() => conf.remove(), 2100);
+            }
+        }
+
+        // 실행
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
-
