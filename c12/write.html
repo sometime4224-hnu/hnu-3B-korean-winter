@@ -1,451 +1,482 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  PenTool, 
-  Layout, 
-  ChevronRight, 
-  ChevronLeft, 
-  Copy, 
-  Check, 
-  Download,
-  Trash2,
-  AlertCircle,
-  Lightbulb
-} from 'lucide-react';
-
-const KoreanWritingApp = () => {
-  // --- States ---
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showSaveNotification, setShowSaveNotification] = useState(false);
-  const [lastSavedTime, setLastSavedTime] = useState(null);
-  
-  // Data State
-  const [data, setData] = useState({
-    q1: '', // Why exercise is needed
-    q2: '', // Easy methods
-    keywords: '',
-    outline: {
-      intro: '',
-      body: '',
-      conclusion: ''
-    },
-    finalText: ''
-  });
-
-  // --- Constants ---
-  const STORAGE_KEY = 'korean_writing_exercise_v1';
-
-  const steps = [
-    { id: 'analyze', titleKR: '내용 구상', titleVN: 'Tìm ý tưởng', icon: <BookOpen className="w-5 h-5" /> },
-    { id: 'vocab', titleKR: '표현 익히기', titleVN: 'Học từ vựng & Biểu hiện', icon: <Lightbulb className="w-5 h-5" /> },
-    { id: 'outline', titleKR: '개요 작성', titleVN: 'Lập dàn ý', icon: <Layout className="w-5 h-5" /> },
-    { id: 'write', titleKR: '글쓰기', titleVN: 'Luyện viết', icon: <PenTool className="w-5 h-5" /> }
-  ];
-
-  // Specific Vocabulary for "Exercise"
-  const vocabulary = {
-    topicWords: [
-      { kr: '건강을 유지하다', vn: 'Duy trì sức khỏe' },
-      { kr: '체력을 기르다', vn: 'Rèn luyện thể lực' },
-      { kr: '스트레스를 해소하다', vn: 'Giải tỏa căng thẳng' },
-      { kr: '비만을 예방하다', vn: 'Phòng ngừa béo phì' },
-      { kr: '계단을 이용하다', vn: 'Sử dụng cầu thang' },
-      { kr: '가까운 거리는 걷다', vn: 'Đi bộ ở khoảng cách gần' }
-    ],
-    grammar: [
-      { kr: '-는 것이 좋다', vn: 'Tốt hơn là nên... (Khuyên nhủ)' },
-      { kr: '-아/어야 한다', vn: 'Phải... (Sự cần thiết)' },
-      { kr: '-기 위해서', vn: 'Để... (Mục đích)' },
-      { kr: '-뿐만 아니라', vn: 'Không những... mà còn' }
-    ]
-  };
-
-  // --- Effects ---
-  useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        setData(JSON.parse(savedData));
-        setLastSavedTime(new Date());
-      } catch (e) {
-        console.error("Failed to load save data", e);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      setLastSavedTime(new Date());
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [data]);
-
-  useEffect(() => {
-    if (currentStep === 3 && data.finalText === '') {
-      const combined = `${data.outline.intro}\n\n${data.outline.body}\n\n${data.outline.conclusion}`;
-      if (combined.trim().length > 0) {
-        handleChange('finalText', null, combined.trim());
-      }
-    }
-  }, [currentStep]);
-
-  // --- Handlers ---
-  const handleChange = (field, subField, value) => {
-    setData(prev => {
-      if (subField) {
-        return { ...prev, [field]: { ...prev[field], [subField]: value } };
-      }
-      return { ...prev, [field]: value };
-    });
-  };
-
-  const handleReset = () => {
-    if (window.confirm('모든 내용이 삭제됩니다. 계속하시겠습니까? (Tất cả nội dung sẽ bị xóa?)')) {
-      setData({
-        q1: '', q2: '', keywords: '',
-        outline: { intro: '', body: '', conclusion: '' },
-        finalText: ''
-      });
-      localStorage.removeItem(STORAGE_KEY);
-      setCurrentStep(0);
-    }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(data.finalText).then(() => {
-      setShowSaveNotification(true);
-      setTimeout(() => setShowSaveNotification(false), 3000);
-    });
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) setCurrentStep(prev => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentStep > 0) setCurrentStep(prev => prev - 1);
-  };
-
-  // --- Components ---
-  const SectionHeader = ({ kr, vn }) => (
-    <div className="border-b pb-3 mb-6">
-      <h2 className="text-2xl font-bold text-gray-900">{kr}</h2>
-      <p className="text-sm text-gray-500 mt-1">{vn}</p>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-100 font-sans print:bg-white">
-      {/* Header */}
-      <header className="bg-emerald-600 text-white p-4 shadow-md print:hidden">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <PenTool className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold">주제: 생활 속의 운동</h1>
-              <p className="text-xs text-emerald-100">Chủ đề: Thể dục trong đời sống</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {lastSavedTime && (
-              <div className="hidden md:flex flex-col items-end text-xs text-emerald-100">
-                <span className="flex items-center gap-1"><Check className="w-3 h-3" /> 저장됨 (Đã lưu)</span>
-              </div>
-            )}
-            <button onClick={handleReset} className="p-2 hover:bg-emerald-700 rounded-full transition-colors text-emerald-100 hover:text-white">
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto p-4 md:p-6 print:p-0 print:max-w-none">
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 쓰기 연습 - 생활 속의 운동</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
         
-        {/* Progress Steps */}
-        <div className="mb-8 print:hidden">
-          <div className="grid grid-cols-4 gap-2">
-            {steps.map((step, index) => (
-              <button
-                key={step.id}
-                onClick={() => setCurrentStep(index)}
-                className={`flex flex-col items-center p-2 rounded-lg transition-all ${
-                  index === currentStep
-                    ? 'bg-white shadow-md border-b-4 border-emerald-600'
-                    : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                }`}
-              >
-                <div className={`${index === currentStep ? 'text-emerald-600' : 'text-gray-400'}`}>{step.icon}</div>
-                <span className={`text-sm font-bold mt-1 ${index === currentStep ? 'text-gray-800' : 'text-gray-400'}`}>{step.titleKR}</span>
-                <span className="text-[10px] hidden sm:block truncate w-full text-center">{step.titleVN}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                padding: 40px;
+                background: white;
+                color: black;
+            }
+            .no-print { display: none !important; }
+        }
 
-        {/* Main Content Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 min-h-[500px] transition-all duration-300 print:shadow-none print:p-0">
-          
-          {/* STEP 1: SPECIFIC GUIDED QUESTIONS */}
-          {currentStep === 0 && (
-            <div className="animate-fadeIn">
-              <SectionHeader kr="1. 내용 구상하기" vn="Tìm ý tưởng cho bài viết" />
-              
-              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 mb-6 flex gap-3">
-                <AlertCircle className="w-6 h-6 text-emerald-600 flex-shrink-0" />
-                <div>
-                  <h4 className="font-bold text-emerald-900 text-sm">가이드 (Hướng dẫn)</h4>
-                  <p className="text-sm text-emerald-800 mt-1">
-                    질문에 답하면서 글의 핵심 내용을 한국어로 간단히 메모해보세요.
-                    <br/>
-                    <span className="text-xs opacity-75">(Hãy trả lời các câu hỏi để ghi lại nội dung chính bằng tiếng Hàn.)</span>
-                  </p>
-                </div>
-              </div>
+        /* Custom Scrollbar for Textareas */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f1f1; }
+        textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
 
-              <div className="space-y-6">
-                <div>
-                  <label className="block mb-2">
-                    <span className="font-bold text-gray-800">Q1. 우리는 왜 운동을 해야 할까요?</span>
-                    <span className="block text-xs text-gray-500">Tại sao chúng ta phải tập thể dục? (Sức khỏe, Căng thẳng...)</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={data.q1}
-                    onChange={(e) => handleChange('q1', null, e.target.value)}
-                    placeholder="예: 건강을 유지하기 위해서, 스트레스를 풀기 위해서..." 
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors" 
-                  />
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i data-lucide="pen-tool" class="w-6 h-6"></i>
                 </div>
-
                 <div>
-                  <label className="block mb-2">
-                    <span className="font-bold text-gray-800">Q2. 생활 속에서 쉽게 할 수 있는 운동은 무엇인가요?</span>
-                    <span className="block text-xs text-gray-500">Những bài tập nào dễ dàng thực hiện trong đời sống?</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    value={data.q2}
-                    onChange={(e) => handleChange('q2', null, e.target.value)}
-                    placeholder="예: 엘리베이터 대신 계단 이용하기, 가까운 곳은 걷기..." 
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors" 
-                  />
+                    <h1 class="text-lg font-bold">주제: 생활 속의 운동</h1>
+                    <p class="text-xs text-emerald-100">Chủ đề: Thể dục trong đời sống</p>
                 </div>
-
-                <div>
-                  <label className="block mb-2">
-                    <span className="font-bold text-gray-800">메모장 (필요한 단어 적기)</span>
-                    <span className="block text-xs text-gray-500">Ghi chú từ vựng cần thiết</span>
-                  </label>
-                  <textarea 
-                    value={data.keywords}
-                    onChange={(e) => handleChange('keywords', null, e.target.value)}
-                    className="w-full p-3 border rounded-lg h-20 resize-none focus:ring-2 focus:ring-emerald-500 outline-none"
-                    placeholder="사용하고 싶은 단어나 표현을 자유롭게 적으세요."
-                  />
-                </div>
-              </div>
             </div>
-          )}
-
-          {/* STEP 2: TOPIC SPECIFIC VOCABULARY */}
-          {currentStep === 1 && (
-            <div className="animate-fadeIn">
-              <SectionHeader kr="2. 주제 관련 표현 익히기" vn="Học từ vựng và ngữ pháp liên quan" />
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="border rounded-xl overflow-hidden shadow-sm">
-                  <div className="bg-blue-50 p-3 border-b border-blue-100 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-bold text-blue-900">운동 관련 어휘 (Từ vựng)</h3>
-                  </div>
-                  <ul className="divide-y divide-gray-100 bg-white">
-                    {vocabulary.topicWords.map((item, idx) => (
-                      <li key={idx} className="p-3 hover:bg-gray-50 flex justify-between items-center group cursor-default">
-                        <span className="font-bold text-gray-800">{item.kr}</span>
-                        <span className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">{item.vn}</span>
-                      </li>
-                    ))}
-                  </ul>
+            
+            <div class="flex items-center gap-4">
+                <div id="save-status" class="hidden md:flex flex-col items-end text-xs text-emerald-100">
+                    <span class="flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> 저장됨 (Đã lưu)</span>
                 </div>
-
-                <div className="border rounded-xl overflow-hidden shadow-sm">
-                  <div className="bg-orange-50 p-3 border-b border-orange-100 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-orange-600" />
-                    <h3 className="font-bold text-orange-900">추천/이유 표현 (Ngữ pháp)</h3>
-                  </div>
-                  <ul className="divide-y divide-gray-100 bg-white">
-                    {vocabulary.grammar.map((item, idx) => (
-                      <li key={idx} className="p-3 hover:bg-gray-50 flex flex-col group cursor-default">
-                        <span className="font-bold text-gray-800">{item.kr}</span>
-                        <span className="text-xs text-gray-500 mt-1 group-hover:text-orange-600 transition-colors">{item.vn}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-gray-50 p-4 rounded-lg text-sm text-gray-600">
-                <p className="font-bold mb-2">💡 활용 예시 (Ví dụ):</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>건강을 <span className="text-blue-600 font-bold">유지하기 위해서</span> 매일 운동을 <span className="text-orange-600 font-bold">해야 합니다</span>.</li>
-                  <li>엘리베이터 대신 <span className="text-blue-600 font-bold">계단을 이용하는 것이 좋습니다</span>.</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: STRUCTURED OUTLINE */}
-          {currentStep === 2 && (
-            <div className="animate-fadeIn">
-              <SectionHeader kr="3. 개요 작성 (문장 만들기)" vn="Lập dàn ý chi tiết" />
-
-              <div className="space-y-8">
-                {/* Intro */}
-                <div className="relative pl-6 border-l-4 border-emerald-200">
-                  <h3 className="font-bold text-lg text-emerald-800 mb-1">서론: 문제 제기</h3>
-                  <p className="text-sm text-gray-500 mb-3">Mở bài: Nêu vấn đề (Sự thiếu vận động của người hiện đại)</p>
-                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
-                    Tip: "요즘 현대인들은 바쁜 생활 때문에 운동할 시간이 부족합니다."로 시작해보세요.
-                  </p>
-                  <textarea 
-                    value={data.outline.intro}
-                    onChange={(e) => handleChange('outline', 'intro', e.target.value)}
-                    className="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
-                    placeholder="서론을 작성하세요."
-                  ></textarea>
-                </div>
-
-                {/* Body */}
-                <div className="relative pl-6 border-l-4 border-emerald-400">
-                  <h3 className="font-bold text-lg text-emerald-800 mb-1">본론: 운동의 필요성 & 방법</h3>
-                  <p className="text-sm text-gray-500 mb-3">Thân bài: Tại sao cần tập & Cách tập đơn giản</p>
-                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
-                    Tip: "첫째, 운동을 하면 건강을 지킬 수 있습니다.", "생활 속에서 계단을 이용하거나..."
-                  </p>
-                  <textarea 
-                    value={data.outline.body}
-                    onChange={(e) => handleChange('outline', 'body', e.target.value)}
-                    className="w-full h-40 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
-                    placeholder="운동이 필요한 이유와 구체적인 방법을 쓰세요."
-                  ></textarea>
-                </div>
-
-                {/* Conclusion */}
-                <div className="relative pl-6 border-l-4 border-emerald-600">
-                  <h3 className="font-bold text-lg text-emerald-800 mb-1">결론: 권유 및 다짐</h3>
-                  <p className="text-sm text-gray-500 mb-3">Kết bài: Khuyên nhủ và khẳng định</p>
-                  <p className="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700">
-                    Tip: "따라서 우리 모두 건강을 위해 꾸준히 운동을 하는 것이 좋습니다."
-                  </p>
-                  <textarea 
-                    value={data.outline.conclusion}
-                    onChange={(e) => handleChange('outline', 'conclusion', e.target.value)}
-                    className="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
-                    placeholder="결론을 작성하세요."
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: FINAL WRITING */}
-          {currentStep === 3 && (
-            <div className="animate-fadeIn h-full flex flex-col">
-              <div className="flex justify-between items-end border-b pb-4 mb-4 print:hidden">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">4. 글쓰기 완성</h2>
-                  <p className="text-sm text-gray-500">Viết bài hoàn chỉnh</p>
-                </div>
-                <div className={`px-3 py-1 rounded-full text-sm font-mono font-bold ${data.finalText.length > 700 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                  {data.finalText.length}자 (chữ)
-                </div>
-              </div>
-
-              {/* Editor */}
-              <div className="flex-grow relative print:hidden">
-                <textarea
-                  value={data.finalText}
-                  onChange={(e) => handleChange('finalText', null, e.target.value)}
-                  className="w-full h-[500px] p-6 border rounded-lg bg-white shadow-inner focus:ring-2 focus:ring-emerald-500 outline-none leading-loose font-medium text-lg resize-none text-gray-800"
-                  placeholder="개요에서 작성한 내용을 바탕으로 글을 완성하세요..."
-                  spellCheck="false"
-                ></textarea>
-              </div>
-
-              {/* Print View */}
-              <div className="hidden print:block print:w-full">
-                <div className="text-center mb-10 border-b-2 border-black pb-4">
-                  <h1 className="text-3xl font-serif font-bold mb-2">생활 속의 운동</h1>
-                  <p className="text-gray-500">한국어 쓰기 과제</p>
-                </div>
-                <div className="text-lg leading-loose font-serif text-justify whitespace-pre-wrap px-8">
-                  {data.finalText}
-                </div>
-                <div className="mt-20 pt-4 border-t flex justify-between text-sm text-gray-500">
-                  <span>작성자 서명: ________________</span>
-                  <span>작성일: {new Date().toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="mt-4 flex flex-col sm:flex-row gap-3 print:hidden">
-                 <button 
-                  onClick={copyToClipboard}
-                  className="flex-1 flex items-center justify-center px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors shadow-sm"
-                >
-                  {showSaveNotification ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {showSaveNotification ? '복사 완료!' : '클립보드 복사 (Sao chép)'}
+                <button onclick="resetData()" class="p-2 hover:bg-emerald-700 rounded-full transition-colors text-emerald-100 hover:text-white" title="초기화 (Làm mới)">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
                 </button>
-
-                <button 
-                  onClick={handlePrint}
-                  className="flex-1 flex items-center justify-center px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  이미지/PDF 저장 (Lưu ảnh/PDF)
-                </button>
-              </div>
             </div>
-          )}
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 md:p-6">
+        
+        <!-- Progress Steps -->
+        <div class="mb-8 no-print">
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="goToStep(0)" class="step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-white shadow-md border-b-4 border-emerald-600" id="btn-step-0">
+                    <div class="text-emerald-600 mb-1"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-bold text-gray-800">내용 구상</span>
+                    <span class="text-[10px] text-gray-400 hidden sm:block">Tìm ý tưởng</span>
+                </button>
+                <button onclick="goToStep(1)" class="step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-gray-50 text-gray-400 hover:bg-gray-100" id="btn-step-1">
+                    <div class="mb-1"><i data-lucide="lightbulb" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-bold">표현 익히기</span>
+                    <span class="text-[10px] hidden sm:block">Học từ vựng</span>
+                </button>
+                <button onclick="goToStep(2)" class="step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-gray-50 text-gray-400 hover:bg-gray-100" id="btn-step-2">
+                    <div class="mb-1"><i data-lucide="layout" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-bold">개요 작성</span>
+                    <span class="text-[10px] hidden sm:block">Lập dàn ý</span>
+                </button>
+                <button onclick="goToStep(3)" class="step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-gray-50 text-gray-400 hover:bg-gray-100" id="btn-step-3">
+                    <div class="mb-1"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                    <span class="text-sm font-bold">글쓰기</span>
+                    <span class="text-[10px] hidden sm:block">Viết bài</span>
+                </button>
+            </div>
         </div>
 
-        {/* Footer Navigation */}
-        <div className="flex justify-between mt-6 print:hidden">
-          <button
-            onClick={handlePrev}
-            disabled={currentStep === 0}
-            className={`flex items-center px-5 py-2.5 rounded-lg font-bold transition-colors ${
-              currentStep === 0
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm'
-            }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            이전 (Trước)
-          </button>
+        <!-- Main Content Area -->
+        <div class="bg-white rounded-xl shadow-lg p-6 min-h-[500px] transition-all duration-300 relative">
+            
+            <!-- STEP 1: Ideas -->
+            <div id="step-0" class="step-content fade-in">
+                <div class="border-b pb-3 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">1. 내용 구상하기</h2>
+                    <p class="text-sm text-gray-500 mt-1">Tìm ý tưởng cho bài viết</p>
+                </div>
 
-          {currentStep < steps.length - 1 && (
-            <button
-              onClick={handleNext}
-              className="flex items-center px-5 py-2.5 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg transition-transform active:scale-95"
-            >
-              다음 (Tiếp theo)
-              <ChevronRight className="w-5 h-5 ml-1" />
-            </button>
-          )}
+                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100 mb-6 flex gap-3">
+                    <i data-lucide="alert-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0"></i>
+                    <div>
+                        <h4 class="font-bold text-emerald-900 text-sm">가이드 (Hướng dẫn)</h4>
+                        <p class="text-sm text-emerald-800 mt-1">
+                            질문에 답하면서 글의 핵심 내용을 한국어로 간단히 메모해보세요.<br>
+                            <span class="text-xs opacity-75">(Hãy trả lời các câu hỏi để ghi lại nội dung chính bằng tiếng Hàn.)</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block mb-2">
+                            <span class="font-bold text-gray-800">Q1. 우리는 왜 운동을 해야 할까요?</span>
+                            <span class="block text-xs text-gray-500">Tại sao chúng ta phải tập thể dục? (Sức khỏe, Căng thẳng...)</span>
+                        </label>
+                        <input type="text" id="input-q1" oninput="saveData()" placeholder="예: 건강을 유지하기 위해서, 스트레스를 풀기 위해서..." 
+                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block mb-2">
+                            <span class="font-bold text-gray-800">Q2. 생활 속에서 쉽게 할 수 있는 운동은 무엇인가요?</span>
+                            <span class="block text-xs text-gray-500">Những bài tập nào dễ dàng thực hiện trong đời sống?</span>
+                        </label>
+                        <input type="text" id="input-q2" oninput="saveData()" placeholder="예: 엘리베이터 대신 계단 이용하기, 가까운 거리 걷기..." 
+                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 focus:bg-white transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block mb-2">
+                            <span class="font-bold text-gray-800">메모장 (필요한 단어 적기)</span>
+                            <span class="block text-xs text-gray-500">Ghi chú từ vựng cần thiết</span>
+                        </label>
+                        <textarea id="input-keywords" oninput="saveData()" class="w-full p-3 border rounded-lg h-24 resize-none focus:ring-2 focus:ring-emerald-500 outline-none"
+                        placeholder="사용하고 싶은 단어나 표현을 자유롭게 적으세요."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Vocab -->
+            <div id="step-1" class="step-content hidden fade-in">
+                <div class="border-b pb-3 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">2. 주제 관련 표현 익히기</h2>
+                    <p class="text-sm text-gray-500 mt-1">Học từ vựng và ngữ pháp liên quan</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Vocab List -->
+                    <div class="border rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-blue-50 p-3 border-b border-blue-100 flex items-center gap-2">
+                            <i data-lucide="book" class="w-4 h-4 text-blue-600"></i>
+                            <h3 class="font-bold text-blue-900">운동 관련 어휘 (Từ vựng)</h3>
+                        </div>
+                        <ul class="divide-y divide-gray-100 bg-white text-sm">
+                            <li class="p-3 flex justify-between"><span>건강을 유지하다</span><span class="text-gray-500">Duy trì sức khỏe</span></li>
+                            <li class="p-3 flex justify-between"><span>체력을 기르다</span><span class="text-gray-500">Rèn luyện thể lực</span></li>
+                            <li class="p-3 flex justify-between"><span>스트레스를 해소하다</span><span class="text-gray-500">Giải tỏa căng thẳng</span></li>
+                            <li class="p-3 flex justify-between"><span>비만을 예방하다</span><span class="text-gray-500">Phòng ngừa béo phì</span></li>
+                            <li class="p-3 flex justify-between"><span>계단을 이용하다</span><span class="text-gray-500">Sử dụng cầu thang</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Grammar List -->
+                    <div class="border rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-orange-50 p-3 border-b border-orange-100 flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-orange-600"></i>
+                            <h3 class="font-bold text-orange-900">필수 문법 (Ngữ pháp)</h3>
+                        </div>
+                        <ul class="divide-y divide-gray-100 bg-white text-sm">
+                            <li class="p-3">
+                                <span class="font-bold block text-gray-800">-는 것이 좋다</span>
+                                <span class="text-xs text-gray-500">Tốt hơn là nên... (Khuyên nhủ)</span>
+                            </li>
+                            <li class="p-3">
+                                <span class="font-bold block text-gray-800">-아/어야 한다</span>
+                                <span class="text-xs text-gray-500">Phải... (Sự cần thiết)</span>
+                            </li>
+                            <li class="p-3">
+                                <span class="font-bold block text-gray-800">-기 위해서</span>
+                                <span class="text-xs text-gray-500">Để... (Mục đích)</span>
+                            </li>
+                            <li class="p-3">
+                                <span class="font-bold block text-gray-800">-뿐만 아니라</span>
+                                <span class="text-xs text-gray-500">Không những... mà còn</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-gray-50 p-4 rounded-lg text-sm text-gray-600 border border-gray-200">
+                    <p class="font-bold mb-2">💡 활용 예시 (Ví dụ):</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>건강을 <span class="text-blue-600 font-bold">유지하기 위해서</span> 매일 운동을 <span class="text-orange-600 font-bold">해야 합니다</span>.</li>
+                        <li>엘리베이터 대신 <span class="text-blue-600 font-bold">계단을 이용하는 것이 좋습니다</span>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- STEP 3: Outline -->
+            <div id="step-2" class="step-content hidden fade-in">
+                <div class="border-b pb-3 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">3. 개요 작성 (문장 만들기)</h2>
+                    <p class="text-sm text-gray-500 mt-1">Lập dàn ý chi tiết</p>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- Intro -->
+                    <div class="relative pl-6 border-l-4 border-emerald-200">
+                        <h3 class="font-bold text-lg text-emerald-800 mb-1">서론: 문제 제기</h3>
+                        <p class="text-sm text-gray-500 mb-3">Mở bài: Nêu vấn đề</p>
+                        <p class="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700 font-medium">
+                            Tip: "요즘 현대인들은 바쁜 생활 때문에 운동할 시간이 부족합니다."로 시작해보세요.
+                        </p>
+                        <textarea id="input-intro" oninput="saveData()" class="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="서론을 작성하세요."></textarea>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="relative pl-6 border-l-4 border-emerald-400">
+                        <h3 class="font-bold text-lg text-emerald-800 mb-1">본론: 운동의 필요성 & 방법</h3>
+                        <p class="text-sm text-gray-500 mb-3">Thân bài: Tại sao cần tập & Cách tập</p>
+                        <p class="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700 font-medium">
+                            Tip: "첫째, 운동을 하면 건강을 지킬 수 있습니다." (1단계 메모 활용)
+                        </p>
+                        <textarea id="input-body" oninput="saveData()" class="w-full h-40 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="운동이 필요한 이유와 구체적인 방법을 쓰세요."></textarea>
+                    </div>
+
+                    <!-- Conclusion -->
+                    <div class="relative pl-6 border-l-4 border-emerald-600">
+                        <h3 class="font-bold text-lg text-emerald-800 mb-1">결론: 권유 및 다짐</h3>
+                        <p class="text-sm text-gray-500 mb-3">Kết bài: Khuyên nhủ</p>
+                        <p class="text-xs bg-emerald-50 p-2 rounded mb-2 text-emerald-700 font-medium">
+                            Tip: "따라서 우리 모두 건강을 위해 꾸준히 운동을 하는 것이 좋습니다."
+                        </p>
+                        <textarea id="input-conclusion" oninput="saveData()" class="w-full h-24 p-3 border rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="결론을 작성하세요."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Final Write -->
+            <div id="step-3" class="step-content hidden fade-in h-full flex flex-col">
+                <div class="flex justify-between items-end border-b pb-4 mb-4 no-print">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">4. 글쓰기 완성</h2>
+                        <p class="text-sm text-gray-500">Viết bài hoàn chỉnh</p>
+                    </div>
+                    <div id="char-count" class="px-3 py-1 rounded-full text-sm font-mono font-bold bg-emerald-100 text-emerald-600">
+                        0자 (chữ)
+                    </div>
+                </div>
+
+                <!-- Web Editor -->
+                <div class="no-print mb-4">
+                    <textarea id="input-final" oninput="saveData(); updateCharCount();" 
+                    class="w-full h-[400px] p-6 border rounded-lg bg-white shadow-inner focus:ring-2 focus:ring-emerald-500 outline-none leading-loose font-medium text-lg resize-none text-gray-800"
+                    placeholder="개요에서 작성한 내용을 바탕으로 글을 완성하세요..." spellcheck="false"></textarea>
+                </div>
+
+                <!-- Printable Area (Hidden on screen, shown on print) -->
+                <div id="print-area" class="hidden">
+                    <div class="text-center mb-10 border-b-2 border-black pb-4">
+                        <h1 class="text-3xl font-serif font-bold mb-2">생활 속의 운동</h1>
+                        <p class="text-gray-500">한국어 쓰기 과제</p>
+                    </div>
+                    <div class="mb-6 p-4 bg-gray-50 border rounded text-sm text-gray-600">
+                         <p><strong>주제(Chủ đề):</strong> 생활 속의 운동</p>
+                         <p><strong>키워드(Từ khóa):</strong> <span id="print-keywords"></span></p>
+                    </div>
+                    <div id="print-content" class="text-lg leading-loose font-serif text-justify whitespace-pre-wrap px-4"></div>
+                    <div class="mt-20 pt-4 border-t flex justify-between text-sm text-gray-500">
+                        <span>작성자 서명: ________________</span>
+                        <span>작성일: <span id="print-date"></span></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-auto flex flex-col sm:flex-row gap-3 no-print">
+                    <button onclick="copyToClipboard()" class="flex-1 flex items-center justify-center px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors shadow-sm">
+                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i>
+                        <span id="copy-btn-text">클립보드 복사 (Sao chép)</span>
+                    </button>
+                    <button onclick="printDoc()" class="flex-1 flex items-center justify-center px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">
+                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i>
+                        이미지/PDF 저장 (Lưu ảnh/PDF)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Navigation -->
+            <div class="flex justify-between mt-8 pt-4 border-t no-print">
+                <button id="btn-prev" onclick="prevStep()" class="flex items-center px-5 py-2.5 rounded-lg font-bold bg-gray-200 text-gray-400 cursor-not-allowed" disabled>
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                    이전 (Trước)
+                </button>
+                <button id="btn-next" onclick="nextStep()" class="flex items-center px-5 py-2.5 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg">
+                    다음 (Tiếp theo)
+                    <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                </button>
+            </div>
         </div>
-      </main>
-    </div>
-  );
-};
+    </main>
 
-export default KoreanWritingApp;
+    <script>
+        // --- Init Icons ---
+        lucide.createIcons();
+
+        // --- State Management ---
+        let currentStep = 0;
+        const totalSteps = 4;
+        const STORAGE_KEY = 'korean_writing_exercise_data_v1';
+
+        // --- Data Loading & Saving ---
+        function saveData() {
+            const data = {
+                q1: document.getElementById('input-q1').value,
+                q2: document.getElementById('input-q2').value,
+                keywords: document.getElementById('input-keywords').value,
+                intro: document.getElementById('input-intro').value,
+                body: document.getElementById('input-body').value,
+                conclusion: document.getElementById('input-conclusion').value,
+                final: document.getElementById('input-final').value
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            
+            // Show save indicator
+            const status = document.getElementById('save-status');
+            if(status) {
+                status.classList.remove('opacity-0');
+                setTimeout(() => status.classList.add('opacity-0'), 2000);
+            }
+            updateCharCount();
+            updatePrintContent();
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('input-q1').value = data.q1 || '';
+                document.getElementById('input-q2').value = data.q2 || '';
+                document.getElementById('input-keywords').value = data.keywords || '';
+                document.getElementById('input-intro').value = data.intro || '';
+                document.getElementById('input-body').value = data.body || '';
+                document.getElementById('input-conclusion').value = data.conclusion || '';
+                document.getElementById('input-final').value = data.final || '';
+                updateCharCount();
+                updatePrintContent();
+            }
+        }
+
+        function resetData() {
+            if(confirm('정말 초기화 하시겠습니까? 모든 내용이 삭제됩니다.\n(Bạn có chắc chắn muốn xóa hết không?)')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        // --- Navigation Logic ---
+        function goToStep(step) {
+            // Update Current Step
+            currentStep = step;
+
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+            // Show current step
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+
+            // Update Header Buttons Styling
+            for (let i = 0; i < totalSteps; i++) {
+                const btn = document.getElementById(`btn-step-${i}`);
+                if (i === step) {
+                    btn.className = "step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-white shadow-md border-b-4 border-emerald-600";
+                    btn.querySelector('.text-sm').classList.add('text-gray-800');
+                    btn.querySelector('div').classList.add('text-emerald-600');
+                } else {
+                    btn.className = "step-btn flex flex-col items-center p-2 rounded-lg transition-all bg-gray-50 text-gray-400 hover:bg-gray-100";
+                    btn.querySelector('.text-sm').classList.remove('text-gray-800');
+                    btn.querySelector('div').classList.remove('text-emerald-600');
+                }
+            }
+
+            // Update Footer Buttons
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+
+            if (step === 0) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                prevBtn.classList.remove('bg-white', 'text-gray-700', 'hover:bg-gray-50', 'border', 'border-gray-300');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                prevBtn.classList.add('bg-white', 'text-gray-700', 'hover:bg-gray-50', 'border', 'border-gray-300');
+            }
+
+            if (step === totalSteps - 1) {
+                nextBtn.classList.add('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+            }
+
+            // Logic: Auto-combine text when entering Final Step
+            if (step === 3) {
+                const finalArea = document.getElementById('input-final');
+                if (!finalArea.value.trim()) {
+                    const intro = document.getElementById('input-intro').value;
+                    const body = document.getElementById('input-body').value;
+                    const conclusion = document.getElementById('input-conclusion').value;
+                    
+                    const combined = [intro, body, conclusion].filter(Boolean).join('\n\n');
+                    if(combined) {
+                        finalArea.value = combined;
+                        saveData();
+                    }
+                }
+                updatePrintContent();
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) goToStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            if (currentStep > 0) goToStep(currentStep - 1);
+        }
+
+        // --- Utility Functions ---
+        function updateCharCount() {
+            const text = document.getElementById('input-final').value;
+            const countEl = document.getElementById('char-count');
+            countEl.innerText = `${text.length}자 (chữ)`;
+            
+            if(text.length > 700) {
+                countEl.classList.remove('bg-emerald-100', 'text-emerald-600');
+                countEl.classList.add('bg-red-100', 'text-red-600');
+            } else {
+                countEl.classList.add('bg-emerald-100', 'text-emerald-600');
+                countEl.classList.remove('bg-red-100', 'text-red-600');
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('input-final').value;
+            navigator.clipboard.writeText(text).then(() => {
+                const btnText = document.getElementById('copy-btn-text');
+                const originalText = btnText.innerText;
+                btnText.innerText = "복사 완료! (Đã xong)";
+                setTimeout(() => {
+                    btnText.innerText = originalText;
+                }, 2000);
+            });
+        }
+
+        function updatePrintContent() {
+            // Update hidden print div
+            const finalText = document.getElementById('input-final').value;
+            const keywords = document.getElementById('input-keywords').value;
+            document.getElementById('print-content').innerText = finalText;
+            document.getElementById('print-keywords').innerText = keywords || '(없음)';
+            document.getElementById('print-date').innerText = new Date().toLocaleDateString();
+        }
+
+        function printDoc() {
+            updatePrintContent();
+            window.print();
+        }
+
+        // --- Initialize ---
+        window.onload = loadData;
+
+    </script>
+</body>
+</html>
 
