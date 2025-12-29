@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 듣기 퀴즈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .option-btn {
+            transition: all 0.2s;
+        }
+        .option-btn.correct {
+            background-color: #10b981; /* green-500 */
+            color: white;
+            border-color: #10b981;
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            border-color: #ef4444;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        /* Mini Player Styles */
+        #mini-player {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        #mini-player.hidden {
+            transform: scale(0.8) translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #mini-player-progress {
+            transform: rotate(-90deg);
+            transform-origin: center;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        /* Floating Script Button Styles */
+        #floating-script-btn {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        #floating-script-btn.hidden {
+            transform: scale(0.8) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Script Modal Styles */
+        #script-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #script-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 flex items-center justify-center min-h-screen">
+    
+    <!-- Custom Alert Message Box -->
+    <div id="alert-box" class="hidden opacity-0 fixed top-5 left-1/2 -translate-x-1/2 bg-yellow-500 text-black py-3 px-6 rounded-lg shadow-xl z-[100] transition-opacity duration-300">
+        <p id="alert-message"></p>
+    </div>
+
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">🎧 한국어 듣기 퀴즈</h1>
+            <p class="text-gray-600">듣기 내용을 잘 듣고 질문에 답해 보세요.</p>
+        </div>
+
+        <!-- Main Audio Player -->
+        <div id="main-audio-player" class="audio-player bg-gray-50 p-4 rounded-lg mb-4">
+             <label for="audio-file" class="text-sm font-medium text-gray-700">듣기 음원 (Track 42)</label>
+             <audio id="audio-file" controls class="w-full mt-2">
+                 <source src="tacrk42.mp3" type="audio/mpeg">
+                 Your browser does not support the audio element.
+             </audio>
+        </div>
+
+        <!-- Script Toggle Button -->
+        <div class="mb-6">
+            <button id="toggle-script-btn" class="w-full text-left text-indigo-600 font-semibold py-2 px-3 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
+                <i class="fas fa-file-alt mr-2"></i>스크립트 보기
+            </button>
+            <div id="script-content" class="hidden mt-3 bg-gray-50 p-4 rounded-lg text-sm space-y-2 border">
+                <p><strong class="text-purple-600">앵커:</strong> 다음은 파리에서 열린 ‘한국음식축제’ 소식입니다. 이주연 리포터를 연결해 보겠습니다. 이주연 리포터.</p>
+                <p><strong class="text-teal-600">리포터:</strong> 네, 파리 한국문화원은 오늘 파리 서울공원에서 한국 음식을 알리는 음식 축제를 성공적으로 잘 마쳤습니다.</p>
+                <p><strong class="text-purple-600">앵커:</strong> 파리는 오늘 비가 왔다고 하던데 괜찮았나요?</p>
+                <p><strong class="text-teal-600">리포터:</strong> 네, 오전에 비가 약간 왔지만 큰 문제는 없었습니다. 불고기와 비빔밥이 인기가 좋아서 줄 서서 사 먹는 모습을 볼 수 있었습니다.</p>
+                <p><strong class="text-purple-600">앵커:</strong> 행사 준비 팀이 여러 가지로 신경을 써서 준비했다고 하던데요.</p>
+                <p><strong class="text-teal-600">리포터:</strong> 네, 그렇습니다. 행사 장소도 한국의 정원처럼 꾸몄고 한복을 입고 사진을 찍을 수 있는 코너도 마련해 놓았습니다.</p>
+                <p><strong class="text-purple-600">앵커:</strong> 김치 만들기 체험도 했다고 하는데 어땠습니까?</p>
+                <p><strong class="text-teal-600">리포터:</strong> 외국인들이 김치 냄새를 싫어할까 봐 걱정했는데 오히려 참가자가 너무 많아서 나중에는 재료가 부족했습니다. 재료를 충분히 준비했어야 했다는 생각이 들었습니다.</p>
+                <p><strong class="text-purple-600">앵커:</strong> 음식을 먹거나 구경만 하는 게 아니라 직접 만들어 보도록 한 것은 아주 좋은 생각이네요. 공연도 했다면서요?</p>
+                <p><strong class="text-teal-600">리포터:</strong> 네, 부엌에서 쓰는 물건을 악기처럼 사용한 공연이었는데요, 한국어를 모르는 외국인들도 함께 즐겁게 볼 수 있어서 참 좋았습니다.</p>
+                <p><strong class="text-purple-600">앵커:</strong> 네, 잘 들었습니다. 감사합니다.</p>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-8 border-t pt-6">
+            <!-- Quizzes are dynamically generated here -->
+        </div>
+        
+        <!-- Result and Action Buttons -->
+        <div class="border-t pt-6 text-center mt-6">
+             <div id="result-container" class="hidden mb-4">
+                 <h2 class="text-2xl font-bold text-green-600">퀴즈 완료!</h2>
+                 <p id="score-text" class="text-gray-700 text-lg mt-2"></p>
+             </div>
+             <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition duration-300 w-full sm:w-auto">결과 보기</button>
+             <button id="retry-btn" class="hidden bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition duration-300 w-full sm:w-auto">다시 풀기</button>
+        </div>
+    </div>
+
+    <!-- Mini Audio Player (Sticky) -->
+    <div id="mini-player" class="hidden fixed top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg z-50">
+        <div class="relative w-12 h-12">
+            <svg class="absolute top-0 left-0 w-full h-full" viewBox="0 0 36 36">
+                <circle class="text-gray-200" cx="18" cy="18" r="16" fill="none" stroke-width="3"></circle>
+                <circle id="mini-player-progress" class="text-indigo-600"
+                    cx="18" cy="18" r="16"
+                    fill="none"
+                    stroke-width="3"
+                    stroke-dasharray="100.5"
+                    stroke-dashoffset="100.5" />
+            </svg>
+            <button id="mini-player-play-pause-btn" class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-indigo-600">
+                <i class="fas fa-play text-base"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Script Button -->
+    <button id="floating-script-btn" class="hidden fixed bottom-4 right-4 bg-indigo-600 text-white p-3 rounded-full shadow-lg z-50 flex items-center justify-center w-12 h-12">
+        <i class="fas fa-file-alt text-lg"></i>
+    </button>
+
+    <!-- Script Modal -->
+    <div id="script-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto relative">
+            <button id="close-modal-btn" class="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">스크립트</h3>
+            <div id="modal-script-content" class="text-sm space-y-2">
+                <!-- Script content will be copied here -->
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    const quizData = [
+        {
+            question: "이 행사는 어디에서 열렸어요?",
+            options: ["서울", "파리", "뉴욕", "도쿄"],
+            answer: "파리"
+        },
+        {
+            question: "행사에서 가장 인기가 많았던 음식은 무엇이었어요?",
+            options: ["김치와 떡볶이", "불고기와 비빔밥", "라면과 김밥", "치킨과 맥주"],
+            answer: "불고기와 비빔밥"
+        },
+        {
+            question: "김치 만들기 체험은 어땠어요?",
+            options: [
+                "인기가 없어서 재료가 많이 남았어요",
+                "냄새 때문에 아무도 오지 않았어요",
+                "참가자가 너무 많아서 재료가 부족했어요",
+                "비가 와서 체험을 취소했어요"
+            ],
+            answer: "참가자가 너무 많아서 재료가 부족했어요"
+        },
+        {
+            question: "들은 이야기와 다른 것을 고르세요.",
+            options: [
+                "행사 장소는 한국의 정원처럼 꾸몄어요",
+                "한복을 입고 사진을 찍을 수 있었어요",
+                "하루 종일 비가 와서 행사가 어려웠어요",
+                "부엌 물건으로 하는 공연이 있었어요"
+            ],
+            answer: "하루 종일 비가 와서 행사가 어려웠어요"
+        },
+        {
+            question: "이 행사의 이름은 무엇일까요?",
+            options: ["한국 드라마 축제", "K-POP 콘서트", "한국 영화제", "한국 음식 축제"],
+            answer: "한국 음식 축제"
+        }
+    ];
+
+    let score = 0;
+    let questionsAnswered = 0;
+
+    const quizContainer = document.getElementById('quiz-container');
+    const resultContainer = document.getElementById('result-container');
+    const scoreText = document.getElementById('score-text');
+    const submitBtn = document.getElementById('submit-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const toggleScriptBtn = document.getElementById('toggle-script-btn');
+    const scriptContent = document.getElementById('script-content');
+    
+    // Audio Player Elements
+    const audio = document.getElementById('audio-file');
+    const mainAudioPlayer = document.getElementById('main-audio-player');
+    const miniPlayer = document.getElementById('mini-player');
+    const miniPlayerPlayPauseBtn = document.getElementById('mini-player-play-pause-btn');
+    const miniPlayerProgress = document.getElementById('mini-player-progress');
+    const progressCircleRadius = miniPlayerProgress.r.baseVal.value;
+    const progressCircumference = 2 * Math.PI * progressCircleRadius;
+    miniPlayerProgress.style.strokeDasharray = `${progressCircumference} ${progressCircumference}`;
+    miniPlayerProgress.style.strokeDashoffset = progressCircumference;
+
+    // Script Modal & Floating Button Elements
+    const floatingScriptBtn = document.getElementById('floating-script-btn');
+    const scriptModal = document.getElementById('script-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalScriptContent = document.getElementById('modal-script-content');
+
+    function showAlert(message) {
+        const alertBox = document.getElementById('alert-box');
+        const alertMessage = document.getElementById('alert-message');
+        if (!alertBox || !alertMessage) return;
+
+        alertMessage.textContent = message;
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.remove('opacity-0'), 10);
+
+        setTimeout(() => {
+            alertBox.classList.add('opacity-0');
+            alertBox.addEventListener('transitionend', () => {
+                alertBox.classList.add('hidden');
+            }, { once: true });
+        }, 2500);
+    }
+
+    function loadAllQuizzes() {
+        quizContainer.innerHTML = '';
+        quizData.forEach((quiz, index) => {
+            const questionBlock = document.createElement('div');
+            questionBlock.id = `question-${index}`;
+            const questionEl = document.createElement('h2');
+            questionEl.className = 'text-xl font-bold text-gray-800 mb-4';
+            questionEl.innerText = `Q${index + 1}. ${quiz.question}`;
+            const optionsEl = document.createElement('div');
+            optionsEl.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3';
+            quiz.options.forEach(optionText => {
+                const button = document.createElement('button');
+                button.innerText = optionText;
+                button.classList.add('option-btn', 'w-full', 'p-3', 'text-left', 'border-2', 'rounded-lg', 'hover:bg-gray-100');
+                button.addEventListener('click', () => checkAnswer(index, button, optionText, quiz.answer));
+                optionsEl.appendChild(button);
+            });
+            questionBlock.appendChild(questionEl);
+            questionBlock.appendChild(optionsEl);
+            quizContainer.appendChild(questionBlock);
+        });
+    }
+
+    function checkAnswer(questionIndex, button, selected, correct) {
+        const questionBlock = document.getElementById(`question-${questionIndex}`);
+        if (questionBlock.dataset.answered) return;
+        questionBlock.dataset.answered = 'true';
+        questionsAnswered++;
+        const optionButtons = questionBlock.querySelectorAll('.option-btn');
+        optionButtons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.innerText === correct) {
+                btn.classList.add('correct');
+            }
+        });
+        if (selected === correct) {
+            score++;
+        } else {
+            button.classList.add('incorrect');
+        }
+    }
+
+    submitBtn.addEventListener('click', () => {
+        if (questionsAnswered < quizData.length) {
+            showAlert('모든 문제를 풀어주세요.');
+            return;
+        }
+        resultContainer.classList.remove('hidden');
+        scoreText.innerText = `총 ${quizData.length}문제 중 ${score}문제를 맞혔습니다!`;
+        submitBtn.classList.add('hidden');
+        retryBtn.classList.remove('hidden');
+    });
+
+    retryBtn.addEventListener('click', () => {
+        score = 0;
+        questionsAnswered = 0;
+        resultContainer.classList.add('hidden');
+        submitBtn.classList.remove('hidden');
+        retryBtn.classList.add('hidden');
+        loadAllQuizzes();
+    });
+
+    toggleScriptBtn.addEventListener('click', () => {
+        scriptContent.classList.toggle('hidden');
+        const isHidden = scriptContent.classList.contains('hidden');
+        toggleScriptBtn.innerHTML = isHidden ? '<i class="fas fa-file-alt mr-2"></i>스크립트 보기' : '<i class="fas fa-eye-slash mr-2"></i>스크립트 숨기기';
+    });
+    
+    // --- MINI PLAYER LOGIC ---
+    miniPlayerPlayPauseBtn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+    audio.addEventListener('play', () => miniPlayerPlayPauseBtn.innerHTML = '<i class="fas fa-pause text-base"></i>');
+    audio.addEventListener('pause', () => miniPlayerPlayPauseBtn.innerHTML = '<i class="fas fa-play text-base"></i>');
+    audio.addEventListener('timeupdate', () => {
+        const progressPercent = (audio.currentTime / audio.duration) || 0;
+        const offset = progressCircumference - progressPercent * progressCircumference;
+        miniPlayerProgress.style.strokeDashoffset = offset;
+    });
+
+    const playerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => miniPlayer.classList.toggle('hidden', entry.isIntersecting));
+    }, { threshold: 0.1 }); 
+    playerObserver.observe(mainAudioPlayer);
+
+    // --- SCRIPT MODAL & FLOATING BUTTON LOGIC ---
+    modalScriptContent.innerHTML = scriptContent.innerHTML;
+    floatingScriptBtn.addEventListener('click', () => scriptModal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => scriptModal.classList.add('hidden'));
+    scriptModal.addEventListener('click', (e) => {
+        if (e.target === scriptModal) scriptModal.classList.add('hidden');
+    });
+
+    const scriptButtonObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => floatingScriptBtn.classList.toggle('hidden', entry.isIntersecting));
+    }, { threshold: 0.1 });
+    scriptButtonObserver.observe(toggleScriptBtn);
+
+    loadAllQuizzes();
+</script>
+
+</body>
+</html>
+

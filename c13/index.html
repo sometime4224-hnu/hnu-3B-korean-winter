@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NB76SV96');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13과. 지금 입고 있는 양복이 잘 어울려요</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .activity-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #34495e;
+            margin-bottom: 15px;
+            text-align: left;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .section-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        /* 문법 섹션을 위한 2x2 그리드 레이아웃 */
+        .grammar-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .activity-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px;
+            font-size: 1.1em;
+            font-weight: 500;
+            text-decoration: none;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .activity-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-vocabulary { background-color: #3498db; }
+        .btn-grammar { background-color: #2ecc71; }
+        .btn-conversation { background-color: #e67e22; }
+        .btn-listening { background-color: #9b59b6; }
+
+        .activity-button.disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .activity-button.disabled:hover {
+            transform: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .section-buttons, .grammar-grid { /* 작은 화면에서는 모두 1열로 변경 */
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>13과 활동을 선택하세요</h1>
+
+        <div class="activity-section">
+            <h2 class="section-title">어휘</h2>
+            <div class="section-buttons">
+                <a href="vocabulary.html" class="activity-button btn-vocabulary" data-target="vocabulary.html"><i class="fas fa-book"></i> 어휘</a>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <h2 class="section-title">문법</h2>
+            <!-- 문법 버튼들을 2x2 그리드로 만들기 위해 'grammar-grid' 클래스 추가 -->
+            <div class="section-buttons grammar-grid">
+                <a href="grammar1.html" class="activity-button btn-grammar" data-target="grammar1.html">문법 1</a>
+                <a href="grammar2.html" class="activity-button btn-grammar" data-target="grammar2.html">문법 2</a>
+                <a href="grammar3.html" class="activity-button btn-grammar" data-target="grammar3.html">문법 3</a>
+                <a href="grammar4.html" class="activity-button btn-grammar" data-target="grammar4.html">문법 4</a>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <h2 class="section-title">말하기</h2>
+            <div class="section-buttons">
+                <a href="conv1.html" class="activity-button btn-conversation" data-target="conv1.html">말하기 1</a>
+                <a href="conv2.html" class="activity-button btn-conversation" data-target="conv2.html">말하기 2</a>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <h2 class="section-title">듣기</h2>
+            <div class="section-buttons">
+                <a href="listen1.html" class="activity-button btn-listening" data-target="listen1.html">듣기 1</a>
+                <a href="listen2.html" class="activity-button btn-listening" data-target="listen2.html">듣기 2</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.activity-button');
+            
+            buttons.forEach(button => {
+                const fileUrl = button.getAttribute('href');
+                
+                // Check if the file exists. If not, disable the button.
+                fetch(fileUrl, { method: 'HEAD' })
+                    .then(response => {
+                        if (!response.ok) {
+                            button.classList.add('disabled');
+                            button.setAttribute('title', '준비 중인 활동입니다.');
+                        }
+                    })
+                    .catch(error => {
+                        button.classList.add('disabled');
+                        button.setAttribute('title', '파일을 찾을 수 없습니다.');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
