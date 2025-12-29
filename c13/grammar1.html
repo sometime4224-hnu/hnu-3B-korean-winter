@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 문법 학습: -(으)ㄹ까 봐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .card {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .card {
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #4f46e5;
+            background-color: #e0e7ff;
+            border-color: #4f46e5;
+        }
+        .tab-btn:not(.active) {
+            color: #4b5563;
+        }
+        .quiz-input {
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .quiz-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .feedback {
+            font-weight: 700;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .feedback-correct {
+            color: #16a34a;
+            background-color: #dcfce7;
+        }
+        .feedback-incorrect {
+            color: #dc2626;
+            background-color: #fee2e2;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        
+        <header class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold gradient-text" data-key="main_title">문법과 표현 1: A/V-(으)ㄹ까 봐</h1>
+            <p class="text-gray-600 mt-2" data-key="main_subtitle">Grammar and Expression 1: A/V-(으)ㄹ까 봐</p>
+            <div class="mt-4">
+                <select id="lang-selector" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex justify-center flex-wrap space-x-2 sm:space-x-4 mb-6 bg-gray-100 p-2 rounded-xl">
+            <button class="tab-btn active" onclick="changeView('explanation')" data-key="tab_explanation">설명</button>
+            <button class="tab-btn" onclick="changeView('practice')" data-key="tab_practice">연습</button>
+            <button class="tab-btn" onclick="changeView('quiz')" data-key="tab_quiz">연습 문제</button>
+        </div>
+
+        <!-- Content Views -->
+        <main>
+            <!-- Explanation View -->
+            <div id="explanation-view">
+                <div class="card">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" data-key="explanation_title">무엇을 배울까요?</h2>
+                    <p class="text-gray-700 mb-2" data-key="explanation_desc_1">
+                        <strong>-(으)ㄹ까 봐</strong>는 미래의 어떤 일이나 상황에 대해 걱정하거나 우려할 때 사용하는 표현입니다.
+                    </p>
+                     <p class="text-gray-700" data-key="explanation_desc_2">
+                        '~할 것 같아서 걱정돼요' 또는 '~할 경우를 대비해서'라는 의미를 가집니다.
+                    </p>
+                    <div class="mt-6 pt-6 border-t">
+                        <h3 class="font-bold text-lg text-gray-800 mb-2" data-key="conjugation_title">만드는 법</h3>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li data-key="conjugation_rule_1">동사/형용사 어간이 모음이나 'ㄹ'로 끝나면 + <strong>ㄹ까 봐</strong> (예: 가다 → 갈까 봐, 만들다 → 만들까 봐)</li>
+                            <li data-key="conjugation_rule_2">동사/형용사 어간이 자음으로 끝나면 + <strong>을까 봐</strong> (예: 먹다 → 먹을까 봐, 작다 → 작을까 봐)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice View -->
+            <div id="practice-view" class="hidden">
+                 <div class="card">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" data-key="dialogue_title">대화 예시</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">A</div>
+                            <div class="bg-gray-100 rounded-xl p-3 sm:p-4">
+                                <p class="text-gray-800" data-key="dialogue_a_1">아키라 씨, 발표 준비 잘돼 가요?</p>
+                                <p class="text-sm text-gray-500" data-key="dialogue_a_2">Akira, how are the presentation preparations going?</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-lg">B</div>
+                            <div class="bg-gray-100 rounded-xl p-3 sm:p-4">
+                                <p class="text-gray-800" data-key="dialogue_b_1">준비는 열심히 했는데 <strong>실수할까 봐</strong> 걱정이에요.</p>
+                                <p class="text-sm text-gray-500" data-key="dialogue_b_2">I prepared hard, but I'm worried I'll make a mistake.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4" data-key="examples_title">문장 예시</h2>
+                    <ul class="space-y-4">
+                        <li>
+                            <p class="text-gray-800">내일 소풍 가는데 날씨가 <strong>나쁠까 봐</strong> 걱정이에요.</p>
+                        </li>
+                        <li>
+                            <p class="text-gray-800">비빔밥이 너무 <strong>매울까 봐</strong> 고추장을 조금만 넣었어요.</p>
+                        </li>
+                        <li>
+                            <p class="text-gray-800">어머니가 <strong>걱정하실까 봐</strong> 미리 전화했어요.</p>
+                        </li>
+                         <li>
+                            <p class="text-gray-800">동생이 시험에 <strong>떨어질까 봐</strong> 제가 수학 공부를 도와줬어요.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quiz View -->
+            <div id="quiz-view" class="hidden">
+                <div class="card">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2" data-key="quiz_title">연습 문제</h2>
+                    <p class="text-gray-600 mb-6" data-key="quiz_instruction">괄호 안의 단어를 사용하여 문장을 완성하세요.</p>
+                    <div id="quiz-container"></div>
+                    <div class="mt-6 flex justify-between items-center">
+                        <button id="check-btn" class="btn btn-primary" data-key="check_button">정답 확인</button>
+                        <button id="next-btn" class="btn bg-gray-600 hover:bg-gray-700 hidden" data-key="next_button">다음 문제</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const translations = {
+            ko: {
+                main_title: "문법과 표현 1: A/V-(으)ㄹ까 봐",
+                main_subtitle: "Grammar and Expression 1: A/V-(으)ㄹ까 봐",
+                tab_explanation: "설명",
+                tab_practice: "연습",
+                tab_quiz: "연습 문제",
+                explanation_title: "무엇을 배울까요?",
+                explanation_desc_1: "<strong>-(으)ㄹ까 봐</strong>는 미래의 어떤 일이나 상황에 대해 걱정하거나 우려할 때 사용하는 표현입니다.",
+                explanation_desc_2: "'~할 것 같아서 걱정돼요' 또는 '~할 경우를 대비해서'라는 의미를 가집니다.",
+                conjugation_title: "만드는 법",
+                conjugation_rule_1: "동사/형용사 어간이 모음이나 'ㄹ'로 끝나면 + <strong>ㄹ까 봐</strong> (예: 가다 → 갈까 봐, 만들다 → 만들까 봐)",
+                conjugation_rule_2: "동사/형용사 어간이 자음으로 끝나면 + <strong>을까 봐</strong> (예: 먹다 → 먹을까 봐, 작다 → 작을까 봐)",
+                dialogue_title: "대화 예시",
+                dialogue_a_1: "아키라 씨, 발표 준비 잘돼 가요?",
+                dialogue_a_2: "Akira, how are the presentation preparations going?",
+                dialogue_b_1: "준비는 열심히 했는데 <strong>실수할까 봐</strong> 걱정이에요.",
+                dialogue_b_2: "I prepared hard, but I'm worried I'll make a mistake.",
+                examples_title: "문장 예시",
+                quiz_title: "연습 문제",
+                quiz_instruction: "괄호 안의 단어를 사용하여 문장을 완성하세요.",
+                check_button: "정답 확인",
+                next_button: "다음 문제",
+                feedback_correct: "정답입니다!",
+                feedback_incorrect_template: (answer) => `틀렸어요. 정답은 "${answer}" 입니다.`,
+                quiz_end: "모든 문제를 다 풀었어요! 정말 잘했어요! 👏"
+            },
+            en: {
+                main_title: "Grammar and Expression 1: A/V-(으)ㄹ까 봐",
+                main_subtitle: "",
+                tab_explanation: "Explanation",
+                tab_practice: "Practice",
+                tab_quiz: "Quiz",
+                explanation_title: "What will we learn?",
+                explanation_desc_1: "<strong>-(으)ㄹ까 봐</strong> is an expression used when you are worried or concerned about a future event or situation.",
+                explanation_desc_2: "It means 'I'm worried that...' or 'in case...'.",
+                conjugation_title: "Conjugation",
+                conjugation_rule_1: "Verb/Adjective stem ends in a vowel or 'ㄹ' + <strong>ㄹ까 봐</strong> (e.g., 가다 → 갈까 봐, 만들다 → 만들까 봐)",
+                conjugation_rule_2: "Verb/Adjective stem ends in a consonant + <strong>을까 봐</strong> (e.g., 먹다 → 먹을까 봐, 작다 → 작을까 봐)",
+                dialogue_title: "Dialogue Example",
+                dialogue_a_1: "Akira, how are the presentation preparations going?",
+                dialogue_a_2: "",
+                dialogue_b_1: "I prepared hard, but I'm worried <strong>I'll make a mistake</strong>.",
+                dialogue_b_2: "",
+                examples_title: "Example Sentences",
+                quiz_title: "Practice Quiz",
+                quiz_instruction: "Complete the sentence using the word in parentheses.",
+                check_button: "Check Answer",
+                next_button: "Next Question",
+                feedback_correct: "Correct!",
+                feedback_incorrect_template: (answer) => `Incorrect. The answer is "${answer}".`,
+                quiz_end: "You've completed all the questions! Great job! 👏"
+            },
+            vi: {
+                main_title: "Ngữ pháp và biểu hiện 1: A/V-(으)ㄹ까 봐",
+                main_subtitle: "",
+                tab_explanation: "Giải thích",
+                tab_practice: "Luyện tập",
+                tab_quiz: "Câu đố",
+                explanation_title: "Chúng ta sẽ học gì?",
+                explanation_desc_1: "<strong>-(으)ㄹ까 봐</strong> là biểu hiện được sử dụng khi bạn lo lắng hoặc quan ngại về một sự kiện hoặc tình huống trong tương lai.",
+                explanation_desc_2: "Nó có nghĩa là 'Tôi lo rằng...' hoặc 'phòng khi...'.",
+                conjugation_title: "Cách chia",
+                conjugation_rule_1: "Gốc động từ/tính từ kết thúc bằng nguyên âm hoặc 'ㄹ' + <strong>ㄹ까 봐</strong> (ví dụ: 가다 → 갈까 봐, 만들다 → 만들까 봐)",
+                conjugation_rule_2: "Gốc động từ/tính từ kết thúc bằng phụ âm + <strong>을까 봐</strong> (ví dụ: 먹다 → 먹을까 봐, 작다 → 작을까 봐)",
+                dialogue_title: "Ví dụ hội thoại",
+                dialogue_a_1: "Akira, việc chuẩn bị bài phát biểu thế nào rồi?",
+                dialogue_a_2: "",
+                dialogue_b_1: "Tôi đã chuẩn bị kỹ lưỡng, nhưng tôi lo <strong>sẽ mắc lỗi</strong>.",
+                dialogue_b_2: "",
+                examples_title: "Ví dụ câu",
+                quiz_title: "Câu đố thực hành",
+                quiz_instruction: "Hoàn thành câu bằng cách sử dụng từ trong ngoặc.",
+                check_button: "Kiểm tra đáp án",
+                next_button: "Câu tiếp theo",
+                feedback_correct: "Đúng rồi!",
+                feedback_incorrect_template: (answer) => `Sai rồi. Đáp án là "${answer}".`,
+                quiz_end: "Bạn đã hoàn thành tất cả các câu hỏi! Làm tốt lắm! 👏"
+            },
+            ja: {
+                main_title: "文法と表現 1: A/V-(으)ㄹ까 봐",
+                main_subtitle: "",
+                tab_explanation: "説明",
+                tab_practice: "練習",
+                tab_quiz: "練習問題",
+                explanation_title: "何を学びますか？",
+                explanation_desc_1: "<strong>-(으)ㄹ까 봐</strong>は、未来のある出来事や状況について心配したり、懸念したりするときに使う表現です。",
+                explanation_desc_2: "「〜するかと心配で」または「〜場合に備えて」という意味を持ちます。",
+                conjugation_title: "作り方",
+                conjugation_rule_1: "動詞/形容詞の語幹が母音または「ㄹ」で終わる場合 + <strong>ㄹ까 봐</strong> (例: 가다 → 갈까 봐, 만들다 → 만들까 봐)",
+                conjugation_rule_2: "動詞/形容詞の語幹が子音で終わる場合 + <strong>을까 봐</strong> (例: 먹다 → 먹을까 봐, 작다 → 작을까 봐)",
+                dialogue_title: "会話の例",
+                dialogue_a_1: "あきらさん、発表の準備は順調ですか？",
+                dialogue_a_2: "",
+                dialogue_b_1: "準備は頑張りましたが、<strong>失敗するかと</strong>心配です。",
+                dialogue_b_2: "",
+                examples_title: "例文",
+                quiz_title: "練習問題",
+                quiz_instruction: "括弧内の単語を使って文章を完成させてください。",
+                check_button: "正解確認",
+                next_button: "次の問題",
+                feedback_correct: "正解です！",
+                feedback_incorrect_template: (answer) => `不正解です。正解は「${answer}」です。`,
+                quiz_end: "すべての問題を完了しました！お疲れ様でした！👏"
+            },
+            zh: {
+                main_title: "语法与表达 1: A/V-(으)ㄹ까 봐",
+                main_subtitle: "",
+                tab_explanation: "说明",
+                tab_practice: "练习",
+                tab_quiz: "练习题",
+                explanation_title: "我们将学习什么？",
+                explanation_desc_1: "<strong>-(으)ㄹ까 봐</strong> 是一个用于表达对未来某事或情况的担心或忧虑的表达方式。",
+                explanation_desc_2: "它的意思是“我担心会...”或“以防...”。",
+                conjugation_title: "构成方法",
+                conjugation_rule_1: "动词/形容词词干以元音或 'ㄹ' 结尾 + <strong>ㄹ까 봐</strong> (例如: 가다 → 갈까 봐, 만들다 → 만들까 봐)",
+                conjugation_rule_2: "动词/形容词词干以辅音结尾 + <strong>을까 봐</strong> (例如: 먹다 → 먹을까 봐, 작다 → 작을까 봐)",
+                dialogue_title: "对话示例",
+                dialogue_a_1: "Akira，发表准备得怎么样了？",
+                dialogue_a_2: "",
+                dialogue_b_1: "虽然很努力地准备了，但<strong>担心会失误</strong>。",
+                dialogue_b_2: "",
+                examples_title: "例句",
+                quiz_title: "练习题",
+                quiz_instruction: "请使用括号中的单词完成句子。",
+                check_button: "确认答案",
+                next_button: "下一题",
+                feedback_correct: "回答正确！",
+                feedback_incorrect_template: (answer) => `回答错误。正确答案是“${answer}”。`,
+                quiz_end: "你已经完成了所有问题！做得好！👏"
+            }
+        };
+
+        const quizData = [
+            // Adjectives
+            { type: "형용사", base: "덥다", sentence: "날씨가 (덥다) ___ 에어컨을 켰어요.", answer: "더울까 봐" },
+            { type: "형용사", base: "짜다", sentence: "음식이 (짜다) ___ 물을 많이 마셨어요.", answer: "짤까 봐" },
+            { type: "형용사", base: "복잡하다", sentence: "길이 (복잡하다) ___ 지하철을 탔어요.", answer: "복잡할까 봐" },
+            // Verbs
+            { type: "동사", base: "오다", sentence: "비가 (오다) ___ 우산을 가져왔어요.", answer: "올까 봐" },
+            { type: "동사", base: "기다리다", sentence: "사람들이 (기다리다) ___ 서둘러서 갔어요.", answer: "기다릴까 봐" },
+            { type: "동사", base: "잊어버리다", sentence: "약속을 (잊어버리다) ___ 달력에 표시했어요.", answer: "잊어버릴까 봐" },
+        ];
+
+        let currentQuestionIndex = 0;
+        let currentLang = 'ko';
+
+        const quizContainer = document.getElementById('quiz-container');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const langSelector = document.getElementById('lang-selector');
+
+        function changeView(viewId) {
+            document.querySelectorAll('main > div').forEach(view => view.classList.add('hidden'));
+            document.getElementById(`${viewId}-view`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="changeView('${viewId}')"]`).classList.add('active');
+            
+            if (viewId === 'quiz') {
+                currentQuestionIndex = 0;
+                loadQuestion();
+            }
+        }
+
+        function changeLanguage() {
+            currentLang = langSelector.value;
+            const langData = translations[currentLang];
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.dataset.key;
+                if (langData[key]) {
+                    el.innerHTML = langData[key];
+                }
+            });
+        }
+        
+        function loadQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            quizContainer.innerHTML = `
+                <p class="text-sm font-bold text-indigo-600 mb-2">${currentQuestion.type}</p>
+                <p class="text-lg text-gray-800 mb-3">${currentQuestionIndex + 1}. ${currentQuestion.sentence}</p>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="user-answer" class="quiz-input flex-grow" placeholder="...">
+                </div>
+                <div id="feedback-container" class="feedback"></div>
+            `;
+            const input = document.getElementById('user-answer');
+            input.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') checkAnswer();
+            });
+            input.focus();
+            hideFeedback();
+            nextBtn.classList.add('hidden');
+            checkBtn.classList.remove('hidden');
+        }
+        
+        function hideFeedback() {
+             const feedbackContainer = document.getElementById('feedback-container');
+             feedbackContainer.textContent = '';
+             feedbackContainer.className = 'feedback';
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('user-answer').value.trim();
+            const correctAnswer = quizData[currentQuestionIndex].answer;
+            const feedbackContainer = document.getElementById('feedback-container');
+            const langData = translations[currentLang];
+
+            if (userAnswer === correctAnswer) {
+                feedbackContainer.textContent = langData.feedback_correct;
+                feedbackContainer.className = 'feedback feedback-correct';
+            } else {
+                feedbackContainer.innerHTML = langData.feedback_incorrect_template(correctAnswer);
+                feedbackContainer.className = 'feedback feedback-incorrect';
+            }
+            nextBtn.classList.remove('hidden');
+            checkBtn.classList.add('hidden');
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                quizContainer.innerHTML = `
+                    <p class="text-xl font-bold text-center text-indigo-600">${translations[currentLang].quiz_end}</p>
+                `;
+                checkBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
+        }
+        
+        langSelector.addEventListener('change', changeLanguage);
+        checkBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+
+        // Initial load
+        window.onload = () => {
+            changeLanguage();
+            changeView('explanation');
+        };
+    </script>
+</body>
+</html>
+
+
