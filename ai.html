@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인공지능을 활용하여 글쓰기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. RESET & SETUP */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1e293b; /* Dark Slate Background for the page */
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr;
+            margin: 0;
+            min-height: 100vh;
+            padding: 20px 0;
+            place-items: center;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* 2. SLIDE CONTAINER */
+        .slide-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            height: 720px; /* Fixed Height */
+            justify-content: center;
+            overflow: hidden;
+            padding: 60px;
+            position: relative;
+            width: 1280px; /* Fixed Width */
+            color: #334155;
+        }
+
+        /* Dark Theme Slide Variant */
+        .slide-container.dark-theme {
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc;
+        }
+
+        /* Decorative Background Elements (Abstract Shapes) */
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            top: -100px;
+            right: -100px;
+            z-index: 0;
+        }
+
+        .slide-container.dark-theme::before {
+            opacity: 0.15;
+        }
+
+        .slide-container > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 3. TYPOGRAPHY */
+        h1, h2, h3 {
+            margin: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 72px;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+        
+        .dark-theme h1 {
+            color: #ffffff;
+        }
+
+        /* Slide Title (h2) */
+        .slide-title {
+            font-size: 48px;
+            color: #0f172a;
+            margin-bottom: 40px;
+            text-align: left;
+            width: 100%;
+            border-left: 6px solid #0ea5e9;
+            padding-left: 20px;
+        }
+
+        .dark-theme .slide-title {
+            color: #ffffff;
+            border-left-color: #38bdf8;
+        }
+
+        h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        .dark-theme h3 {
+            color: #e2e8f0;
+        }
+
+        p, li {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #475569;
+        }
+
+        .dark-theme p, .dark-theme li {
+            color: #cbd5e1;
+        }
+
+        /* 4. LAYOUTS */
+        
+        /* Flex Grow Content Area */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Title Slide Layout */
+        .title-slide-layout {
+            text-align: center;
+            z-index: 2;
+        }
+        
+        .title-slide-layout .subtitle {
+            font-size: 32px;
+            color: #0ea5e9;
+            font-weight: 500;
+        }
+
+        /* Section Title Layout */
+        .section-title-layout {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .section-title-layout h2 {
+            font-size: 64px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .section-title-layout p {
+            font-size: 24px;
+            color: #bae6fd;
+            max-width: 800px;
+        }
+
+        .section-title-layout hr {
+            width: 100px;
+            height: 4px;
+            background-color: #38bdf8;
+            border: none;
+            margin: 30px 0;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            width: 100%;
+            align-items: center; /* Center vertically */
+        }
+        
+        .two-column.tiled {
+            align-items: stretch;
+        }
+
+        .two-column.tiled > div {
+            background-color: #f1f5f9;
+            padding: 40px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dark-theme .two-column.tiled > div {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        /* Image Wrapper */
+        .image-wrapper {
+            width: 100%;
+            height: 400px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Default for layouts with content */
+            background-color: #f8fafc;
+        }
+
+        /* Bleed Image Layout */
+        .slide-container.bleed-image-layout {
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+        }
+
+        .slide-container.bleed-image-layout > .content-container {
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .slide-container.bleed-image-layout > .image-container {
+            height: 100%;
+            width: 100%;
+        }
+
+        .slide-container.bleed-image-layout img.bleed-image-side {
+            width: 100%;
+            height: 100%;
+            max-height: 720px;
+            object-fit: cover;
+        }
+
+        /* Tiled Text with Icons */
+        .tiled-content {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .tile {
+            flex: 1;
+            background-color: #f8fafc;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dark-theme .tile {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+
+        .tile .icon {
+            font-size: 40px;
+            color: #0ea5e9;
+            margin-bottom: 20px;
+            background-color: rgba(14, 165, 233, 0.1);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Styled Bullet Points */
+        .styled-bullets ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .styled-bullets li {
+            background-color: #f1f5f9;
+            padding: 25px;
+            border-radius: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 0; /* Override default */
+        }
+        
+        .dark-theme .styled-bullets li {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        .styled-bullets i {
+            color: #0ea5e9;
+            font-size: 24px;
+            margin-top: 4px;
+        }
+
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            padding: 20px;
+        }
+
+        .bar-chart-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .bar-label {
+            width: 150px;
+            text-align: right;
+            padding-right: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .bar-track {
+            flex-grow: 1;
+            background-color: #e2e8f0;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .dark-theme .bar-track {
+            background-color: #334155;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Quote Layout */
+        .quote-layout blockquote {
+            font-size: 40px;
+            font-style: italic;
+            text-align: center;
+            color: #0f172a;
+            position: relative;
+            padding: 40px;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .dark-theme .quote-layout blockquote {
+            color: #ffffff;
+        }
+
+        .quote-layout cite {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            color: #0ea5e9;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Q&A */
+        .qa-layout {
+            text-align: center;
+        }
+        
+        .qa-layout h2 {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #0ea5e9;
+        }
+
+        /* 5. PRINT SUPPORT & DOWNLOAD BUTTON */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            body {
+                background-color: white;
+                display: block;
+                padding: 0;
+                margin: 0;
+            }
+
+            .slide-container {
+                page-break-after: always; /* Force new page for each slide */
+                break-inside: avoid;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                -webkit-print-color-adjust: exact; /* Preserve colors/images */
+                print-color-adjust: exact;
+            }
+
+            /* Hide the print button in the PDF */
+            .print-button {
+                display: none !important;
+            }
+        }
+
+        /* Floating Download/Print Button */
+        .print-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4);
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 1000;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .print-button:hover {
+            transform: translateY(-2px);
+            background-color: #0284c7;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Title Slide -->
+    <div class="slide-container dark-theme" id="slide1">
+        <div class="content-area title-slide-layout">
+            <h1 style="font-size: 80px; margin-bottom: 30px;">인공지능을 활용하여<br>글쓰기</h1>
+            <p class="subtitle">창의성과 효율성의 새로운 시대</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Section Title -->
+    <div class="slide-container dark-theme" id="slide2">
+        <div class="section-title-layout">
+            <hr>
+            <h2>인공지능 글쓰기의 이해</h2>
+            <p>대규모 언어 모델과 자연어 처리 기술의 융합</p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Slide 3: Bleed Image Right (How it Works) -->
+    <div class="slide-container bleed-image-layout" id="slide3">
+        <div class="content-container">
+            <h2 class="slide-title">작동 원리</h2>
+            <div class="content-area">
+                <p>인공지능은 수십억 개의 텍스트 데이터를 학습하여 단어와 문장의 <strong>확률적 관계</strong>를 파악합니다.</p>
+                <p>이를 통해 단순한 단어 조합을 넘어, 문맥을 이해하고 사람처럼 자연스러운 문장을 생성하거나 교정할 수 있습니다.</p>
+                <p style="color: #0ea5e9; font-weight: 600; margin-top: 20px;">핵심 기술: 신경망 및 트랜스포머</p>
+            </div>
+        </div>
+        <div class="image-container">
+            <img class="bleed-image-side" src="http://googleusercontent.com/image_collection/image_retrieval/16830183467628399585" alt="신경망과 데이터 처리를 표현한 추상적인 디지털 이미지">
+        </div>
+    </div>
+
+    <!-- Slide 4: Tiled Text With Icons (Use Cases) -->
+    <div class="slide-container" id="slide4">
+        <h2 class="slide-title">주요 활용 분야</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-lightbulb"></i></div>
+                    <h3>아이디어 구상</h3>
+                    <p>브레인스토밍, 주제 선정, 개요 작성 등 창작의 초기 단계를 지원하여 '빈 페이지 공포'를 해소합니다.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-pen-nib"></i></div>
+                    <h3>초안 작성</h3>
+                    <p>블로그 포스팅, 이메일, 보고서 등 다양한 형식의 글을 사용자의 요구에 맞춰 빠르게 생성합니다.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-check-double"></i></div>
+                    <h3>교정 및 편집</h3>
+                    <p>단순한 맞춤법 검사를 넘어, 문체 변경, 요약, 가독성 개선 등 전문적인 편집 기능을 제공합니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Two Column Tiled Text (Major Tools) -->
+    <div class="slide-container dark-theme" id="slide5">
+        <h2 class="slide-title">주요 인공지능 글쓰기 도구</h2>
+        <div class="content-area">
+            <div class="two-column tiled">
+                <div>
+                    <h3 style="color: #38bdf8;"><i class="fa-solid fa-robot" style="margin-right: 10px;"></i> 생성형 인공지능</h3>
+                    <p style="font-weight: bold; margin-bottom: 5px; color: #fff;">챗GPT, 제미나이, 클로드</p>
+                    <p>대화형 인터페이스를 통해 질문에 답하거나, 창의적인 스토리텔링, 코드 작성, 긴 글 쓰기에 강점을 보입니다.</p>
+                </div>
+                <div>
+                    <h3 style="color: #38bdf8;"><i class="fa-solid fa-file-pen" style="margin-right: 10px;"></i> 보조형 인공지능</h3>
+                    <p style="font-weight: bold; margin-bottom: 5px; color: #fff;">그래머리, 재스퍼</p>
+                    <p>문법 교정, 마케팅 카피라이팅 최적화, 비즈니스 이메일 작성 등 특정 목적과 효율성에 특화되어 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Bar Chart (Efficiency) -->
+    <div class="slide-container" id="slide6">
+        <h2 class="slide-title">업무 시간 단축 효과</h2>
+        <div class="content-area">
+            <div class="chart-container">
+                <!-- Row 1: Research -->
+                <div class="bar-chart-row">
+                    <div class="bar-label">자료 조사</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 85%;">85% 단축</div>
+                    </div>
+                </div>
+                <!-- Row 2: Drafting -->
+                <div class="bar-chart-row">
+                    <div class="bar-label">초안 작성</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 70%;">70% 단축</div>
+                    </div>
+                </div>
+                <!-- Row 3: Editing -->
+                <div class="bar-chart-row">
+                    <div class="bar-label">교정/편집</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: 50%;">50% 단축</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 30px; font-style: italic; color: #64748b;">* 인공지능 도구 활용 시 평균적인 업무 시간 절감 비율</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Styled Bullet Points (Benefits) -->
+    <div class="slide-container" id="slide7">
+        <h2 class="slide-title">도입의 이점</h2>
+        <div class="content-area">
+            <div class="styled-bullets">
+                <ul>
+                    <li>
+                        <i class="fa-solid fa-bolt"></i>
+                        <div>
+                            <strong>생산성 향상</strong>
+                            <p style="font-size: 16px; margin-bottom: 0;">단순 반복적인 작성 업무를 자동화하여 전략적 사고에 집중할 시간을 확보합니다.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-star"></i>
+                        <div>
+                            <strong>창의성 확장</strong>
+                            <p style="font-size: 16px; margin-bottom: 0;">다양한 관점과 아이디어를 즉각적으로 제안받아 창작의 한계를 넓힙니다.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-arrow-up-right-dots"></i>
+                        <div>
+                            <strong>품질 개선</strong>
+                            <p style="font-size: 16px; margin-bottom: 0;">정확한 문법 교정과 어휘 추천을 통해 글의 완성도와 전문성을 높입니다.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-language"></i>
+                        <div>
+                            <strong>다국어 지원</strong>
+                            <p style="font-size: 16px; margin-bottom: 0;">실시간 번역 및 다국어 콘텐츠 제작을 통해 글로벌 소통 능력을 강화합니다.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Image Right Text Left (Challenges) -->
+    <div class="slide-container" id="slide8">
+        <h2 class="slide-title">주의사항 및 윤리</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; margin-top: 5px;"></i>
+                            <span><strong>할루시네이션(환각):</strong> 인공지능이 사실이 아닌 정보를 그럴듯하게 생성할 수 있으므로 팩트 체크가 필수입니다.</span>
+                        </li>
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <i class="fa-solid fa-copyright" style="color: #ef4444; margin-top: 5px;"></i>
+                            <span><strong>저작권 및 표절:</strong> 학습 데이터의 출처 문제와 생성물의 저작권 귀속 여부에 대한 법적/윤리적 논의가 필요합니다.</span>
+                        </li>
+                        <li style="display: flex; gap: 15px; align-items: flex-start;">
+                            <i class="fa-solid fa-user-shield" style="color: #ef4444; margin-top: 5px;"></i>
+                            <span><strong>인간성 유지:</strong> 인공지능에 과도하게 의존하기보다는, 인간 고유의 감성과 비판적 사고를 더해야 합니다.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="image-wrapper">
+                     <img src="http://googleusercontent.com/image_collection/image_retrieval/10636742882773798530" alt="인간의 창의성과 인공지능 윤리의 균형을 표현한 개념 예술" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Quote -->
+    <div class="slide-container dark-theme" id="slide9">
+        <div class="content-area quote-layout">
+            <i class="fa-solid fa-quote-left" style="font-size: 40px; color: #38bdf8; margin-bottom: 20px;"></i>
+            <blockquote>
+                "인공지능은 작가를 대체하는 것이 아니라,<br>작가의 능력을 증강시키는 도구입니다."
+            </blockquote>
+            <cite>인간과 인공지능의 협업</cite>
+        </div>
+    </div>
+
+    <!-- Slide 10: Q&A -->
+    <div class="slide-container dark-theme" id="slide10">
+        <div class="content-area qa-layout">
+            <h2>질의응답</h2>
+            <p>인공지능 글쓰기에 대해 궁금한 점을 자유롭게 질문해주세요.</p>
+        </div>
+    </div>
+
+    <!-- Download/Print Button -->
+    <button class="print-button" onclick="window.print()">
+        <i class="fa-solid fa-file-pdf"></i> PDF로 저장 / 인쇄
+    </button>
+
+</body>
+</html>
+
+
