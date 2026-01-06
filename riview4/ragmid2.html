@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>한국어 읽기 연습 (지문 활용)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f3f4f6;
+        }
+        .correct { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
+        .incorrect { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+        .vietnamese { color: #64748b; font-size: 0.82rem; line-height: 1.4; margin-top: 4px; border-left: 2px solid #cbd5e1; padding-left: 8px; }
+        .blank-title { color: #2563eb; font-weight: 700; border: 2px dashed #2563eb; padding: 4px 12px; border-radius: 6px; background-color: #eff6ff; display: inline-block; }
+        .passage-box { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-top: 16px; font-size: 0.95rem; line-height: 1.7; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .option-btn { transition: all 0.1s; border-width: 2px; }
+        .option-btn:active { transform: scale(0.98); }
+        .highlight-blue { color: #2563eb; font-weight: 700; text-decoration: underline; }
+        .highlight-yellow { background-color: #fef08a; padding: 0 4px; border-radius: 4px; font-weight: 700; color: #854d0e; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <div id="app" class="w-full max-w-md bg-white min-h-screen shadow-2xl flex flex-col relative">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-5 text-white sticky top-0 z-30 shadow-md">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-lg font-bold">한국어 읽기 실전 퀴즈</h1>
+                    <p class="text-indigo-200 text-[10px] uppercase tracking-wider">Reading Comprehension Practice</p>
+                </div>
+                <button id="view-text-btn" class="bg-white/20 px-3 py-2 rounded-lg text-xs font-bold border border-white/30 active:bg-white/40 transition">
+                    📂 전체 지문 (Xem bài)
+                </button>
+            </div>
+            <div class="mt-4 bg-indigo-900/40 rounded-full h-1 w-full overflow-hidden">
+                <div id="progress-bar" class="bg-yellow-400 h-1 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="flex-grow p-5 pb-24 overflow-y-auto">
+            <div id="question-area">
+                <div class="flex justify-between items-center mb-4">
+                    <span id="question-category" class="text-indigo-600 text-[10px] font-black uppercase bg-indigo-50 px-2 py-1 rounded">CATEGORY</span>
+                    <span id="q-count" class="text-xs font-bold text-gray-400 font-mono">01/12</span>
+                </div>
+                
+                <!-- Question Section -->
+                <div class="mb-6">
+                    <h2 id="question-title" class="text-base font-bold text-gray-800 leading-tight"></h2>
+                    <p id="question-title-vn" class="vietnamese italic mb-4"></p>
+                    
+                    <div id="body-display-area">
+                        <!-- Content Injected Here -->
+                    </div>
+                </div>
+                
+                <div id="options-grid" class="space-y-3 mt-6">
+                    <!-- Options -->
+                </div>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-area" class="hidden mt-8 p-5 rounded-2xl border-2 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div class="flex items-center mb-2">
+                    <span id="feedback-icon" class="text-2xl mr-2"></span>
+                    <p id="feedback-status" class="font-bold text-base"></p>
+                </div>
+                <p id="feedback-rationale" class="text-gray-700 text-sm mb-1"></p>
+                <div id="feedback-rationale-vn" class="vietnamese font-normal border-none"></div>
+                <button id="next-btn" class="mt-6 w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg active:bg-indigo-700">
+                    다음 문제 (Tiếp theo)
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-container" class="hidden flex-grow flex flex-col items-center justify-center p-10 text-center">
+            <div class="text-7xl mb-6" id="result-emoji">🎉</div>
+            <h2 class="text-2xl font-bold text-gray-800">테스트 종료</h2>
+            <p class="text-gray-500 text-sm mt-1">지문을 완벽하게 이해하셨습니다!</p>
+            <div class="text-5xl font-black text-indigo-600 my-10">
+                <span id="final-score">0</span> / 12
+            </div>
+            <button onclick="location.reload()" class="bg-indigo-600 text-white w-full py-4 rounded-2xl font-bold shadow-xl active:bg-indigo-700">다시 하기 (Làm lại)</button>
+        </div>
+
+        <!-- Full Text Modal -->
+        <div id="text-modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[80vh] flex flex-col shadow-2xl relative">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">전체 지문 보기 (Xem bài đọc)</h3>
+                    <button id="close-modal-btn" class="p-2 text-gray-400 bg-gray-100 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div id="modal-content" class="p-8 overflow-y-auto text-sm leading-loose text-gray-700 whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passages = [
+            { id: 1, title: "사랑의 언어", template: "다섯 가지 사랑의 언어는 말, 선물, 스킨십, 봉사, 그리고 시간 함께 보내기이다. \n\n사랑의 언어가 말인 사람은 ‘사랑해’, ‘넌 정말 좋은 사람이야’ 등의 칭찬이나 격려의 말을 해 주면 사랑받고 있다고 느낀다. 어떤 사람들은 선물이 사랑을 표현하는 방법이라고 생각해서 항상 크고 작은 선물을 주고받는 것을 좋아한다. \n\n스킨십이 사랑의 언어인 사람들은 손을 잡거나 팔짱을 끼는 것만으로도 행복해진다. 하지만 어떤 사람은 손을 잡거나 선물을 받는 것보다 상대방과 함께 시간을 보내는 것을 좋아한다. \n\n어떤 사람들은 상대방이 자기를 도와줄 때 사랑을 느낀다. ㉠이들은 사랑하는 사람이 생기면 말없이 요리나 청소 등을 해 주는 것으로 사랑을 표현한다." },
+            { id: 2, title: "크로스핏(CrossFit)", template: "‘크로스핏’은 달리기나 줄넘기, 역도 같은 여러 가지 운동을 섞어서 만든 운동 프로그램이다. 이 운동은 몸의 여러 부분을 골고루 쓰기 때문에 다이어트와 몸매 만들기에 효과적이다. \n\n‘크로스핏’ 운동 방법의 예는 다음과 같다. 먼저 팔굽혀펴기를 한 후 역기를 든다. 처음에는 가벼운 역기로 시작하지만 점점 무거운 역기로 바꿔서 ( ㉠ ) 동작을 반복한다. \n\n그 다음에 윗몸 일으키기를 한 후 철봉에 매달리거나 작은 덤벨을 들고 팔을 올렸다가 내리는 동작을 여러 번 한다." },
+            { id: 3, title: "교수님에게 문의 이메일", template: "교수님, 안녕하십니까? 저는 히엔이라고 합니다. \n\n숙제 제출 날짜를 물어보려고 메일을 씁니다. 숙제는 다음 주에 ( ㉠ )? \n\n답장을 ( ㉡ ). 안녕히 계십시오." },
+            { id: 4, title: "청첩장 내용", template: "드디어 결혼합니다. \n\n두 사람이 만나서 하나가 되었습니다. 오랜 연애 끝에 저희가 ( ㉠ ). 바쁘시겠지만 꼭 ( ㉡ ). \n\n 신랑 : 김철수   신부 : 이영희 \n 일시 : 12월 25일 오후 2시 \n 장소 : 행복웨딩홀" }
+        ];
+
+        const quizData = [
+            // 지문 1: 사랑의 언어 (분량 확대)
+            { 
+                pid: 1, 
+                q: "빈칸 ( ㉠ )에 알맞은 말은 무엇입니까?", 
+                vn: "Hãy chọn từ thích hợp cho khoảng trống ( ㉠ ).", 
+                displayType: "blank", 
+                body: "다섯 가지 사랑의 언어는 말, 선물, 스킨십, 봉사, 그리고 ( ㉠ )이다. 사랑의 언어가 말인 사람은 칭찬이나 격려의 말을 들을 때 사랑받는다고 느낀다. 반면 스킨십이 사랑의 언어인 사람들은 손을 잡는 것만으로도 행복해진다.", 
+                options: ["시간 함께 보내기", "혼자 여행하기", "편지 쓰기", "돈 모으기"], 
+                ans: "시간 함께 보내기", 
+                rat: "지문 도입부에서 제시된 5가지 사랑의 언어 중 마지막 요소입니다.", 
+                ratVn: "Là yếu tố cuối cùng trong 5 ngôn ngữ tình yêu được nêu ở đầu bài." 
+            },
+            { 
+                pid: 1, 
+                q: "밑줄 친 ㉠‘이들은’이 가리키는 사람은?", 
+                vn: "Cụm từ 'Những người này' chỉ ai?", 
+                displayType: "blank", 
+                body: "어떤 사람은 선물을 받는 것보다 상대방과 함께 시간을 보내는 것을 좋아한다. 어떤 사람들은 상대방이 자기를 도와줄 때 사랑을 느낀다. [ ㉠이들은 ] 사랑하는 사람이 생기면 요리나 청소 등을 해 주는 것으로 사랑을 표현한다.", 
+                options: ["봉사가 사랑의 언어인 사람", "선물을 좋아하는 사람", "말을 잘하는 사람", "함께 있는 것을 좋아하는 사람"], 
+                ans: "봉사가 사랑의 언어인 사람", 
+                rat: "상대방을 도와주는 행위(요리, 청소)를 통해 사랑을 표현하는 '봉사' 유형을 말합니다.", 
+                ratVn: "Chỉ nhóm người 'phục vụ' thể hiện tình yêu qua việc giúp đỡ (nấu ăn, dọn dẹp)." 
+            },
+            { 
+                pid: 1, 
+                q: "말이 사랑의 언어인 사람에 대한 올바른 설명은?", 
+                vn: "Đâu là giải thích đúng về người có ngôn ngữ tình yêu là 'lời nói'?", 
+                displayType: "inline", 
+                body: "다섯 가지 사랑의 언어는 저마다 다릅니다. 사랑의 언어가 말인 사람은 ‘사랑해’, ‘넌 정말 좋은 사람이야’ 같은 (      )을 들을 때 사랑받고 있다고 느낍니다. 하지만 어떤 사람은 선물이나 스킨십을 더 중요하게 생각하기도 합니다.", 
+                options: ["칭찬이나 격려의 말", "비싼 선물", "따뜻한 포옹", "맛있는 음식"], 
+                ans: "칭찬이나 격려의 말", 
+                rat: "사랑한다는 고백이나 좋은 사람이라는 칭찬은 긍정적인 격려에 해당합니다.", 
+                ratVn: "Lời tỏ tình hay lời khen ngợi là người tốt thuộc về sự khích lệ tích cực." 
+            },
+
+            // 지문 2: 크로스핏 (분량 확대)
+            { 
+                pid: 2, 
+                q: "크로스핏의 특징에 대한 설명으로 알맞은 빈칸은?", 
+                vn: "Điền vào khoảng trống giải thích về đặc điểm của CrossFit.", 
+                displayType: "inline", 
+                body: "‘크로스핏’은 달리기나 줄넘기, 역도 같은 여러 가지 운동을 섞어서 만든 프로그램이다. 이 운동은 몸의 여러 부분을 (      ) 쓰기 때문에 다이어트와 몸매 만들기에 효과적이다. 운동 방법의 예로는 팔굽혀펴기, 역기 들기 등이 있다.", 
+                options: ["골고루", "한쪽만", "머리만", "다리만"], 
+                ans: "골고루", 
+                rat: "여러 운동을 섞어서 신체 전체를 균형 있게 사용한다는 뜻입니다.", 
+                ratVn: "Nghĩa là sử dụng toàn bộ cơ thể một cách cân bằng bằng cách kết hợp nhiều bài tập." 
+            },
+            { 
+                pid: 2, 
+                q: "빈칸 ( ㉠ )에 들어갈 적절한 동작은 무엇입니까?", 
+                vn: "Động tác nào phù hợp để điền vào khoảng trống ( ㉠ )?", 
+                displayType: "blank", 
+                body: "먼저 팔굽혀펴기를 한 후 역기를 든다. 처음에는 가벼운 역기로 시작하지만 점점 무거운 역기로 바꿔서 [ ㉠ ] 동작을 반복한다. 그 다음에 윗몸 일으키기를 한 후 철봉에 매달리기도 한다.", 
+                options: ["팔을 굽혔다 펴는", "발을 높이 드는", "숨을 깊이 참는", "빠르게 달려가는"], 
+                ans: "팔을 굽혔다 펴는", 
+                rat: "역기를 들고 내릴 때 팔 근육을 굽혔다 펴는 운동 원리를 설명합니다.", 
+                ratVn: "Giải thích nguyên lý tập luyện gập và duỗi cơ tay khi nâng và hạ tạ." 
+            },
+            { 
+                pid: 2, 
+                q: "본문에 언급된 크로스핏 운동의 종류가 아닌 것은?", 
+                vn: "Môn nào KHÔNG được nhắc đến trong bài tập CrossFit?", 
+                displayType: "inline", 
+                body: "크로스핏은 달리기나 줄넘기, 역도 같은 여러 운동을 섞어서 만든 프로그램이다. 먼저 팔굽혀펴기와 역기 들기를 한다. 그 다음에 윗몸 일으키기를 한 후 철봉에 매달리거나 덤벨 운동을 한다.", 
+                options: ["수영", "줄넘기", "팔굽혀펴기", "윗몸 일으키기"], 
+                ans: "수영", 
+                rat: "지문에 달리기, 줄넘기, 역도, 팔굽혀펴기 등은 나오지만 수영은 언급되지 않았습니다.", 
+                ratVn: "Trong bài có nhắc đến chạy, nhảy dây, tạ, chống đẩy nhưng không có bơi lội." 
+            },
+
+            // 지문 3: 이메일
+            { pid: 3, q: "히엔 씨가 이메일을 쓴 목적은?", vn: "Mục đích Hien viết email là gì?", displayType: "inline", body: "교수님, 안녕하십니까? 저는 히엔이라고 합니다. 숙제 제출 날짜를 물어보려고 메일을 씁니다. 숙제는 다음 주에 ( ㉠ )? 답장을 ( ㉡ ).", options: ["숙제 제출 날짜를 물어보려고", "시험 성적을 확인하려고", "수업을 취소하려고", "고향 선물을 전해 드리려고"], ans: "숙제 제출 날짜를 물어보려고", rat: "본문에 '숙제 제출 날짜를 물어보려고'라고 명시되어 있습니다.", ratVn: "Trong bài có ghi rõ 'để hỏi về ngày nộp bài tập'." },
+            { pid: 3, q: "빈칸 ( ㉠ )에 들어갈 적합한 표현은?", vn: "Đáp án cho khoảng trống ( ㉠ ) là gì?", displayType: "blank", body: "저는 히엔이라고 합니다. 숙제 제출 날짜를 물어보려고 메일을 씁니다. 숙제는 다음 주에 [ ㉠ ]? 답장을 ( ㉡ ).", options: ["제출해도 됩니까", "어디에 있습니까", "함께 합시다", "먼저 하십시오"], ans: "제출해도 됩니까", rat: "제출 날짜를 문의하는 정중한 질문 형태입니다.", ratVn: "Dạng câu hỏi lịch sự để hỏi về ngày nộp bài." },
+            { pid: 3, q: "빈칸 ( ㉡ )에 들어갈 정답은?", vn: "Đáp án cho khoảng trống ( ㉡ ) là gì?", displayType: "blank", body: "숙제 제출 날짜를 물어보려고 메일을 씁니다. 숙제는 다음 주에 ( ㉠ )? 답장을 [ ㉡ ]. 안녕히 계십시오.", options: ["기다리겠습니다", "안 하겠습니다", "벌써 했습니다", "안 받겠습니다"], ans: "기다리겠습니다", rat: "이메일 마무리 시 상대방의 답신을 바라는 표현입니다.", ratVn: "Cách diễn đạt mong chờ phản hồi của đối phương khi kết thúc email." },
+
+            // 지문 4: 청첩장
+            { pid: 4, q: "이 글의 성격으로 가장 알맞은 것은?", vn: "Tính chất của văn bản này là gì?", displayType: "inline", body: "드디어 결혼합니다. 두 사람이 만나서 하나가 되었습니다. 오랜 연애 끝에 저희가 ( ㉠ ). 바쁘시겠지만 꼭 ( ㉡ ).", options: ["청첩장", "사과문", "감사 편지", "광고 전단지"], ans: "청첩장", rat: "두 사람의 결혼 소식을 알리고 초대하는 글입니다.", ratVn: "Văn bản thông báo tin mừng và mời dự đám cưới của hai người." },
+            { pid: 4, q: "빈칸 ( ㉠ )에 들어갈 알맞은 말은?", vn: "Đáp án cho khoảng trống ( ㉠ ) là gì?", displayType: "blank", body: "두 사람이 만나서 하나가 되었습니다. 오랜 연애 끝에 저희가 [ ㉠ ]. 바쁘시겠지만 꼭 ( ㉡ ).", options: ["결혼을 합니다", "이별을 합니다", "싸움을 합니다", "취직을 합니다"], ans: "결혼을 합니다", rat: "전체 글의 주제인 '결혼'을 나타내는 핵심 표현입니다.", ratVn: "Cách diễn đạt trọng tâm thể hiện chủ đề 'kết hôn' của toàn bài." },
+            { pid: 4, q: "빈칸 ( ㉡ )에 들어갈 적절한 요청은?", vn: "Đáp án cho khoảng trống ( ㉡ ) là gì?", displayType: "blank", body: "오랜 연애 끝에 저희가 ( ㉠ ). 바쁘시겠지만 꼭 [ ㉡ ].  일시 : 12월 25일 오후 2시", options: ["참석해 주시기 바랍니다", "오지 마시기 바랍니다", "잊어버리시기 바랍니다", "전화하시기 바랍니다"], ans: "참석해 주시기 바랍니다", rat: "결혼식 일시를 알리며 하객의 방문을 정중히 요청하는 말입니다.", ratVn: "Lời mời lịch sự mong khách khứa đến dự khi thông báo ngày giờ đám cưới." }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        const viewBtn = document.getElementById('view-text-btn');
+        const catEl = document.getElementById('question-category');
+        const qCountEl = document.getElementById('q-count');
+        const qTitleEl = document.getElementById('question-title');
+        const qTitleVnEl = document.getElementById('question-title-vn');
+        const bodyArea = document.getElementById('body-display-area');
+        const optionsGrid = document.getElementById('options-grid');
+        const fbArea = document.getElementById('feedback-area');
+        const fbStatus = document.getElementById('feedback-status');
+        const fbIcon = document.getElementById('feedback-icon');
+        const fbRat = document.getElementById('feedback-rationale');
+        const fbRatVn = document.getElementById('feedback-rationale-vn');
+        const nextBtn = document.getElementById('next-btn');
+        const progBar = document.getElementById('progress-bar');
+        const quizCont = document.getElementById('quiz-container');
+        const resCont = document.getElementById('result-container');
+        const finalScoreEl = document.getElementById('final-score');
+        const modal = document.getElementById('text-modal');
+        const modalContent = document.getElementById('modal-content');
+
+        function render() {
+            const data = quizData[currentIdx];
+            const passage = passages.find(p => p.id === data.pid);
+            
+            catEl.textContent = passage.title;
+            qCountEl.textContent = `${(currentIdx + 1).toString().padStart(2, '0')}/${quizData.length.toString().padStart(2, '0')}`;
+            qTitleEl.textContent = data.q;
+            qTitleVnEl.textContent = data.vn;
+            
+            bodyArea.innerHTML = '';
+            const boxClass = data.displayType === "blank" ? "passage-box shadow-inner bg-blue-50/30 border-blue-100" : "passage-box bg-slate-50 border-slate-200";
+            const label = data.displayType === "blank" ? "지문 본문 발췌 (Excerpt)" : "문제 본문 (Context)";
+            const labelColor = data.displayType === "blank" ? "text-blue-600" : "text-gray-500";
+            
+            bodyArea.innerHTML = `<div class="${boxClass}"><p class="${labelColor} text-[10px] font-bold uppercase mb-2 border-b pb-1">${label}</p>${data.body}</div>`;
+
+            optionsGrid.innerHTML = '';
+            fbArea.classList.add('hidden');
+            progBar.style.width = `${(currentIdx / quizData.length) * 100}%`;
+
+            const shuffledOptions = shuffle([...data.options]);
+
+            shuffledOptions.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-4 border border-gray-200 rounded-2xl bg-white text-gray-700 font-medium shadow-sm flex items-center";
+                btn.innerHTML = `<span class="w-8 h-8 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-full mr-4 font-bold text-sm shrink-0">${i + 1}</span> <span>${opt}</span>`;
+                btn.onclick = () => check(opt, btn);
+                optionsGrid.appendChild(btn);
+            });
+            window.scrollTo(0, 0);
+        }
+
+        function check(selectedText, btn) {
+            const data = quizData[currentIdx];
+            const btns = optionsGrid.querySelectorAll('button');
+            btns.forEach(b => b.disabled = true);
+
+            if (selectedText === data.ans) {
+                btn.classList.add('correct');
+                fbIcon.innerHTML = "🎯";
+                fbStatus.textContent = "정답입니다!";
+                fbStatus.className = "font-bold text-green-700";
+                fbArea.className = "mt-8 p-5 rounded-2xl border-2 border-green-200 bg-green-50 block shadow-md";
+                score++;
+            } else {
+                btn.classList.add('incorrect');
+                btns.forEach(b => {
+                    if(b.querySelector('span:last-child').textContent === data.ans) b.classList.add('correct');
+                });
+                fbIcon.innerHTML = "💡";
+                fbStatus.textContent = "오답입니다.";
+                fbStatus.className = "font-bold text-red-700";
+                fbArea.className = "mt-8 p-5 rounded-2xl border-2 border-red-200 bg-red-50 block shadow-md";
+            }
+            fbRat.textContent = data.rat;
+            fbRatVn.innerHTML = data.ratVn;
+            
+            setTimeout(() => {
+                fbArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        nextBtn.onclick = () => {
+            currentIdx++;
+            if (currentIdx < quizData.length) render();
+            else showResults();
+        };
+
+        function showResults() {
+            progBar.style.width = "100%";
+            quizCont.classList.add('hidden');
+            resCont.classList.remove('hidden');
+            viewBtn.classList.add('hidden');
+            finalScoreEl.textContent = score;
+            const emoji = document.getElementById('result-emoji');
+            if (score >= 11) emoji.textContent = "🏅";
+            else if (score >= 8) emoji.textContent = "🥈";
+            else emoji.textContent = "📖";
+        }
+
+        viewBtn.onclick = () => {
+            const data = quizData[currentIdx];
+            if (!data) return;
+            
+            const passage = passages.find(p => p.id === data.pid);
+            if (!passage) return;
+
+            modalContent.innerHTML = `
+                <h4 class="font-black text-indigo-700 mb-4 text-lg border-b-2 border-indigo-100 pb-2">${passage.title}</h4>
+                <div class="leading-loose text-gray-700 text-sm whitespace-pre-wrap">${passage.template}</div>
+            `;
+            modal.classList.remove('hidden');
+        };
+
+        document.getElementById('close-modal-btn').onclick = () => modal.classList.add('hidden');
+        window.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
+        
+        window.onload = render;
+    </script>
+</body>
+</html>
