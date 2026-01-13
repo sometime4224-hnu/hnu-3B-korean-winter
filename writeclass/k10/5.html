@@ -185,8 +185,86 @@
   </div>
 
   <script>
-    /* (A) 여기에 Q 데이터 붙여넣기 */
-    const Q = null; // <-- 반드시 교체
+   const Q = {
+  id: 5,
+  title: "태백시의 변화",
+  blanks: [
+    {
+      key: "b1",
+      correct: ["쇠퇴해 갔다", "쇠퇴했다", "침체되었다", "활력을 잃었다"],
+      options: ["쇠퇴해 갔다", "더 활발해졌다", "갑자기 커졌다", "대도시가 되었다"]
+    },
+    {
+      key: "b2",
+      correct: ["늘었다", "증가했다", "늘어났다"],
+      options: ["늘었다", "줄었다", "멈췄다", "흩어졌다"]
+    }
+  ],
+  passage: [
+    "강원도 태백시는 한때 대한민국 최대의 연탄 생산지로서 활력이 넘쳐 나는 도시였다. 그러나 1980년대 이후 난방 방식이 연탄에서 석유나 가스로 바뀌면서 인구가 급격히 감소하고 도시는 점차 (",
+    "). 태백시 주민들은 도시를 살릴 방법을 고민했다. 높은 산지에 위치해 있어 여름에도 시원하고 겨울에는 눈이 많이 내리는 태백시의 자연환경과 기후를 활용하기로 했다. 여름에는 해바라기 축제를 그리고 겨울에는 눈 축제를 열고 적극적으로 홍보한 결과 태백시에 찾아오는 관광객 수는 꾸준히 (",
+    ")."
+  ],
+  terms: [
+    {match:"한때", ko:{head:"한때", desc:"예전의 어떤 시기."}, vi:{head:"một thời", desc:"một thời điểm trong quá khứ."}},
+    {match:"연탄 생산지", ko:{head:"생산지", desc:"어떤 것을 생산하는 지역."}, vi:{head:"nơi sản xuất", desc:"khu vực sản xuất."}},
+    {match:"활력이 넘쳐 나는", ko:{head:"활력이 넘치다", desc:"힘과 에너지가 많다."}, vi:{head:"tràn đầy sức sống", desc:"nhiều năng lượng, sôi nổi."}},
+    {match:"난방 방식", ko:{head:"난방 방식", desc:"집을 데우는 방법."}, vi:{head:"cách sưởi ấm", desc:"phương thức sưởi ấm."}},
+    {match:"바뀌면서", ko:{head:"바뀌다", desc:"다른 것으로 변하다."}, vi:{head:"thay đổi", desc:"chuyển sang cái khác."}},
+    {match:"급격히 감소하고", ko:{head:"급격히 감소하다", desc:"빠르게 줄다."}, vi:{head:"giảm mạnh", desc:"giảm nhanh và nhiều."}},
+    {match:"점차", ko:{head:"점차", desc:"조금씩, 서서히."}, vi:{head:"dần dần", desc:"từ từ, từng chút một."}},
+    {match:"도시를 살릴", ko:{head:"살리다", desc:"다시 좋아지게/활발하게 만들다."}, vi:{head:"hồi sinh", desc:"khôi phục, làm sôi động lại."}},
+    {match:"활용하기로 했다", ko:{head:"활용하다", desc:"좋게 이용하다."}, vi:{head:"tận dụng", desc:"dùng hiệu quả."}},
+    {match:"적극적으로 홍보한", ko:{head:"홍보하다", desc:"널리 알려 사람을 모으다."}, vi:{head:"quảng bá", desc:"quảng bá để thu hút."}},
+    {match:"관광객 수는", ko:{head:"관광객", desc:"여행하러 오는 사람."}, vi:{head:"du khách", desc:"người đến du lịch."}},
+    {match:"꾸준히", ko:{head:"꾸준히", desc:"계속해서, 끊기지 않게."}, vi:{head:"đều đặn", desc:"liên tục, ổn định."}}
+  ],
+  study: {
+    ko: {
+      vocab: [
+        ["한때", "예전의 어떤 시기."],
+        ["연탄 / 생산지", "연료 / 만드는 지역."],
+        ["난방 방식", "집을 데우는 방법."],
+        ["급격히 감소하다", "빠르게 줄다."],
+        ["점차", "조금씩, 서서히."],
+        ["쇠퇴하다", "점점 약해지고 나빠지다."],
+        ["홍보하다", "알려서 사람을 모으다."],
+        ["꾸준히", "계속해서."]
+      ],
+      tips: [
+        "‘그러나’ + ‘인구 감소’ → 도시 상황은 보통 ‘나빠짐’ 방향이다.",
+        "빈칸 1은 ‘점차’와 잘 결합하는 점진 변화 표현: ‘쇠퇴해 갔다’.",
+        "빈칸 2는 ‘축제 + 홍보’의 결과 → 관광객은 증가 방향: ‘꾸준히 늘었다’."
+      ],
+      explain: [
+        "빈칸 1: 산업 변화로 인구가 줄며 도시가 약해짐 → ‘쇠퇴해 갔다’.",
+        "빈칸 2: 축제·홍보 이후 방문자가 증가 → ‘늘었다’."
+      ]
+    },
+    vi: {
+      vocab: [
+        ["한때", "một thời, trước đây."],
+        ["연탄", "than tổ ong (nhiên liệu)."],
+        ["난방 방식", "cách sưởi ấm."],
+        ["급격히 감소하다", "giảm mạnh."],
+        ["점차", "dần dần."],
+        ["쇠퇴하다", "sa sút/suy thoái."],
+        ["홍보하다", "quảng bá."],
+        ["꾸준히", "đều đặn, liên tục."]
+      ],
+      tips: [
+        "Có ‘그러나’ và ‘dân số giảm’ → nghĩa thường là ‘tình hình xấu đi’.",
+        "Trống 1 đi với ‘점차’ → hợp với biểu hiện suy giảm dần: ‘쇠퇴해 갔다’.",
+        "Trống 2 là kết quả lễ hội + quảng bá → du khách tăng: ‘꾸준히 늘었다’."
+      ],
+      explain: [
+        "Trống 1: do suy giảm dân số/kinh tế → ‘쇠퇴해 갔다’.",
+        "Trống 2: sau khi tổ chức lễ hội và quảng bá → du khách tăng → ‘늘었다’."
+      ]
+    }
+  }
+};
+
 
     /* ====== 앱 로직(공통) ====== */
     const LS_KEY = () => "blank_infer_single_q" + Q.id + "_v1";
