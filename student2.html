@@ -12,12 +12,7 @@
             touch-action: manipulation;
         }
         .student-card {
-            /* 마우스 오버 시 시각적 변화가 없도록 cursor를 default로 설정 */
             cursor: default;
-        }
-        /* 마우스 오버 시 하이라이트 효과 제거 */
-        .student-card:hover {
-            /* No hover effects */
         }
         
         /* Animation Styles */
@@ -87,7 +82,15 @@
     <div id="animation-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
 
     <script>
-        const students = ["하후당", "두 캉 두안 안", "황 티 튀 드엉", "응웬 응억 마이", "풍 티 귄 응아", "레 시 디엔", "응우엔 뜩 만", "쯔엉 티 투이 린", "츠엉 밍 황", "팜 티 응억 후옌", "짠 두이 풍", "팜 티 투 니", "양진룽", "테우 티 부 홍", "당 반 도안", "응웬 티 후엔 린", "찬 티 미 흐엉", "마이 티 짱", "또 자 하오", "부 레 뒤엔", "유미동", "도쿠나가 코우미"];
+        // 교체된 학생 명단 (총 22명)
+        const students = [
+            "짠 푹 콴", "타 티 민 트", "응웬 반 푹", "응웬 응억 마이", "쿠엇반탕", 
+            "응웬 티 응웻 응아", "응우옌 민 히에우", "응웬 티엔 헙", "응웬티타잉짱", "응웬 디엔 닷", 
+            "팜 꾸옥 상", "보 쑤안 타이", "버 느 꾸잉", "짠 당 구인 프엉", "후잉 레 꾸억 안", 
+            "쩐아잉즈엉", "응웬 비엣 꾸억", "레 부 하", "응우옌 티 지앙", "짠 티 캄 리", 
+            "또 티 후엔 짱", "쯔엉티튀홍"
+        ];
+        
         let fixedStudents = []; // 순서 고정된 학생들 (비밀 기능)
 
         const appContainer = document.getElementById('app-container');
@@ -155,18 +158,18 @@
                 });
             }, 500);
 
-            // 2. Gather effect (오류 수정)
+            // 2. Gather effect
             setTimeout(() => {
                 clearInterval(shuffleInterval);
-                const centerX = rect.left + rect.width / 2 - 40; // 이름 div의 너비 절반 고려
-                const centerY = rect.top + rect.height / 2 - 20; // 이름 div의 높이 절반 고려
+                const centerX = rect.left + rect.width / 2 - 40;
+                const centerY = rect.top + rect.height / 2 - 20;
                 animatedNames.forEach(el => {
                     el.style.top = `${centerY}px`;
                     el.style.left = `${centerX}px`;
                 });
             }, 2500);
 
-            // 3. Explosion effect (오류 수정)
+            // 3. Explosion effect
             setTimeout(() => {
                 animatedNames.forEach(el => el.remove());
                 const centerX = rect.left + rect.width / 2;
@@ -208,7 +211,6 @@
         // --- 코드 보기 및 다운로드 방지 기능 ---
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', event => {
-            // Ctrl+S, Ctrl+U, Ctrl+P, F12 등 방지
             if (event.ctrlKey && ['s', 'u', 'p'].includes(event.key.toLowerCase())) {
                 event.preventDefault();
             }
@@ -221,4 +223,3 @@
     </script>
 </body>
 </html>
-
