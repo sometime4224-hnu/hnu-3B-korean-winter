@@ -185,8 +185,82 @@
   </div>
 
   <script>
-    /* (A) 여기에 Q 데이터 붙여넣기 */
-    const Q = null; // <-- 반드시 교체
+   const Q = {
+  id: 4,
+  title: "자동차 안전 실험",
+  blanks: [
+    {
+      key: "b1",
+      correct: ["만들기 위해서이다", "만들기 위해서다", "만들기 위해"],
+      options: ["만들기 위해서이다", "팔기 위해서이다", "보여 주기 위해서이다", "빠르게 하기 위해서이다"]
+    },
+    {
+      key: "b2",
+      correct: ["조사 결과를 바탕으로", "이 결과를 바탕으로", "이를 바탕으로", "조사한 결과를 바탕으로"],
+      options: ["조사 결과를 바탕으로", "광고를 통해", "우연히", "힘으로"]
+    }
+  ],
+  passage: [
+    "자동차의 생산 과정에는 안전 실험이 포함되어 있다. 안전 실험의 목적은 교통사고가 나더라도 이용자의 피해를 줄일 수 있는 튼튼한 차를 (",
+    "). 안전 실험에서는 사람 크기의 인형을 태운 차가 과속, 추락, 충돌 사고 등을 당하도록 만든다. 그리고 인형이 입은 피해 상황과 피해 원인을 조사한다. 자동차 회사는 (",
+    ") 자동차의 성능을 개선해 나간다."
+  ],
+  terms: [
+    {match:"생산 과정", ko:{head:"생산 과정", desc:"물건을 만드는 전체 과정."}, vi:{head:"quá trình sản xuất", desc:"toàn bộ quy trình sản xuất."}},
+    {match:"안전 실험", ko:{head:"안전 실험", desc:"안전성을 확인하는 실험."}, vi:{head:"thử nghiệm an toàn", desc:"thử nghiệm kiểm tra độ an toàn."}},
+    {match:"포함되어 있다", ko:{head:"포함되다", desc:"안에 들어 있다."}, vi:{head:"được bao gồm", desc:"được đưa vào/bao gồm."}},
+    {match:"목적은", ko:{head:"목적", desc:"하려는 이유/목표."}, vi:{head:"mục đích", desc:"lý do/mục tiêu."}},
+    {match:"교통사고", ko:{head:"교통사고", desc:"교통수단 관련 사고."}, vi:{head:"tai nạn giao thông", desc:"tai nạn liên quan giao thông."}},
+    {match:"피해를 줄일", ko:{head:"피해를 줄이다", desc:"손해/상해를 감소시키다."}, vi:{head:"giảm thiệt hại", desc:"làm giảm thiệt hại."}},
+    {match:"튼튼한 차", ko:{head:"튼튼하다", desc:"강하고 잘 부서지지 않다."}, vi:{head:"chắc chắn/bền", desc:"vững chắc, bền."}},
+    {match:"조사한다", ko:{head:"조사하다", desc:"원인/사실을 알아보다."}, vi:{head:"điều tra", desc:"tìm hiểu nguyên nhân/sự thật."}},
+    {match:"바탕으로", ko:{head:"-을 바탕으로", desc:"근거로 삼아."}, vi:{head:"dựa trên", desc:"lấy làm cơ sở."}},
+    {match:"개선해 나간다", ko:{head:"개선하다", desc:"점점 더 좋게 바꾸다."}, vi:{head:"cải thiện dần", desc:"cải thiện theo hướng tốt hơn."}}
+  ],
+  study: {
+    ko: {
+      vocab: [
+        ["생산 과정", "물건을 만드는 전체 과정."],
+        ["안전 실험", "안전성을 시험하는 실험."],
+        ["목적", "하려는 이유/목표."],
+        ["피해를 줄이다", "손해/상해를 감소시키다."],
+        ["-도록 만들다", "그렇게 되게 하다."],
+        ["-을 바탕으로", "근거로 삼아."],
+        ["개선하다", "더 좋게 바꾸다."]
+      ],
+      tips: [
+        "빈칸 1은 ‘목적’ 설명의 끝: ‘-기 위해서이다’ 형태가 자연스럽다.",
+        "빈칸 2는 ‘조사한다’ 다음이므로 ‘결과/자료’와 연결되는 근거 표현이 필요하다.",
+        "‘개선해 나간다’는 ‘-을 바탕으로’와 자주 결합한다."
+      ],
+      explain: [
+        "빈칸 1: 목적 → ‘튼튼한 차를 만들기 위해서이다’.",
+        "빈칸 2: 조사 내용을 근거로 개선 → ‘조사 결과를 바탕으로’."
+      ]
+    },
+    vi: {
+      vocab: [
+        ["생산 과정", "quá trình sản xuất."],
+        ["안전 실험", "thử nghiệm an toàn."],
+        ["목적", "mục đích."],
+        ["피해를 줄이다", "giảm thiệt hại."],
+        ["-도록 만들다", "khiến cho… xảy ra."],
+        ["-을 바탕으로", "dựa trên (làm cơ sở)."],
+        ["개선하다", "cải thiện."]
+      ],
+      tips: [
+        "Trống 1 kết thúc phần ‘mục đích’ → mẫu chuẩn: ‘-기 위해서이다’.",
+        "Trống 2 đứng sau ‘điều tra’ → cần cụm ‘dựa trên kết quả điều tra’.",
+        "‘cải thiện dần’ thường đi kèm ‘-을 바탕으로’."
+      ],
+      explain: [
+        "Trống 1: mục đích của thử nghiệm → ‘만들기 위해서이다’.",
+        "Trống 2: cải thiện dựa trên điều tra → ‘조사 결과를 바탕으로’."
+      ]
+    }
+  }
+};
+
 
     /* ====== 앱 로직(공통) ====== */
     const LS_KEY = () => "blank_infer_single_q" + Q.id + "_v1";
