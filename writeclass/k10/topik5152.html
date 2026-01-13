@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>한국어 빈칸 추론 (TOPIK Ⅱ 중급)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Warm / Cozy Theme (Default) */
+      --bg: #F9F7F2;          /* 따뜻한 미색 배경 */
+      --card: #FFFFFF;        /* 깨끗한 카드 */
+      --card-sub: #F4F1EA;    /* 카드 내부 구분 영역 */
+      --text-main: #4A4238;   /* 부드러운 고동색 텍스트 */
+      --text-sub: #8C8478;    /* 연한 설명 텍스트 */
+      --primary: #8DA399;     /* 차분한 세이지 그린 (강조) */
+      --primary-dark: #6F857B;
+      --accent: #D4A373;      /* 따뜻한 라떼색 (포인트) */
+      --line: #E6E2D8;        /* 연한 경계선 */
+      --correct: #8FB598;     /* 정답 (파스텔 그린) */
+      --wrong: #E08E8E;       /* 오답 (파스텔 레드) */
+      --shadow: 0 8px 24px rgba(74, 66, 56, 0.08);
+      
+      --radius: 20px;
+      --radius-sm: 12px;
+      --font-body: "Gowun Dodum", "Noto Sans KR", sans-serif;
+    }
+
+    [data-theme="dark"] {
+      /* Night Study Theme */
+      --bg: #2C2824;
+      --card: #38322C;
+      --card-sub: #423C36;
+      --text-main: #E8DCCA;
+      --text-sub: #A89F96;
+      --primary: #7A968C;
+      --primary-dark: #5F7A70;
+      --accent: #C49363;
+      --line: #504840;
+      --correct: #5E8F6C;
+      --wrong: #C76B6B;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.6;
+      transition: background 0.3s ease, color 0.3s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 120px;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(249, 247, 242, 0.95); /* Backdrop for light */
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      transition: background 0.3s;
+    }
+    [data-theme="dark"] header { background: rgba(44, 40, 36, 0.95); }
+
+    .head-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+    .brand p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      height: 4px;
+      background: var(--line);
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Controls */
+    .controls { display: flex; gap: 8px; }
+    
+    button {
+      font-family: var(--font-body);
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 99px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
+    .btn:active { transform: translateY(0); }
+    
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn.primary:hover { background: var(--primary-dark); }
+    
+    .btn.secondary {
+      background: var(--card-sub);
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+
+    .seg-control {
+      display: inline-flex;
+      background: var(--card-sub);
+      padding: 4px;
+      border-radius: 99px;
+    }
+    .seg-control button {
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 13px;
+      color: var(--text-sub);
+      background: transparent;
+      font-weight: 600;
+    }
+    .seg-control button[aria-pressed="true"] {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Dashboard */
+    .dashboard {
+      margin: 24px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stats {
+      display: flex;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+    .badge {
+      padding: 4px 10px;
+      background: var(--card-sub);
+      border-radius: 6px;
+      color: var(--text-main);
+    }
+    .badge b { color: var(--accent); }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.3s;
+    }
+    .card.correct { border-color: var(--correct); }
+    .card.wrong { border-color: var(--wrong); }
+
+    .card-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: var(--card-sub);
+    }
+    .q-meta h3 { margin: 0; font-size: 18px; color: var(--text-main); }
+    .q-meta span { font-size: 13px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .card-body { padding: 24px; }
+
+    /* Passage & Blanks */
+    .passage-box {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: var(--radius-sm);
+      line-height: 2.0;
+      font-size: 18px;
+      color: var(--text-main);
+      border: 1px solid var(--line);
+    }
+    
+    .blank-wrap {
+      display: inline-block;
+      margin: 0 4px;
+      position: relative;
+    }
+    
+    select, input[type="text"] {
+      appearance: none;
+      border: 2px solid var(--line);
+      background: var(--card);
+      color: var(--primary-dark);
+      padding: 8px 32px 8px 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      min-width: 120px;
+      max-width: 100%;
+    }
+    /* Select arrow custom */
+    .blank-wrap::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0; 
+      height: 0; 
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-sub);
+      pointer-events: none;
+    }
+    .blank-wrap.type-mode::after { display: none; } /* No arrow for text input */
+    .blank-wrap input { padding-right: 12px; }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(141, 163, 153, 0.2);
+    }
+    
+    /* Feedback Area */
+    .feedback {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)}}
+
+    .feedback.is-correct { background: color-mix(in srgb, var(--correct) 15%, transparent); color: #3d5a45; display: block; }
+    .feedback.is-wrong { background: color-mix(in srgb, var(--wrong) 15%, transparent); color: #8a3c3c; display: block; }
+
+    [data-theme="dark"] .feedback.is-correct { color: #a4dcb5; }
+    [data-theme="dark"] .feedback.is-wrong { color: #ffb8b8; }
+
+    .card-foot {
+      padding: 16px 24px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .link-btn {
+      background: none;
+      color: var(--primary);
+      font-weight: 700;
+      padding: 0;
+      border: none;
+      font-size: 14px;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.open { display: flex; opacity: 1; }
+
+    .modal {
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    .modal-head {
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-head h2 { margin: 0; font-size: 18px; }
+    
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--card-sub);
+      color: var(--text-sub);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(141, 163, 153, 0.4);
+    }
+
+    .study-list { display: flex; flex-direction: column; gap: 12px; }
+    .study-item {
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg);
+    }
+    .study-item strong { display: block; color: var(--accent); margin-bottom: 4px; font-size: 15px; }
+    .study-item p { margin: 0; font-size: 14px; color: var(--text-main); }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+      z-index: 90;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .head-inner { flex-direction: column; align-items: stretch; gap: 16px; }
+      .controls { justify-content: space-between; }
+      .card-foot { flex-direction: column; align-items: stretch; text-align: center; }
+      select, input[type="text"] { width: 100%; min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <h1>한국어 빈칸 추론</h1>
+      <p>TOPIK Ⅱ 중급 (2급 후반~3급 초반)</p>
+    </div>
+    <div class="controls">
+      <div class="seg-control" role="group">
+        <button id="langKoBtn" aria-pressed="true">설명: 한국어</button>
+        <button id="langViBtn" aria-pressed="false">Tiếng Việt</button>
+      </div>
+      <button class="btn secondary" id="themeBtn">테마 변경</button>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+</header>
+
+<div class="wrap">
+  <div class="dashboard">
+    <div class="stats">
+      <span class="badge">진행 <b id="progressText">0/5</b></span>
+      <span class="badge">정답 <b id="scoreText">0</b></span>
+    </div>
+    <div class="controls">
+      <button class="btn secondary" id="modeToggleBtn">입력 모드: 선택형</button>
+      <button class="btn" id="openGlobalStudyBtn">전체 단어장</button>
+      <button class="btn secondary" id="resetBtn">초기화</button>
+    </div>
+  </div>
+
+  <div id="quizRoot"></div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn primary" id="gradeAllBtn" style="flex:1; max-width: 200px;">전체 채점</button>
+  <button class="btn secondary" id="filterWrongBtn">오답만 보기</button>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">학습 자료</h2>
+      <button class="btn secondary" id="closeModalBtn">닫기</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab" id="tabVocab" aria-selected="true">어휘/표현</button>
+        <button class="tab" id="tabTips" aria-selected="false">추론 팁</button>
+        <button class="tab" id="tabExplain" aria-selected="false">정답 해설</button>
+      </div>
+      <div id="modalContent" class="study-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ----------------------------------------------------
+  // DATA (Revised for Natural Vietnamese & Korean)
+  // ----------------------------------------------------
+  const QUIZ = [
+    {
+      id: 1,
+      title: "냉장고 보관 위치 (Vị trí bảo quản)",
+      blanks: [
+        {
+          key: "b1",
+          label: "1번 빈칸",
+          correct: ["냉장실 안쪽에 둔 음식보다", "안쪽에 둔 음식보다"],
+          options: ["냉장실 안쪽에 둔 음식보다", "냉장실 안쪽에 둔 음식처럼", "냉장실 문 쪽에 둔 음식보다", "바로 꺼낸 음식보다"]
+        },
+        {
+          key: "b2",
+          label: "2번 빈칸",
+          correct: ["두지 말고", "보관하지 말고", "넣지 말고"],
+          options: ["두지 말고", "넣어도 되지만", "넣어야 하고", "두었다가"]
+        }
+      ],
+      passage: [
+        `냉장고 속 식품을 신선하게 보관하려면 식품의 특성에 맞는 위치에 두어야 한다. 냉장실의 문 쪽은 안쪽보다 온도가 높고 문을 열고 닫을 때마다 온도가 달라진다. 그래서 같은 식품이라도 냉장실 문 쪽에 둔 음식은 (`,
+        `) 더 빨리 상한다. 물이나 음료수처럼 쉽게 상하지 않는 식품은 문 쪽에 보관해도 된다. 그렇지만 우유나 달걀처럼 상하기 쉬운 식품은 냉장고 문 쪽에 (`,
+        `) 냉장고 안쪽에 보관해야 한다.`
+      ],
+      study: {
+        ko: {
+          vocab: [
+            ["보관하다", "물건을 맡아서 간직하다."],
+            ["신선하다", "음식이 상하지 않고 상태가 좋다."],
+            ["특성", "그것만이 가진 특별한 성질."],
+            ["상하다", "음식이 썩거나 맛이 변하다."],
+            ["-지 말고", "앞의 행동은 하지 말고 뒤의 행동을 하라는 뜻 (금지+대안)."]
+          ],
+          tips: [
+            "첫 번째 빈칸은 '문 쪽'과 '안쪽'을 비교하고 있어요. '더 빨리 상한다'는 결과가 나오려면 비교 표현인 '-보다'가 필요해요.",
+            "두 번째 빈칸 뒤에 '안쪽에 보관해야 한다'가 나오죠? 그럼 앞에는 '문 쪽에 두면 안 된다'는 말이 와야 해요."
+          ],
+          explain: [
+            "1번: 문 쪽이 온도가 더 높으니까 안쪽보다 음식이 빨리 상합니다. 비교 대상인 '안쪽에 둔 음식보다'가 정답입니다.",
+            "2번: '문 쪽에 두지 않는다'와 '안쪽에 둔다'를 연결해야 하므로 '두지 말고'가 가장 자연스럽습니다."
+          ]
+        },
+        vi: {
+          vocab: [
+            ["보관하다", "Bảo quản, cất giữ."],
+            ["신선하다", "Tươi ngon (thực phẩm)."],
+            ["특성", "Đặc tính, tính chất đặc biệt."],
+            ["상하다", "Bị hỏng, bị ôi thiu."],
+            ["-지 말고", "Đừng làm A mà hãy làm B (Cấu trúc cấm đoán + thay thế)."]
+          ],
+          tips: [
+            "Ô trống 1 đang so sánh 'phía cửa' và 'phía trong'. Để dẫn đến kết quả 'hỏng nhanh hơn', ta cần cấu trúc so sánh '-보다'.",
+            "Ô trống 2: Phía sau nói là 'phải bảo quản phía trong', vậy phía trước phải là 'đừng để ở phía cửa'. Hãy tìm cấu trúc phủ định."
+          ],
+          explain: [
+            "1: Vì nhiệt độ ở cửa cao hơn nên thực phẩm hỏng nhanh hơn so với phía trong. Đáp án là '안쪽에 둔 음식보다' (so với thức ăn để bên trong).",
+            "2: Cấu trúc 'Đừng để ở cửa mà hãy để bên trong' là tự nhiên nhất -> '두지 말고'."
+          ]
+        }
+      }
+    },
+    {
+      id: 2,
+      title: "성적과 메타인지 (Thành tích học tập)",
+      blanks: [
+        {
+          key: "b1",
+          label: "1번 빈칸",
+          correct: ["차이가 있는지", "차이가 있는가"],
+          options: ["차이가 있는지", "가격이 얼마인지", "언제 시작했는지", "어디에 있는지"]
+        },
+        {
+          key: "b2",
+          label: "2번 빈칸",
+          correct: ["능력이 뛰어난 반면", "능력이 뛰어났지만"],
+          options: ["능력이 뛰어난 반면", "능력이 없는 대신", "능력을 잃었기 때문에", "능력이 높아져서"]
+        }
+      ],
+      passage: [
+        `한 방송 프로그램에서 학업 성적이 우수한 학생과 그렇지 않은 학생들 사이에 어떤 (`,
+        `) 조사했다. 조사 결과 성적이 우수한 학생들과 그렇지 않은 학생들의 기억력과 아이큐(IQ)는 큰 차이가 없는 것으로 나타났다. 반면에 성적이 우수한 학생들은 자신이 아는 것과 모르는 것을 파악하는 (`,
+        `) 성적이 우수하지 않은 학생들은 그 능력이 부족했다.`
+      ],
+      study: {
+        ko: {
+          vocab: [
+            ["학업 성적", "공부한 결과로 얻은 점수."],
+            ["우수하다", "여럿 중에서 아주 뛰어나다."],
+            ["파악하다", "어떤 내용을 확실하게 알다."],
+            ["반면에", "앞의 내용과 반대되는 내용을 말할 때 씀."]
+          ],
+          tips: [
+            "첫 빈칸은 무엇을 '조사'했는지 묻고 있어요. 보통 두 그룹을 조사할 때는 '차이'를 봅니다.",
+            "두 번째 빈칸 뒤에 '성적이 안 좋은 학생은 능력이 부족했다'라고 했죠? 그럼 앞에는 '성적이 좋은 학생은 능력이 좋다'는 말이 와야 하고, 두 문장은 반대 관계예요."
+          ],
+          explain: [
+            "1번: 성적이 좋은 학생과 나쁜 학생을 비교 조사했으므로 '어떤 차이가 있는지'가 적절합니다.",
+            "2번: 성적 우수 학생은 능력이 좋고, 반대 학생은 부족하다는 대조 문장이므로 '능력이 뛰어난 반면'이 정답입니다."
+          ]
+        },
+        vi: {
+          vocab: [
+            ["학업 성적", "Thành tích học tập."],
+            ["우수하다", "Xuất sắc, ưu tú."],
+            ["파악하다", "Nắm bắt, hiểu rõ."],
+            ["반면에", "Ngược lại, trái lại (dùng khi đối chiếu)."]
+          ],
+          tips: [
+            "Ô trống 1: Động từ là 'điều tra/khảo sát'. Khi nghiên cứu hai nhóm đối lập, người ta thường tìm xem có sự 'khác biệt' (차이) nào không.",
+            "Ô trống 2: Vế sau nói học sinh kém thì thiếu năng lực này. Vậy vế trước nói học sinh giỏi phải 'có năng lực vượt trội', và cần từ nối thể hiện sự đối lập."
+          ],
+          explain: [
+            "1: Điều tra sự khác biệt giữa hai nhóm -> '차이가 있는지' (có sự khác biệt nào không).",
+            "2: Đối lập giữa nhóm giỏi (năng lực tốt) và nhóm kém (thiếu năng lực) -> '능력이 뛰어난 반면' (trong khi năng lực xuất sắc thì...)."
+          ]
+        }
+      }
+    },
+    {
+      id: 3,
+      title: "수면 시간 (Thời gian ngủ)",
+      blanks: [
+        {
+          key: "b1",
+          label: "1번 빈칸",
+          correct: ["사람마다 다르게", "각자 다르게", "개인마다 다르게"],
+          options: ["사람마다 다르게", "항상 똑같이", "조금만", "빠르게"]
+        },
+        {
+          key: "b2",
+          label: "2번 빈칸",
+          correct: ["낮잠을 자야 한다", "잠을 더 자야 한다"],
+          options: ["낮잠을 자야 한다", "운동을 더 해야 한다", "밥을 먹지 말아야 한다", "커피를 마셔야 한다"]
+        }
+      ],
+      passage: [
+        `조사에 따르면 타고난 체질이나 건강 상태에 따라 필요한 수면 시간이 (`,
+        `) 나타났다. 성인 10명 중 2명은 필요한 수면 시간이 6시간 미만인 데 반해 10명 중 1명은 9시간 이상을 자야 피로가 풀린다고 한다. 9시간 이상을 자야 하는 사람들이 밤에 잘 못 잤다면 부족한 잠을 보충하기 위해 (`,
+        `).`
+      ],
+      study: {
+        ko: {
+          vocab: [
+            ["타고난 체질", "태어날 때부터 가지고 있는 몸의 성질."],
+            ["미만 / 이상", "보다 적음 / 보다 많거나 같음."],
+            ["피로가 풀리다", "몸이 힘들었던 것이 사라지다."],
+            ["보충하다", "부족한 것을 채우다."]
+          ],
+          tips: [
+            "첫 문장에서 '체질에 따라'라고 했으니 결과도 '다르다'가 나와야겠죠?",
+            "잠이 부족해서 '보충'하려면 무엇을 해야 할까요? 당연히 잠을 더 자야 합니다."
+          ],
+          explain: [
+            "1번: 어떤 사람은 6시간, 어떤 사람은 9시간이므로 '사람마다 다르게'가 맞습니다.",
+            "2번: 부족한 잠을 채우는 가장 직접적인 방법은 '낮잠'입니다."
+          ]
+        },
+        vi: {
+          vocab: [
+            ["타고난 체질", "Cơ địa bẩm sinh."],
+            ["미만 / 이상", "Dưới / Trên (hoặc bằng)."],
+            ["피로가 풀리다", "Tan biến mệt mỏi, hồi phục sức khỏe."],
+            ["보충하다", "Bổ sung, bù đắp."]
+          ],
+          tips: [
+            "Câu đầu nói 'tùy theo cơ địa', nghĩa là kết quả phải 'khác nhau' (다르다).",
+            "Để 'bù đắp' (보충) giấc ngủ thiếu, hành động hợp lý nhất là ngủ thêm."
+          ],
+          explain: [
+            "1: Người cần 6 tiếng, người cần 9 tiếng -> '사람마다 다르게' (khác nhau tùy mỗi người).",
+            "2: Cách để bù giấc ngủ thiếu là ngủ trưa -> '낮잠을 자야 한다'."
+          ]
+        }
+      }
+    },
+    {
+      id: 4,
+      title: "자동차 안전 실험 (Thử nghiệm an toàn xe)",
+      blanks: [
+        {
+          key: "b1",
+          label: "1번 빈칸",
+          correct: ["만들기 위해서이다", "만들기 위해서다"],
+          options: ["만들기 위해서이다", "팔기 위해서이다", "보여 주기 위해서이다", "빠르게 하기 위해서이다"]
+        },
+        {
+          key: "b2",
+          label: "2번 빈칸",
+          correct: ["조사 결과를 바탕으로", "이 결과를 바탕으로"],
+          options: ["조사 결과를 바탕으로", "광고를 통해", "우연히", "힘으로"]
+        }
+      ],
+      passage: [
+        `자동차의 생산 과정에는 안전 실험이 포함되어 있다. 안전 실험의 목적은 교통사고가 나더라도 이용자의 피해를 줄일 수 있는 튼튼한 차를 (`,
+        `). 안전 실험에서는 사람 크기의 인형을 태운 차가 과속, 추락, 충돌 사고 등을 당하도록 만든다. 그리고 인형이 입은 피해 상황과 피해 원인을 조사한다. 자동차 회사는 (`,
+        `) 자동차의 성능을 개선해 나간다.`
+      ],
+      study: {
+        ko: {
+          vocab: [
+            ["생산 과정", "물건을 만들어 내는 순서/과정."],
+            ["목적", "어떤 일을 하는 이유나 목표."],
+            ["튼튼하다", "쉽게 부서지지 않다."],
+            ["개선하다", "더 좋게 고치다."],
+            ["-을 바탕으로", "무엇을 기초/근거로 하여."]
+          ],
+          tips: [
+            "첫 번째 빈칸은 '목적은 ~'으로 시작했으니, 끝은 '~기 위해서이다'가 자연스러워요.",
+            "두 번째 빈칸은 '조사한다' 뒤에 나오죠? 조사한 것을 근거로 차를 더 좋게 만드는 거예요."
+          ],
+          explain: [
+            "1번: 실험의 목적은 안전한 차를 '만들기 위해서이다'입니다.",
+            "2번: 앞 문장에서 조사한 내용을 근거로 삼아야 하므로 '조사 결과를 바탕으로'가 정답입니다."
+          ]
+        },
+        vi: {
+          vocab: [
+            ["생산 과정", "Quá trình sản xuất."],
+            ["목적", "Mục đích."],
+            ["튼튼하다", "Chắc chắn, bền."],
+            ["개선하다", "Cải thiện, làm cho tốt hơn."],
+            ["-을 바탕으로", "Dựa trên nền tảng/cơ sở là..."]
+          ],
+          tips: [
+            "Ô 1 bắt đầu bằng 'Mục đích là...', nên đuôi câu thường là cấu trúc 'để...' (-기 위해서이다).",
+            "Ô 2 xuất hiện sau hành động 'điều tra'. Để cải thiện xe, người ta phải 'dựa trên kết quả' đó."
+          ],
+          explain: [
+            "1: Mục đích là để sản xuất (làm ra) xe bền -> '만들기 위해서이다'.",
+            "2: Cải thiện hiệu năng dựa trên những gì đã điều tra -> '조사 결과를 바탕으로'."
+          ]
+        }
+      }
+    },
+    {
+      id: 5,
+      title: "태백시의 변화 (Sự thay đổi của Taebaek)",
+      blanks: [
+        {
+          key: "b1",
+          label: "1번 빈칸",
+          correct: ["쇠퇴해 갔다", "쇠퇴했다", "침체되었다"],
+          options: ["쇠퇴해 갔다", "더 활발해졌다", "갑자기 커졌다", "대도시가 되었다"]
+        },
+        {
+          key: "b2",
+          label: "2번 빈칸",
+          correct: ["늘었다", "증가했다", "늘어났다"],
+          options: ["늘었다", "줄었다", "멈췄다", "흩어졌다"]
+        }
+      ],
+      passage: [
+        `강원도 태백시는 한때 대한민국 최대의 연탄 생산지로서 활력이 넘쳐 나는 도시였다. 그러나 1980년대 이후 난방 방식이 연탄에서 석유나 가스로 바뀌면서 인구가 급격히 감소하고 도시는 점차 (`,
+        `). 태백시 주민들은 도시를 살릴 방법을 고민했다. 높은 산지에 위치해 있어 여름에도 시원하고 겨울에는 눈이 많이 내리는 태백시의 자연환경과 기후를 활용하기로 했다. 여름에는 해바라기 축제를 그리고 겨울에는 눈 축제를 열고 적극적으로 홍보한 결과 태백시에 찾아오는 관광객 수는 꾸준히 (`,
+        `).`
+      ],
+      study: {
+        ko: {
+          vocab: [
+            ["한때", "과거의 어느 시기."],
+            ["활력이 넘치다", "힘과 에너지가 가득하다."],
+            ["급격히", "변화의 속도가 매우 빠르게."],
+            ["쇠퇴하다", "기운이나 세력이 약해지다."],
+            ["홍보하다", "널리 알리다."]
+          ],
+          tips: [
+            "'그러나' 뒤에 인구가 줄어든다고 했어요. 그럼 도시는 안 좋은 상태가 되겠죠?",
+            "축제를 열고 홍보를 열심히 했어요. 결과는? 관광객이 많이 오겠죠?"
+          ],
+          explain: [
+            "1번: 인구가 줄고 산업이 사라지면 도시는 약해집니다. '쇠퇴해 갔다'가 맞습니다.",
+            "2번: 노력의 결과로 관광객이 많아졌으므로 '늘었다'가 정답입니다."
+          ]
+        },
+        vi: {
+          vocab: [
+            ["한때", "Một thời (trong quá khứ)."],
+            ["활력이 넘치다", "Tràn đầy sức sống, sầm uất."],
+            ["급격히", "Một cách cấp격, nhanh chóng."],
+            ["쇠퇴하다", "Suy thoái, xuống dốc."],
+            ["홍보하다", "Quảng bá, tuyên truyền."]
+          ],
+          tips: [
+            "Sau từ 'Tuy nhiên' (그러나), dân số giảm mạnh. Vậy thành phố sẽ đi theo chiều hướng xấu (suy thoái).",
+            "Tổ chức lễ hội và quảng bá tích cực. Kết quả tích cực là khách du lịch sẽ 'tăng lên'."
+          ],
+          explain: [
+            "1: Do thay đổi nhiên liệu sưởi ấm, thành phố dần đi xuống -> '쇠퇴해 갔다' (trở nên suy thoái).",
+            "2: Kết quả của nỗ lực quảng bá là khách du lịch tăng -> '늘었다' (đã tăng lên)."
+          ]
+        }
+      }
+    }
+  ];
+
+  // ----------------------------------------------------
+  // LOGIC
+  // ----------------------------------------------------
+  const LS_KEY = "korean_quiz_v2";
+  
+  // Default State
+  const defaultState = {
+    theme: "light",
+    lang: "ko",      // ko | vi
+    mode: "select",  // select | type
+    answers: {},     // { "q1_b1": "val" }
+    results: {},     // { q1: true/false }
+    wrongFilter: false
+  };
+
+  let state = loadState();
+
+  // DOM Elements
+  const $ = (sel) => document.querySelector(sel);
+  const root = $("#quizRoot");
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      return raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState };
+    } catch {
+      return { ...defaultState };
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    updateUIHeader();
+  }
+
+  function getKey(qId, bKey) { return `q${qId}_${bKey}`; }
+
+  function updateUIHeader() {
+    // Progress
+    const total = QUIZ.length;
+    const answered = Object.keys(state.results).length;
+    const correctCount = Object.values(state.results).filter(Boolean).length;
+    
+    $("#progressText").textContent = `${answered}/${total}`;
+    $("#scoreText").textContent = correctCount;
+    
+    const pct = Math.round((answered / total) * 100);
+    $("#progressBar").style.width = `${pct}%`;
+
+    // Toggles
+    $("#langKoBtn").setAttribute("aria-pressed", state.lang === "ko");
+    $("#langViBtn").setAttribute("aria-pressed", state.lang === "vi");
+    
+    $("#modeToggleBtn").textContent = state.mode === "select" ? "입력 모드: 선택형" : "입력 모드: 직접 입력";
+    
+    // Theme
+    document.body.dataset.theme = state.theme;
+  }
+
+  // Render
+  function render() {
+    root.innerHTML = "";
+    
+    QUIZ.forEach(q => {
+      const result = state.results[`q${q.id}`];
+      // Filter Logic
+      if (state.wrongFilter && result === true) return; 
+
+      const card = document.createElement("article");
+      card.className = "card";
+      if (result === true) card.classList.add("correct");
+      if (result === false) card.classList.add("wrong");
+      
+      // Header
+      const head = document.createElement("div");
+      head.className = "card-head";
+      head.innerHTML = `
+        <div class="q-meta">
+          <span>Question ${q.id}</span>
+          <h3>${q.title}</h3>
+        </div>
+        <div class="controls">
+          <button class="btn secondary icon-btn" onclick="readPassage(${q.id})">🔊 듣기</button>
+          <button class="btn secondary icon-btn" onclick="openStudy(${q.id})">📖 학습</button>
+        </div>
+      `;
+
+      // Body
+      const body = document.createElement("div");
+      body.className = "card-body";
+      
+      const passageBox = document.createElement("div");
+      passageBox.className = "passage-box";
+      
+      // Construct Passage HTML
+      let pHTML = "";
+      q.passage.forEach((text, i) => {
+        pHTML += text;
+        if (i < q.blanks.length) {
+          pHTML += createBlankHTML(q, q.blanks[i]);
+        }
+      });
+      passageBox.innerHTML = pHTML;
+
+      // Feedback
+      const feedback = document.createElement("div");
+      if (result === true) {
+        feedback.className = "feedback is-correct";
+        feedback.innerHTML = `<strong>정답입니다! 🎉</strong> <br>참 잘했어요.`;
+      } else if (result === false) {
+        feedback.className = "feedback is-wrong";
+        feedback.innerHTML = `<strong>아쉬워요. 다시 생각해 볼까요?</strong> <br>힌트가 필요하면 '학습' 버튼을 눌러보세요.`;
+      } else {
+        feedback.className = "feedback";
+      }
+
+      body.appendChild(passageBox);
+      body.appendChild(feedback);
+
+      // Footer
+      const foot = document.createElement("div");
+      foot.className = "card-foot";
+      
+      // Button wording based on state
+      const btnText = result === true ? "다시 풀기" : "채점하기";
+      const btnClass = result === true ? "btn secondary" : "btn primary";
+      
+      foot.innerHTML = `
+        <button class="link-btn" onclick="openStudy(${q.id}, 'tips')">💡 힌트 보기</button>
+        <div class="controls">
+          ${result === false ? `<button class="btn secondary" onclick="showAnswer(${q.id})">정답 보기</button>` : ""}
+          <button class="${btnClass}" onclick="handleCheck(${q.id})">${btnText}</button>
+        </div>
+      `;
+
+      card.appendChild(head);
+      card.appendChild(body);
+      card.appendChild(foot);
+      root.appendChild(card);
+
+      // Bind Inputs
+      q.blanks.forEach(b => {
+        const key = getKey(q.id, b.key);
+        const el = card.querySelector(`[data-key="${key}"]`);
+        if (el) {
+          el.value = state.answers[key] || "";
+          el.onchange = (e) => {
+            state.answers[key] = e.target.value;
+            saveState();
+          };
+        }
+      });
+    });
+    
+    updateUIHeader();
+  }
+
+  function createBlankHTML(q, blank) {
+    const key = getKey(q.id, blank.key);
+    const wrapClass = state.mode === "type" ? "blank-wrap type-mode" : "blank-wrap";
+    
+    if (state.mode === "type") {
+      return `<div class="${wrapClass}"><input type="text" data-key="${key}" placeholder="입력" autocomplete="off" spellcheck="false"></div>`;
+    } else {
+      const opts = [`<option value="" disabled selected>선택</option>`, ...blank.options.map(o => `<option value="${o}">${o}</option>`)].join("");
+      return `<div class="${wrapClass}"><select data-key="${key}">${opts}</select></div>`;
+    }
+  }
+
+  // ----------------------------------------------------
+  // ACTIONS
+  // ----------------------------------------------------
+  window.handleCheck = (qId) => {
+    // If already correct, this button acts as reset for this question
+    if (state.results[`q${qId}`] === true) {
+      if(!confirm("이 문제를 초기화하고 다시 풀까요?")) return;
+      delete state.results[`q${qId}`];
+      // clear answers
+      const q = QUIZ.find(x => x.id === qId);
+      q.blanks.forEach(b => delete state.answers[getKey(qId, b.key)]);
+      saveState();
+      render();
+      return;
+    }
+
+    const q = QUIZ.find(x => x.id === qId);
+    let allCorrect = true;
+
+    q.blanks.forEach(b => {
+      const key = getKey(qId, b.key);
+      const val = (state.answers[key] || "").trim().replace(/\s+/g, ""); // remove spaces for comparison
+      const corrects = b.correct.map(c => c.replace(/\s+/g, ""));
+      if (!corrects.includes(val)) allCorrect = false;
+    });
+
+    state.results[`q${qId}`] = allCorrect;
+    saveState();
+    render();
+  };
+
+  window.showAnswer = (qId) => {
+    if(!confirm("정답을 확인하시겠습니까?")) return;
+    const q = QUIZ.find(x => x.id === qId);
+    q.blanks.forEach(b => {
+      state.answers[getKey(qId, b.key)] = b.correct[0];
+    });
+    delete state.results[`q${qId}`]; // Reset status to let them check again or just see it
+    saveState();
+    render();
+  };
+
+  window.readPassage = (qId) => {
+    const q = QUIZ.find(x => x.id === qId);
+    const text = q.passage.join(" 빈칸 "); // Read "Blank" for gaps
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ko-KR";
+    utter.rate = 0.9; // Slightly slower for learners
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  };
+
+  // ----------------------------------------------------
+  // MODAL
+  // ----------------------------------------------------
+  window.openStudy = (qId, forceTab) => {
+    const modal = $("#modalOverlay");
+    const content = $("#modalContent");
+    const title = $("#modalTitle");
+    const isGlobal = qId === 'global';
+    
+    // Set Active Tab
+    const tabName = forceTab || 'vocab';
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+    if(tabName === 'tips') $("#tabTips").setAttribute('aria-selected', 'true');
+    else if(tabName === 'explain') $("#tabExplain").setAttribute('aria-selected', 'true');
+    else $("#tabVocab").setAttribute('aria-selected', 'true');
+
+    // Build Content
+    let html = "";
+    const langKey = state.lang; // ko or vi
+
+    if (isGlobal) {
+      title.textContent = "전체 단어장";
+      // Aggregate all vocab
+      const allVocab = [];
+      QUIZ.forEach(q => {
+        q.study[langKey].vocab.forEach(v => allVocab.push(v));
+      });
+      html = allVocab.map(([w, d]) => `
+        <div class="study-item">
+          <strong>${w}</strong>
+          <p>${d}</p>
+        </div>
+      `).join("");
+      // Hide irrelevant tabs for global
+      $("#tabTips").style.display = 'none';
+      $("#tabExplain").style.display = 'none';
+    } else {
+      const q = QUIZ.find(x => x.id === qId);
+      title.textContent = `학습 자료 (${q.id}번)`;
+      $("#tabTips").style.display = '';
+      $("#tabExplain").style.display = '';
+
+      // Define renderers for tabs
+      const renderTab = () => {
+        const active = document.querySelector('.tab[aria-selected="true"]').id;
+        const data = q.study[langKey];
+        
+        let subHtml = "";
+        if (active === "tabVocab") {
+          subHtml = data.vocab.map(([w, d]) => `<div class="study-item"><strong>${w}</strong><p>${d}</p></div>`).join("");
+        } else if (active === "tabTips") {
+          subHtml = data.tips.map((t, i) => `<div class="study-item"><strong>Tip ${i+1}</strong><p>${t}</p></div>`).join("");
+        } else {
+          subHtml = data.explain.map((t, i) => `<div class="study-item"><strong>해설 ${i+1}</strong><p>${t}</p></div>`).join("");
+        }
+        content.innerHTML = subHtml;
+      };
+      
+      // Tab Click Events
+      $("#tabVocab").onclick = () => { $("#tabVocab").setAttribute('aria-selected',true); $("#tabTips").setAttribute('aria-selected',false); $("#tabExplain").setAttribute('aria-selected',false); renderTab(); };
+      $("#tabTips").onclick = () => { $("#tabVocab").setAttribute('aria-selected',false); $("#tabTips").setAttribute('aria-selected',true); $("#tabExplain").setAttribute('aria-selected',false); renderTab(); };
+      $("#tabExplain").onclick = () => { $("#tabVocab").setAttribute('aria-selected',false); $("#tabTips").setAttribute('aria-selected',false); $("#tabExplain").setAttribute('aria-selected',true); renderTab(); };
+      
+      // Initial render
+      renderTab();
+      modal.classList.add("open");
+      return; 
+    }
+
+    content.innerHTML = html;
+    modal.classList.add("open");
+  };
+
+  $("#closeModalBtn").onclick = () => $("#modalOverlay").classList.remove("open");
+  $("#modalOverlay").onclick = (e) => { if(e.target === $("#modalOverlay")) $("#modalOverlay").classList.remove("open"); };
+  $("#openGlobalStudyBtn").onclick = () => openStudy('global');
+
+  // ----------------------------------------------------
+  // GLOBAL EVENTS
+  // ----------------------------------------------------
+  $("#langKoBtn").onclick = () => { state.lang = "ko"; saveState(); render(); };
+  $("#langViBtn").onclick = () => { state.lang = "vi"; saveState(); render(); };
+  
+  $("#themeBtn").onclick = () => {
+    state.theme = state.theme === "light" ? "dark" : "light";
+    saveState();
+  };
+  
+  $("#modeToggleBtn").onclick = () => {
+    state.mode = state.mode === "select" ? "type" : "select";
+    saveState();
+    render();
+  };
+
+  $("#resetBtn").onclick = () => {
+    if(confirm("모든 진행 상황을 삭제하시겠습니까?")) {
+      localStorage.removeItem(LS_KEY);
+      location.reload();
+    }
+  };
+
+  $("#gradeAllBtn").onclick = () => {
+    QUIZ.forEach(q => window.handleCheck(q.id));
+    alert("채점이 완료되었습니다.");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  $("#filterWrongBtn").onclick = () => {
+    state.wrongFilter = !state.wrongFilter;
+    $("#filterWrongBtn").textContent = state.wrongFilter ? "모든 문제 보기" : "오답만 보기";
+    $("#filterWrongBtn").classList.toggle("primary");
+    render();
+  };
+
+  // Initial
+  render();
+
+</script>
+</body>
+</html>
