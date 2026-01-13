@@ -185,8 +185,86 @@
   </div>
 
   <script>
-    /* (A) 여기에 Q 데이터 붙여넣기 */
-    const Q = null; // <-- 반드시 교체
+   const Q = {
+  id: 3,
+  title: "수면 시간의 개인차",
+  blanks: [
+    {
+      key: "b1",
+      correct: ["사람마다 다르게", "각자 다르게", "개인마다 다르게"],
+      options: ["사람마다 다르게", "항상 똑같이", "조금만", "빠르게"]
+    },
+    {
+      key: "b2",
+      correct: ["낮잠을 자야 한다", "잠을 더 자야 한다", "더 자야 한다", "낮잠을 자야 합니다"],
+      options: ["낮잠을 자야 한다", "운동을 더 해야 한다", "밥을 먹지 말아야 한다", "커피를 마셔야 한다"]
+    }
+  ],
+  passage: [
+    "조사에 따르면 타고난 체질이나 건강 상태에 따라 필요한 수면 시간이 (",
+    ") 나타났다. 성인 10명 중 2명은 필요한 수면 시간이 6시간 미만인 데 반해 10명 중 1명은 9시간 이상을 자야 피로가 풀린다고 한다. 9시간 이상을 자야 하는 사람들이 밤에 잘 못 잤다면 부족한 잠을 보충하기 위해 (",
+    ")."
+  ],
+  terms: [
+    {match:"조사에 따르면", ko:{head:"-에 따르면", desc:"어떤 자료/말을 근거로 할 때."}, vi:{head:"theo…", desc:"dựa theo (nguồn thông tin)."}},
+    {match:"타고난", ko:{head:"타고나다", desc:"태어날 때부터 갖추다."}, vi:{head:"bẩm sinh", desc:"có từ khi sinh ra."}},
+    {match:"체질", ko:{head:"체질", desc:"사람의 몸 성향/특징."}, vi:{head:"cơ địa", desc:"đặc điểm thể chất/cơ địa."}},
+    {match:"건강 상태", ko:{head:"건강 상태", desc:"건강의 현재 상태."}, vi:{head:"tình trạng sức khỏe", desc:"trạng thái sức khỏe hiện tại."}},
+    {match:"-에 따라", ko:{head:"-에 따라", desc:"조건/기준에 따라서."}, vi:{head:"tùy theo", desc:"phụ thuộc vào điều kiện/tiêu chí."}},
+    {match:"미만", ko:{head:"미만", desc:"그보다 적음(=아래)."}, vi:{head:"dưới", desc:"ít hơn mức đó."}},
+    {match:"인 데 반해", ko:{head:"-인 데 반해", desc:"A와 B를 비교/대조."}, vi:{head:"trong khi", desc:"đối chiếu A với B."}},
+    {match:"이상", ko:{head:"이상", desc:"그 이상(=… trở lên)."}, vi:{head:"từ… trở lên", desc:"bằng hoặc lớn hơn mức đó."}},
+    {match:"피로가 풀린다고", ko:{head:"피로가 풀리다", desc:"피곤함이 없어지다."}, vi:{head:"hết mệt", desc:"mệt mỏi giảm/hết."}},
+    {match:"보충하기 위해", ko:{head:"보충하다", desc:"부족한 것을 채우다."}, vi:{head:"bù/đắp", desc:"bổ sung phần thiếu."}}
+  ],
+  study: {
+    ko: {
+      vocab: [
+        ["타고난", "태어날 때부터 가진."],
+        ["체질 / 건강 상태", "몸의 성향 / 몸의 상태."],
+        ["-에 따라", "조건에 따라서."],
+        ["다르게", "같지 않게."],
+        ["-인 데 반해", "A와 B를 비교/대조."],
+        ["미만 / 이상", "보다 적음 / 그 이상."],
+        ["피로가 풀리다", "피곤함이 없어지다."],
+        ["보충하다", "부족한 것을 채우다."],
+        ["-아/어야 하다", "의무/당위 표현."]
+      ],
+      tips: [
+        "빈칸 1: 6시간 미만 vs 9시간 이상 → 개인차 강조 → ‘사람마다 다르게’.",
+        "빈칸 2: ‘보충하기 위해 ( )’ → 해결 방법 + ‘-아/어야 하다’가 자연스럽다.",
+        "문맥상 ‘낮잠’ 또는 ‘더 자기’가 직접적이다."
+      ],
+      explain: [
+        "빈칸 1: 필요한 수면 시간이 사람마다 다름 → ‘사람마다 다르게’.",
+        "빈칸 2: 부족한 잠을 채우는 방법 → ‘낮잠을 자야 한다’가 자연스럽다."
+      ]
+    },
+    vi: {
+      vocab: [
+        ["타고난", "bẩm sinh."],
+        ["체질 / 건강 상태", "cơ địa / tình trạng sức khỏe."],
+        ["-에 따라", "tùy theo."],
+        ["다르게", "khác nhau."],
+        ["-인 데 반해", "trong khi (đối chiếu)."],
+        ["미만 / 이상", "dưới / từ… trở lên."],
+        ["피로가 풀리다", "hết mệt."],
+        ["보충하다", "bù/đắp."],
+        ["-아/어야 하다", "phải (bắt buộc/khuyến nghị mạnh)."]
+      ],
+      tips: [
+        "Trống 1: ví dụ 6 giờ vs 9 giờ → khác nhau theo từng người → ‘사람마다 다르게’.",
+        "Trống 2: ‘để bù giấc ngủ’ → thường dùng ‘-아/어야 하다’.",
+        "Giải pháp hợp lý nhất: ‘ngủ trưa’ hoặc ‘ngủ thêm’."
+      ],
+      explain: [
+        "Trống 1: nói về khác nhau giữa cá nhân → ‘사람마다 다르게’.",
+        "Trống 2: cách bù ngủ thiếu → ‘낮잠을 자야 한다’ phù hợp nhất."
+      ]
+    }
+  }
+};
+
 
     /* ====== 앱 로직(공통) ====== */
     const LS_KEY = () => "blank_infer_single_q" + Q.id + "_v1";
