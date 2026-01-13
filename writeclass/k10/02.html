@@ -1,0 +1,1890 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>빈칸 추론 퀴즈 (학습 웹앱)</title>
+  <style>
+    :root{
+      /* Warm, cozy palette (default: light) */
+      --bg:#FFF7ED;          /* warm cream */
+      --card:#FFFFFF;
+      --card2:#FFF1E3;
+      --text:#1F2937;
+      --muted:#6B7280;
+      --line:#F2D8C2;
+      --accent:#F97316;      /* warm orange */
+      --accent2:#FB923C;
+      --good:#10B981;
+      --bad:#EF4444;
+      --chip:#FFF3E8;
+      --shadow: 0 10px 26px rgba(31,41,55,.10);
+      --radius:18px;
+      --radius2:14px;
+      --pad:14px;
+      --fs:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#1A1410;          /* warm dark */
+      --card:#231B16;
+      --card2:#2B211B;
+      --text:#F9FAFB;
+      --muted:#B9B4AE;
+      --line:#3A2D25;
+      --accent:#FB923C;
+      --accent2:#FDBA74;
+      --good:#34D399;
+      --bad:#FB7185;
+      --chip:#2A2019;
+      --shadow: 0 12px 30px rgba(0,0,0,.45);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+      font-size:var(--fs);
+      line-height:1.6;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    [data-theme="dark"] header{
+      background: rgba(26,20,16,.72);
+    }
+
+    .head{
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px 14px 10px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .title h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:-.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:flex-end;
+    }
+    .btn, .seg button{
+      appearance:none;
+      border:1px solid var(--line);
+      background: var(--chip);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 999px;
+      font-weight:700;
+      font-size:13px;
+      line-height:1;
+      cursor:pointer;
+      user-select:none;
+      min-height:40px;
+    }
+    .btn:active, .seg button:active{transform: translateY(1px)}
+    .btn.primary{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #111827;
+      border-color: transparent;
+    }
+    [data-theme="dark"] .btn.primary{
+      color:#111827;
+    }
+    .btn.secondary{
+      background: var(--card2);
+    }
+
+    .seg{
+      display:inline-flex;
+      border:1px solid var(--line);
+      border-radius:999px;
+      overflow:hidden;
+      background: var(--chip);
+    }
+    .seg button{
+      border:none;
+      border-right:1px solid var(--line);
+      border-radius:0;
+      background:transparent;
+      min-height:40px;
+    }
+    .seg button:last-child{border-right:none}
+    .seg button[aria-pressed="true"]{
+      background: linear-gradient(135deg, rgba(249,115,22,.22), rgba(251,146,60,.18));
+    }
+
+    .wrap{
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 14px 14px 120px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin: 14px 0 10px;
+    }
+    .status{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .pill{
+      padding:7px 10px;
+      background: var(--chip);
+      border:1px solid var(--line);
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--accent);
+      display:inline-block;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border-bottom:1px solid var(--line);
+    }
+    .cardHead .meta{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .qno{
+      color:var(--muted);
+      font-size:13px;
+      margin:0;
+    }
+    .qtitle{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:-.2px;
+    }
+    .cardBody{ padding: 14px; }
+
+    .legend{
+      margin: 0 0 10px;
+      padding: 10px 12px;
+      border:1px dashed var(--line);
+      border-radius: 14px;
+      background: var(--card2);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .legend b{color:var(--text)}
+
+    .passage{
+      padding: 12px;
+      background: var(--card2);
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+    }
+    .passage p{margin:0}
+
+    /* Clickable study targets in passage */
+    .hl{
+      display:inline-block;
+      padding: 0 .18em;
+      margin: 0 .02em;
+      border-radius: 10px;
+      background: rgba(249,115,22,.18);
+      border-bottom: 2px dotted rgba(249,115,22,.65);
+      cursor: pointer;
+      transition: transform .08s ease, background .15s ease;
+    }
+    [data-theme="dark"] .hl{
+      background: rgba(251,146,60,.20);
+      border-bottom-color: rgba(251,146,60,.70);
+    }
+    .hl:active{transform: scale(.98)}
+    .hl:focus{
+      outline: 2px solid rgba(249,115,22,.55);
+      outline-offset: 2px;
+    }
+
+    .blank{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin: 0 4px;
+    }
+    select, input[type="text"]{
+      width: 100%;
+      max-width: 320px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      font-weight:800;
+      outline:none;
+    }
+    select{cursor:pointer}
+    input[type="text"]::placeholder{color: rgba(107,114,128,.85)}
+    [data-theme="dark"] input[type="text"]::placeholder{color: rgba(185,180,174,.85)}
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    .result{
+      margin-top:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: var(--card2);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .result.good{
+      border-color: rgba(16,185,129,.45);
+      background: rgba(16,185,129,.12);
+      color: var(--text);
+    }
+    .result.bad{
+      border-color: rgba(239,68,68,.45);
+      background: rgba(239,68,68,.10);
+      color: var(--text);
+    }
+
+    .hintRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      align-items:center;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .linkBtn{
+      background:transparent;
+      border:none;
+      color: var(--accent);
+      font-weight:900;
+      cursor:pointer;
+      padding: 6px 0;
+    }
+
+    /* Bottom bar */
+    .bottomBar{
+      position: fixed;
+      left:0; right:0; bottom:0;
+      background: rgba(255,255,255,.80);
+      border-top:1px solid var(--line);
+      backdrop-filter: blur(10px);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      z-index: 20;
+    }
+    [data-theme="dark"] .bottomBar{
+      background: rgba(26,20,16,.72);
+    }
+    .bottomInner{
+      max-width: 960px;
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    /* Modal (Study) */
+    .modalBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index: 50;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+    .modalBackdrop.open{display:flex}
+    .modal{
+      width:min(960px, 100%);
+      max-height: 86vh;
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    .modalTop{
+      padding: 12px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, var(--card2), var(--card));
+    }
+    .modalTitle{
+      margin:0;
+      font-size:15px;
+      font-weight:950;
+      letter-spacing:-.2px;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .modalContent{
+      padding: 14px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .tab{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: var(--chip);
+      color: var(--text);
+      font-weight:900;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .tab[aria-selected="true"]{
+      background: linear-gradient(135deg, rgba(249,115,22,.22), rgba(251,146,60,.18));
+      border-color: rgba(249,115,22,.35);
+    }
+    .list{
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      padding: 12px;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card2);
+    }
+    .item b{display:block; font-size:14px; margin-bottom:4px}
+    .item .desc{color:var(--muted); font-size:13px; margin:0}
+    .kicker{
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0 0 6px;
+    }
+
+    /* Term Sheet (tap in passage) */
+    .sheetBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.45);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index: 60;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+    .sheetBackdrop.open{display:flex}
+    .sheet{
+      width:min(680px, 100%);
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sheetTop{
+      padding: 12px 14px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.10));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sheetTitle{
+      margin:0;
+      font-size:15px;
+      font-weight:950;
+      letter-spacing:-.2px;
+    }
+    .sheetBody{ padding: 14px; }
+    .sheetTerm{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom: 10px;
+    }
+    .termChip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:fit-content;
+      padding: 8px 10px;
+      border:1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip);
+      font-weight:950;
+    }
+    .starBtn{
+      border:1px solid var(--line);
+      background: var(--chip);
+      border-radius: 999px;
+      padding: 10px 12px;
+      min-height:40px;
+      cursor:pointer;
+      font-weight:950;
+    }
+    .sheetExample{
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--card2);
+      border:1px solid var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width:420px){
+      .title h1{font-size:16px}
+      select, input[type="text"]{max-width: 100%}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="head">
+      <div class="title">
+        <h1>빈칸 추론 퀴즈</h1>
+        <p class="subtitle">밑줄/하이라이트 표현을 터치하면 뜻과 요령을 확인할 수 있습니다. (설명은 KO/VI 전환)</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="설명 언어 선택">
+          <button id="langKoBtn" aria-pressed="true" type="button">설명: 한국어</button>
+          <button id="langViBtn" aria-pressed="false" type="button">Giải thích: VI</button>
+        </div>
+        <div class="seg" role="group" aria-label="입력 방식 선택">
+          <button id="modeSelectBtn" aria-pressed="true" type="button">선택</button>
+          <button id="modeTypeBtn" aria-pressed="false" type="button">직접입력</button>
+        </div>
+        <button class="btn" id="highlightBtn" type="button">하이라이트</button>
+        <button class="btn secondary" id="themeBtn" type="button">테마</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="row">
+      <div class="status">
+        <span class="pill"><span class="dot"></span><span id="progressText">진행: 0/5</span></span>
+        <span class="pill">정답: <b id="scoreText">0</b></span>
+        <span class="pill">저장: <span id="saveText">ON</span></span>
+        <span class="pill">표현 터치: <b id="hlState">ON</b></span>
+      </div>
+      <div class="status">
+        <button class="btn" id="openVocabBtn" type="button">단어장/요령</button>
+        <button class="btn" id="openFavBtn" type="button">내 단어장</button>
+        <button class="btn" id="resetBtn" type="button">초기화</button>
+      </div>
+    </div>
+
+    <div class="grid" id="quizRoot"></div>
+  </div>
+
+  <div class="bottomBar">
+    <div class="bottomInner">
+      <button class="btn primary" id="gradeAllBtn" type="button">전체 채점</button>
+      <button class="btn" id="reviewWrongBtn" type="button">오답만 보기</button>
+      <button class="btn secondary" id="clearFilterBtn" type="button" disabled>필터 해제</button>
+    </div>
+  </div>
+
+  <!-- Study Modal -->
+  <div class="modalBackdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <h2 class="modalTitle" id="modalTitle">학습</h2>
+        <button class="btn" id="closeModalBtn" type="button">닫기</button>
+      </div>
+      <div class="modalContent">
+        <div class="tabs">
+          <button class="tab" id="tabVocab" type="button" aria-selected="true">어휘/표현</button>
+          <button class="tab" id="tabTips" type="button" aria-selected="false">추론 요령</button>
+          <button class="tab" id="tabExplain" type="button" aria-selected="false">정답 해설</button>
+          <button class="tab" id="tabCards" type="button" aria-selected="false">플래시카드</button>
+        </div>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Term Sheet (tap in passage) -->
+  <div class="sheetBackdrop" id="sheetBackdrop" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheetTop">
+        <div>
+          <p class="sheetTitle" id="sheetTitle">표현</p>
+          <p class="subtitle" id="sheetSub" style="margin:4px 0 0; font-size:12px;">터치한 표현의 뜻/요령</p>
+        </div>
+        <button class="btn" id="closeSheetBtn" type="button">닫기</button>
+      </div>
+      <div class="sheetBody" id="sheetBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------
+    // Data (Korean text unchanged; explanations corrected in KO/VI)
+    // Also: study targets in passage (terms.match) for tapping.
+    // -------------------------
+    const QUIZ = [
+      {
+        id: 1,
+        title: "냉장고 보관 위치",
+        blanks: [
+          {
+            key: "b1",
+            label: "빈칸 1",
+            correct: ["냉장실 안쪽에 둔 음식보다", "안쪽에 둔 음식보다", "냉장고 안쪽에 둔 음식보다"],
+            options: [
+              "냉장실 안쪽에 둔 음식보다",
+              "냉장실 안쪽에 둔 음식처럼",
+              "냉장실 문 쪽에 둔 음식보다",
+              "바로 꺼낸 음식보다"
+            ]
+          },
+          {
+            key: "b2",
+            label: "빈칸 2",
+            correct: ["두지 말고", "보관하지 말고", "넣지 말고"],
+            options: [
+              "두지 말고",
+              "넣어도 되지만",
+              "넣어야 하고",
+              "두었다가"
+            ]
+          }
+        ],
+        passage: [
+          `냉장고 속 식품을 신선하게 보관하려면 식품의 특성에 맞는 위치에 두어야 한다. 냉장실의 문 쪽은 안쪽보다 온도가 높고 문을 열고 닫을 때마다 온도가 달라진다. 그래서 같은 식품이라도 냉장실 문 쪽에 둔 음식은 (`,
+          `) 더 빨리 상한다. 물이나 음료수처럼 쉽게 상하지 않는 식품은 문 쪽에 보관해도 된다. 그렇지만 우유나 달걀처럼 상하기 쉬운 식품은 냉장고 문 쪽에 (`,
+          `) 냉장고 안쪽에 보관해야 한다.`
+        ],
+        terms: [
+          { match:"보관하려면", ko:{head:"보관하다", desc:"식품 등을 상하지 않게 잘 두다."}, vi:{head:"bảo quản", desc:"cất giữ/giữ gìn để không bị hỏng."}},
+          { match:"특성", ko:{head:"특성", desc:"대상이 가진 특징/성질."}, vi:{head:"đặc tính", desc:"đặc điểm/thuộc tính của sự vật."}},
+          { match:"문 쪽", ko:{head:"문 쪽", desc:"냉장고 문에 가까운 위치."}, vi:{head:"phía cửa", desc:"vị trí gần cửa tủ lạnh."}},
+          { match:"안쪽", ko:{head:"안쪽", desc:"안으로 들어간 쪽, 깊은 곳."}, vi:{head:"phía trong", desc:"vị trí ở sâu bên trong."}},
+          { match:"온도", ko:{head:"온도", desc:"차갑고 따뜻한 정도."}, vi:{head:"nhiệt độ", desc:"mức độ nóng/lạnh."}},
+          { match:"열고 닫을 때마다", ko:{head:"열고 닫다", desc:"문 등을 열었다가 닫다(여닫다)."}, vi:{head:"mở rồi đóng", desc:"mở và đóng (cửa) lặp lại."}},
+          { match:"달라진다", ko:{head:"달라지다", desc:"이전과 다르게 변하다."}, vi:{head:"thay đổi", desc:"trở nên khác đi."}},
+          { match:"그래서", ko:{head:"그래서", desc:"앞의 이유로 뒤의 결과를 이어 주는 말."}, vi:{head:"vì vậy", desc:"nối nguyên nhân → kết quả."}},
+          { match:"더 빨리 상한다", ko:{head:"상하다", desc:"음식이 나빠지다(먹기 어렵게 되다)."}, vi:{head:"bị hỏng/thiu", desc:"đồ ăn bị hỏng, không còn tươi."}},
+          { match:"쉽게 상하지", ko:{head:"쉽게 -지 않다", desc:"쉽게 그런 상태가 되지 않다."}, vi:{head:"không dễ bị", desc:"không dễ rơi vào trạng thái đó."}},
+          { match:"그렇지만", ko:{head:"그렇지만", desc:"앞과 반대/대조되는 내용을 이어 주는 말."}, vi:{head:"tuy nhiên", desc:"nối ý đối lập/đối chiếu."}},
+          { match:"상하기 쉬운", ko:{head:"-기 쉽다", desc:"그런 일이 일어나기 쉽다."}, vi:{head:"dễ -", desc:"dễ xảy ra/đạt trạng thái đó."}},
+          { match:"보관해야 한다", ko:{head:"-아/어야 하다", desc:"의무/당위를 나타내는 표현."}, vi:{head:"phải", desc:"mẫu diễn tả ‘phải/nhất định’."}}
+        ],
+        study: {
+          ko: {
+            vocab: [
+              ["보관하다", "식품 등을 상하지 않게 잘 두다."],
+              ["신선하다", "상하지 않고 새롭다."],
+              ["특성", "대상이 가진 특징/성질."],
+              ["문 쪽 / 안쪽", "문 가까운 위치 / 깊은 위치."],
+              ["온도", "차갑고 따뜻한 정도."],
+              ["열고 닫다", "문 등을 여닫다."],
+              ["-라도", "조건이 달라도 결과가 이어짐(‘비록 …라도’)."],
+              ["상하다", "음식이 나빠지다."],
+              ["-지 말고", "A는 하지 말고 B를 하다(금지+대안)."]
+            ],
+            tips: [
+              "원인-결과: ‘문 쪽은 온도가 높고 변한다’ → ‘더 빨리 상한다’.",
+              "빈칸 1은 비교: ‘( ) 더 빨리’ → 보통 ‘-보다’가 들어간다.",
+              "빈칸 2는 금지+대안: ‘문 쪽에 ( ) 안쪽에 보관’ → ‘-지 말고’ 유형이 자연스럽다."
+            ],
+            explain: [
+              "빈칸 1은 ‘문 쪽’과 ‘안쪽’을 비교하는 자리이므로 ‘안쪽에 둔 음식보다’가 적합하다.",
+              "빈칸 2는 ‘문 쪽에 두면 안 됨’ + ‘안쪽에 둬야 함’ 구조이므로 ‘두지 말고’가 가장 자연스럽다."
+            ]
+          },
+          vi: {
+            vocab: [
+              ["보관하다", "bảo quản, cất giữ đúng cách."],
+              ["신선하다", "tươi, chưa bị hỏng."],
+              ["특성", "đặc tính/đặc điểm."],
+              ["문 쪽 / 안쪽", "phía cửa / phía trong."],
+              ["온도", "nhiệt độ."],
+              ["열고 닫다", "mở rồi đóng (cửa)." ],
+              ["-라도", "dù… (thì)… (nhượng bộ)."],
+              ["상하다", "bị hỏng/thiu (đồ ăn)."],
+              ["-지 말고", "đừng A mà hãy B (cấm + phương án thay thế)."]
+            ],
+            tips: [
+              "Xác định nguyên nhân–kết quả: ‘phía cửa ấm & hay thay đổi’ → ‘hỏng nhanh hơn’.",
+              "Trống 1 cần cấu trúc so sánh: ‘( ) 더 빨리…’ → thường dùng ‘-보다’.",
+              "Trống 2 là mẫu ‘đừng… mà hãy…’: ‘문 쪽에 ( ) 안쪽에 보관…’ → ‘-지 말고’."
+            ],
+            explain: [
+              "Trống 1 so sánh giữa ‘phía cửa’ và ‘phía trong’, nên dạng ‘…보다’ là hợp nhất.",
+              "Trống 2 là ‘không để ở phía cửa’ + ‘để vào phía trong’, nên ‘두지 말고’ phù hợp nhất."
+            ]
+          }
+        }
+      },
+
+      {
+        id: 2,
+        title: "성적과 자기 점검 능력",
+        blanks: [
+          {
+            key: "b1",
+            label: "빈칸 1",
+            correct: ["차이가 있는지", "차이가 있는가"],
+            options: ["차이가 있는지", "가격이 얼마인지", "언제 시작했는지", "어디에 있는지"]
+          },
+          {
+            key: "b2",
+            label: "빈칸 2",
+            correct: ["능력이 뛰어난 반면", "능력이 뛰어난 반면에", "능력이 뛰어났지만"],
+            options: ["능력이 뛰어난 반면", "능력이 없는 대신", "능력을 잃었기 때문에", "능력이 높아져서"]
+          }
+        ],
+        passage: [
+          `한 방송 프로그램에서 학업 성적이 우수한 학생과 그렇지 않은 학생들 사이에 어떤 (`,
+          `) 조사했다. 조사 결과 성적이 우수한 학생들과 그렇지 않은 학생들의 기억력과 아이큐(IQ)는 큰 차이가 없는 것으로 나타났다. 반면에 성적이 우수한 학생들은 자신이 아는 것과 모르는 것을 파악하는 (`,
+          `) 성적이 우수하지 않은 학생들은 그 능력이 부족했다.`
+        ],
+        terms: [
+          { match:"방송 프로그램", ko:{head:"방송 프로그램", desc:"TV/라디오 등에서 하는 기획된 방송."}, vi:{head:"chương trình", desc:"chương trình phát sóng trên TV/radio."}},
+          { match:"학업 성적", ko:{head:"학업 성적", desc:"공부 성적(학업 결과)."}, vi:{head:"thành tích học tập", desc:"kết quả học tập/điểm số."}},
+          { match:"우수한", ko:{head:"우수하다", desc:"매우 좋다/뛰어나다."}, vi:{head:"xuất sắc", desc:"rất tốt, vượt trội."}},
+          { match:"그렇지 않은", ko:{head:"그렇지 않다", desc:"앞에서 말한 정도가 아니다."}, vi:{head:"không như vậy", desc:"không đạt mức như đã nói."}},
+          { match:"사이에", ko:{head:"-사이에", desc:"둘(여럿) 사이의 관계/비교."}, vi:{head:"giữa", desc:"giữa hai (hoặc nhiều) đối tượng."}},
+          { match:"조사 결과", ko:{head:"조사 결과", desc:"조사해서 나온 결론/내용."}, vi:{head:"kết quả khảo sát", desc:"kết luận/nội dung thu được sau khảo sát."}},
+          { match:"큰 차이가 없는", ko:{head:"차이가 없다", desc:"서로 다르지 않다."}, vi:{head:"không khác biệt lớn", desc:"hầu như không có khác biệt đáng kể."}},
+          { match:"반면에", ko:{head:"반면에", desc:"앞 내용과 대조되는 내용을 이어 줌."}, vi:{head:"ngược lại", desc:"nối ý đối lập/đối chiếu."}},
+          { match:"파악하는", ko:{head:"파악하다", desc:"확실히 알아보다/이해하다."}, vi:{head:"nắm rõ", desc:"nhận ra rõ, nắm được."}},
+          { match:"능력이 부족했다", ko:{head:"능력이 부족하다", desc:"할 수 있는 힘이 모자라다."}, vi:{head:"thiếu năng lực", desc:"khả năng chưa đủ."}}
+        ],
+        study: {
+          ko: {
+            vocab: [
+              ["학업 성적", "공부 성적."],
+              ["우수하다 / 그렇지 않다", "아주 좋다 / 그 정도가 아니다."],
+              ["조사하다", "알아보기 위해 자료를 모으다."],
+              ["조사 결과", "조사해서 나온 내용."],
+              ["-로 나타나다", "결과가 그렇게 드러나다."],
+              ["기억력", "기억하는 힘."],
+              ["반면에", "앞과 다른 점(대조)을 말할 때."],
+              ["파악하다", "확실히 알아보다."],
+              ["능력 / 부족하다", "할 수 있는 힘 / 모자라다."]
+            ],
+            tips: [
+              "빈칸 1: ‘두 집단 사이’ + 뒤에 비교 결과가 이어짐 → ‘차이가 있는지’가 자연스럽다.",
+              "빈칸 2: 바로 뒤에 다른 집단이 나오므로 ‘대조 연결’이 필요하다(예: ‘반면’).",
+              "문장 끝에 ‘그 능력’이 나오므로 빈칸 2에는 ‘능력’이 포함될 가능성이 높다."
+            ],
+            explain: [
+              "빈칸 1: 두 집단의 차이를 확인하는 조사 → ‘차이가 있는지’.",
+              "빈칸 2: ‘파악하는 능력’에서 집단 간 대조를 만드는 자리 → ‘능력이 뛰어난 반면’."
+            ]
+          },
+          vi: {
+            vocab: [
+              ["학업 성적", "thành tích học tập/điểm số."],
+              ["우수하다 / 그렇지 않다", "xuất sắc / không như vậy."],
+              ["조사하다", "khảo sát, điều tra."],
+              ["조사 결과", "kết quả khảo sát."],
+              ["-로 나타나다", "cho thấy/được thể hiện là."],
+              ["기억력", "trí nhớ."],
+              ["반면에", "ngược lại/trong khi đó."],
+              ["파악하다", "nắm rõ, nhận ra chính xác."],
+              ["능력 / 부족하다", "năng lực / thiếu, không đủ."]
+            ],
+            tips: [
+              "Trống 1: so sánh giữa hai nhóm → thường hỏi ‘có khác nhau không’ (차이가 있는지).",
+              "Trống 2: ngay sau đó là nhóm đối lập → cần cụm nối đối chiếu (반면).",
+              "Cuối câu có ‘그 능력’ → trống 2 rất dễ chứa từ ‘능력’."
+            ],
+            explain: [
+              "Trống 1: mục tiêu khảo sát là sự khác nhau → ‘차이가 있는지’.",
+              "Trống 2: tạo đối chiếu về năng lực tự nhận biết biết/không biết → ‘능력이 뛰어난 반면’."
+            ]
+          }
+        }
+      },
+
+      {
+        id: 3,
+        title: "수면 시간의 개인차",
+        blanks: [
+          {
+            key: "b1",
+            label: "빈칸 1",
+            correct: ["사람마다 다르게", "각자 다르게", "개인마다 다르게"],
+            options: ["사람마다 다르게", "항상 똑같이", "조금만", "빠르게"]
+          },
+          {
+            key: "b2",
+            label: "빈칸 2",
+            correct: ["낮잠을 자야 한다", "잠을 더 자야 한다", "더 자야 한다", "낮잠을 자야 합니다"],
+            options: ["낮잠을 자야 한다", "운동을 더 해야 한다", "밥을 먹지 말아야 한다", "커피를 마셔야 한다"]
+          }
+        ],
+        passage: [
+          `조사에 따르면 타고난 체질이나 건강 상태에 따라 필요한 수면 시간이 (`,
+          `) 나타났다. 성인 10명 중 2명은 필요한 수면 시간이 6시간 미만인 데 반해 10명 중 1명은 9시간 이상을 자야 피로가 풀린다고 한다. 9시간 이상을 자야 하는 사람들이 밤에 잘 못 잤다면 부족한 잠을 보충하기 위해 (`,
+          `).`
+        ],
+        terms: [
+          { match:"조사에 따르면", ko:{head:"-에 따르면", desc:"어떤 자료/말을 근거로 할 때."}, vi:{head:"theo…", desc:"dựa theo (nguồn thông tin)."}},
+          { match:"타고난", ko:{head:"타고나다", desc:"태어날 때부터 갖추다."}, vi:{head:"bẩm sinh", desc:"có từ khi sinh ra."}},
+          { match:"체질", ko:{head:"체질", desc:"사람의 몸 성향/특징."}, vi:{head:"cơ địa", desc:"đặc điểm thể chất/cơ địa."}},
+          { match:"건강 상태", ko:{head:"건강 상태", desc:"건강의 현재 상태."}, vi:{head:"tình trạng sức khỏe", desc:"trạng thái sức khỏe hiện tại."}},
+          { match:"-에 따라", ko:{head:"-에 따라", desc:"조건/기준에 따라서."}, vi:{head:"tùy theo", desc:"phụ thuộc vào điều kiện/tiêu chí."}},
+          { match:"필요한 수면 시간", ko:{head:"필요하다", desc:"반드시 있어야 하다."}, vi:{head:"cần thiết", desc:"phải có/được cần."}},
+          { match:"미만", ko:{head:"미만", desc:"그보다 적음(=아래)."}, vi:{head:"dưới", desc:"ít hơn mức đó."}},
+          { match:"인 데 반해", ko:{head:"-인 데 반해", desc:"A와 B를 비교/대조."}, vi:{head:"trong khi", desc:"dùng để đối chiếu A với B."}},
+          { match:"이상", ko:{head:"이상", desc:"그 이상(=từ … trở lên)."}, vi:{head:"từ… trở lên", desc:"bằng hoặc lớn hơn mức đó."}},
+          { match:"피로가 풀린다고", ko:{head:"피로가 풀리다", desc:"피곤함이 없어지다."}, vi:{head:"hết mệt", desc:"cảm giác mệt mỏi giảm/hết."}},
+          { match:"부족한 잠", ko:{head:"부족하다", desc:"모자라다."}, vi:{head:"thiếu ngủ", desc:"giấc ngủ không đủ."}},
+          { match:"보충하기 위해", ko:{head:"보충하다", desc:"부족한 것을 채우다."}, vi:{head:"bù/đắp", desc:"bổ sung phần thiếu."}}
+        ],
+        study: {
+          ko: {
+            vocab: [
+              ["타고난", "태어날 때부터 가진."],
+              ["체질 / 건강 상태", "몸의 성향 / 몸의 상태."],
+              ["-에 따라", "조건에 따라서."],
+              ["다르게", "같지 않게."],
+              ["-인 데 반해", "A와 B를 비교/대조할 때."],
+              ["미만 / 이상", "보다 적음 / 그 이상."],
+              ["피로가 풀리다", "피곤함이 없어지다."],
+              ["보충하다", "부족한 것을 채우다."],
+              ["-아/어야 하다", "의무/당위를 나타냄."]
+            ],
+            tips: [
+              "빈칸 1: 6시간 미만 vs 9시간 이상 → 개인차 강조 → ‘사람마다 다르게’.",
+              "빈칸 2: ‘보충하기 위해 ( )’ → 해결 방법 + ‘-아/어야 하다’가 자연스럽다.",
+              "상식적으로 ‘낮잠’ 또는 ‘더 자기’가 직접적이다."
+            ],
+            explain: [
+              "빈칸 1: 사람마다 필요한 수면 시간이 다름 → ‘사람마다 다르게’.",
+              "빈칸 2: 부족한 잠을 채우는 방법 → ‘낮잠을 자야 한다’가 가장 자연스럽다."
+            ]
+          },
+          vi: {
+            vocab: [
+              ["타고난", "bẩm sinh."],
+              ["체질 / 건강 상태", "cơ địa / tình trạng sức khỏe."],
+              ["-에 따라", "tùy theo."],
+              ["다르게", "khác nhau."],
+              ["-인 데 반해", "trong khi (đối chiếu)."],
+              ["미만 / 이상", "dưới / từ… trở lên."],
+              ["피로가 풀리다", "hết mệt."],
+              ["보충하다", "bù/đắp, bổ sung."],
+              ["-아/어야 하다", "phải (bắt buộc/khuyến nghị mạnh)."]
+            ],
+            tips: [
+              "Trống 1: có ví dụ 6 giờ vs 9 giờ → nhấn mạnh khác nhau theo từng người → ‘사람마다 다르게’.",
+              "Trống 2: ‘để bù giấc ngủ’ → thường dùng mẫu ‘-아/어야 하다’.",
+              "Giải pháp hợp lý nhất: ‘ngủ trưa’ hoặc ‘ngủ thêm’."
+            ],
+            explain: [
+              "Trống 1: nói về sự khác nhau giữa các cá nhân → ‘사람마다 다르게’.",
+              "Trống 2: cách bù ngủ thiếu → ‘낮잠을 자야 한다’ phù hợp nhất."
+            ]
+          }
+        }
+      },
+
+      {
+        id: 4,
+        title: "자동차 안전 실험",
+        blanks: [
+          {
+            key: "b1",
+            label: "빈칸 1",
+            correct: ["만들기 위해서이다", "만들기 위해서다", "만들기 위해"],
+            options: ["만들기 위해서이다", "팔기 위해서이다", "보여 주기 위해서이다", "빠르게 하기 위해서이다"]
+          },
+          {
+            key: "b2",
+            label: "빈칸 2",
+            correct: ["조사 결과를 바탕으로", "이 결과를 바탕으로", "이를 바탕으로", "조사한 결과를 바탕으로"],
+            options: ["조사 결과를 바탕으로", "광고를 통해", "우연히", "힘으로"]
+          }
+        ],
+        passage: [
+          `자동차의 생산 과정에는 안전 실험이 포함되어 있다. 안전 실험의 목적은 교통사고가 나더라도 이용자의 피해를 줄일 수 있는 튼튼한 차를 (`,
+          `). 안전 실험에서는 사람 크기의 인형을 태운 차가 과속, 추락, 충돌 사고 등을 당하도록 만든다. 그리고 인형이 입은 피해 상황과 피해 원인을 조사한다. 자동차 회사는 (`,
+          `) 자동차의 성능을 개선해 나간다.`
+        ],
+        terms: [
+          { match:"생산 과정", ko:{head:"생산 과정", desc:"물건을 만드는 전체 과정."}, vi:{head:"quá trình sản xuất", desc:"toàn bộ quy trình tạo ra sản phẩm."}},
+          { match:"안전 실험", ko:{head:"안전 실험", desc:"안전성을 확인하는 시험/실험."}, vi:{head:"thử nghiệm an toàn", desc:"thử nghiệm để kiểm tra mức độ an toàn."}},
+          { match:"포함되어 있다", ko:{head:"포함되다", desc:"안에 들어 있다."}, vi:{head:"được bao gồm", desc:"được đưa vào/bao gồm trong."}},
+          { match:"목적은", ko:{head:"목적", desc:"하려는 이유/목표."}, vi:{head:"mục đích", desc:"lý do/mục tiêu."}},
+          { match:"교통사고", ko:{head:"교통사고", desc:"차/교통수단 관련 사고."}, vi:{head:"tai nạn giao thông", desc:"tai nạn liên quan đến giao thông."}},
+          { match:"피해를 줄일", ko:{head:"피해를 줄이다", desc:"손해/상해를 감소시키다."}, vi:{head:"giảm thiệt hại", desc:"làm giảm mức độ thiệt hại."}},
+          { match:"튼튼한 차", ko:{head:"튼튼하다", desc:"잘 부서지지 않고 강하다."}, vi:{head:"chắc chắn/bền", desc:"vững chắc, khó hỏng."}},
+          { match:"인형을 태운", ko:{head:"태우다", desc:"차 등에 사람/인형을 올려 타게 하다."}, vi:{head:"cho lên xe", desc:"để người/hình nộm ngồi trên xe."}},
+          { match:"피해 원인을 조사한다", ko:{head:"조사하다", desc:"원인/사실을 알아보다."}, vi:{head:"điều tra", desc:"tìm hiểu nguyên nhân/sự thật."}},
+          { match:"바탕으로", ko:{head:"-을 바탕으로", desc:"근거로 삼아."}, vi:{head:"dựa trên", desc:"lấy làm cơ sở."}},
+          { match:"개선해 나간다", ko:{head:"개선하다", desc:"점점 더 좋게 바꾸다."}, vi:{head:"cải thiện dần", desc:"cải thiện theo hướng tốt hơn."}}
+        ],
+        study: {
+          ko: {
+            vocab: [
+              ["생산 과정", "물건을 만드는 전체 과정."],
+              ["안전 실험", "안전성을 시험하는 실험."],
+              ["포함되다", "안에 들어 있다."],
+              ["목적", "하려는 이유/목표."],
+              ["피해 / 줄이다", "손해 / 감소시키다."],
+              ["튼튼하다", "강하고 잘 부서지지 않다."],
+              ["-도록 만들다", "그렇게 되게 하다."],
+              ["조사하다", "알아보기 위해 확인하다."],
+              ["성능 / 개선하다", "기능 / 더 좋게 바꾸다."],
+              ["-을 바탕으로", "근거로 삼아."]
+            ],
+            tips: [
+              "빈칸 1은 ‘목적’ 설명의 끝: ‘-기 위해서이다’ 형태가 자연스럽다.",
+              "빈칸 2는 ‘조사한다’ 다음이므로 ‘결과/자료’와 연결되는 근거 표현이 필요하다.",
+              "‘개선해 나간다’는 ‘-을 바탕으로’와 자주 결합한다."
+            ],
+            explain: [
+              "빈칸 1: 안전 실험의 목적 → ‘튼튼한 차를 만들기 위해서이다’.",
+              "빈칸 2: 조사 내용을 근거로 개선 → ‘조사 결과를 바탕으로’."
+            ]
+          },
+          vi: {
+            vocab: [
+              ["생산 과정", "quá trình sản xuất."],
+              ["안전 실험", "thử nghiệm an toàn."],
+              ["포함되다", "được bao gồm."],
+              ["목적", "mục đích."],
+              ["피해 / 줄이다", "thiệt hại / giảm."],
+              ["튼튼하다", "chắc chắn, bền."],
+              ["-도록 만들다", "khiến cho… xảy ra."],
+              ["조사하다", "điều tra/khảo sát."],
+              ["성능 / 개선하다", "hiệu năng / cải thiện."],
+              ["-을 바탕으로", "dựa trên (làm cơ sở)."]
+            ],
+            tips: [
+              "Trống 1 kết thúc phần ‘mục đích’ → mẫu chuẩn: ‘-기 위해서이다’.",
+              "Trống 2 đứng sau ‘điều tra’ → cần cụm ‘dựa trên kết quả điều tra’.",
+              "‘cải thiện dần’ thường đi kèm ‘-을 바탕으로’."
+            ],
+            explain: [
+              "Trống 1: mục đích của thử nghiệm → ‘만들기 위해서이다’.",
+              "Trống 2: cải thiện dựa trên điều tra → ‘조사 결과를 바탕으로’."
+            ]
+          }
+        }
+      },
+
+      {
+        id: 5,
+        title: "태백시의 변화",
+        blanks: [
+          {
+            key: "b1",
+            label: "빈칸 1",
+            correct: ["쇠퇴해 갔다", "쇠퇴했다", "침체되었다", "활력을 잃었다"],
+            options: ["쇠퇴해 갔다", "더 활발해졌다", "갑자기 커졌다", "대도시가 되었다"]
+          },
+          {
+            key: "b2",
+            label: "빈칸 2",
+            correct: ["늘었다", "증가했다", "늘어났다"],
+            options: ["늘었다", "줄었다", "멈췄다", "흩어졌다"]
+          }
+        ],
+        passage: [
+          `강원도 태백시는 한때 대한민국 최대의 연탄 생산지로서 활력이 넘쳐 나는 도시였다. 그러나 1980년대 이후 난방 방식이 연탄에서 석유나 가스로 바뀌면서 인구가 급격히 감소하고 도시는 점차 (`,
+          `). 태백시 주민들은 도시를 살릴 방법을 고민했다. 높은 산지에 위치해 있어 여름에도 시원하고 겨울에는 눈이 많이 내리는 태백시의 자연환경과 기후를 활용하기로 했다. 여름에는 해바라기 축제를 그리고 겨울에는 눈 축제를 열고 적극적으로 홍보한 결과 태백시에 찾아오는 관광객 수는 꾸준히 (`,
+          `).`
+        ],
+        terms: [
+          { match:"한때", ko:{head:"한때", desc:"예전의 어떤 시기."}, vi:{head:"một thời", desc:"một thời điểm trong quá khứ."}},
+          { match:"연탄 생산지", ko:{head:"생산지", desc:"어떤 것을 생산하는 지역."}, vi:{head:"nơi sản xuất", desc:"khu vực sản xuất một sản phẩm."}},
+          { match:"활력이 넘쳐 나는", ko:{head:"활력이 넘치다", desc:"힘과 에너지가 많다."}, vi:{head:"tràn đầy sức sống", desc:"nhiều năng lượng, sôi nổi."}},
+          { match:"그러나", ko:{head:"그러나", desc:"앞과 반대/대조되는 내용을 시작."}, vi:{head:"tuy nhiên", desc:"mở đầu ý đối lập."}},
+          { match:"난방 방식", ko:{head:"난방 방식", desc:"집을 데우는 방법."}, vi:{head:"cách sưởi ấm", desc:"phương thức sưởi ấm."}},
+          { match:"바뀌면서", ko:{head:"바뀌다", desc:"다른 것으로 변하다."}, vi:{head:"thay đổi", desc:"chuyển sang cái khác."}},
+          { match:"급격히 감소하고", ko:{head:"급격히 감소하다", desc:"빠르게 줄다."}, vi:{head:"giảm mạnh", desc:"giảm nhanh và nhiều."}},
+          { match:"점차", ko:{head:"점차", desc:"조금씩, 서서히."}, vi:{head:"dần dần", desc:"từ từ, từng chút một."}},
+          { match:"도시를 살릴", ko:{head:"살리다", desc:"다시 좋아지게/활발하게 만들다."}, vi:{head:"hồi sinh", desc:"làm cho tốt lên/trở nên sôi động lại."}},
+          { match:"활용하기로 했다", ko:{head:"활용하다", desc:"좋게 이용하다."}, vi:{head:"tận dụng", desc:"dùng hiệu quả, tận dụng."}},
+          { match:"적극적으로 홍보한", ko:{head:"홍보하다", desc:"널리 알려 사람을 모으다."}, vi:{head:"quảng bá tích cực", desc:"quảng bá mạnh mẽ để thu hút."}},
+          { match:"관광객 수는", ko:{head:"관광객", desc:"여행하러 오는 사람."}, vi:{head:"du khách", desc:"người đến du lịch."}},
+          { match:"꾸준히", ko:{head:"꾸준히", desc:"계속해서, 끊기지 않게."}, vi:{head:"đều đặn", desc:"liên tục, ổn định."}}
+        ],
+        study: {
+          ko: {
+            vocab: [
+              ["한때", "예전의 어떤 시기."],
+              ["연탄 / 생산지", "연료 / 만드는 지역."],
+              ["활력이 넘치다", "힘과 에너지가 많다."],
+              ["난방 방식", "집을 데우는 방법."],
+              ["급격히 감소하다", "빠르게 줄다."],
+              ["쇠퇴하다", "점점 약해지고 나빠지다."],
+              ["살리다", "다시 좋아지게 하다."],
+              ["자연환경 / 기후", "자연 조건 / 날씨 특징."],
+              ["활용하다", "좋게 이용하다."],
+              ["홍보하다", "알려서 사람을 모으다."],
+              ["관광객 / 꾸준히", "여행 오는 사람 / 계속해서."]
+            ],
+            tips: [
+              "‘그러나’ + ‘인구 감소’ → 도시 상황은 보통 ‘나빠짐’ 방향이다.",
+              "빈칸 1은 ‘점차’와 잘 결합하는 변화 표현: ‘쇠퇴해 갔다’처럼 점진 변화.",
+              "빈칸 2는 ‘축제 + 홍보’의 결과이므로 ‘관광객 증가’ 방향: ‘꾸준히 늘었다’가 자연스럽다."
+            ],
+            explain: [
+              "빈칸 1: 산업 변화로 인구가 줄며 도시가 약해짐 → ‘쇠퇴해 갔다’.",
+              "빈칸 2: 축제·홍보 이후 방문자가 증가 → ‘늘었다’."
+            ]
+          },
+          vi: {
+            vocab: [
+              ["한때", "một thời, trước đây."],
+              ["연탄 / 생산지", "than tổ ong / nơi sản xuất."],
+              ["활력이 넘치다", "tràn đầy sức sống."],
+              ["난방 방식", "cách sưởi ấm."],
+              ["급격히 감소하다", "giảm mạnh."],
+              ["쇠퇴하다", "sa sút/suy thoái."],
+              ["살리다", "hồi sinh/khôi phục."],
+              ["자연환경 / 기후", "môi trường tự nhiên / khí hậu."],
+              ["활용하다", "tận dụng."],
+              ["홍보하다", "quảng bá."],
+              ["관광객 / 꾸준히", "du khách / đều đặn, liên tục."]
+            ],
+            tips: [
+              "Có ‘그러나’ và ‘dân số giảm’ → hướng nghĩa thường là ‘tình hình xấu đi’.",
+              "Trống 1 đi với ‘점차’ (dần dần) → hợp với biểu hiện suy giảm theo thời gian: ‘쇠퇴해 갔다’.",
+              "Trống 2 là kết quả của lễ hội + quảng bá → số du khách tăng: ‘꾸준히 늘었다’."
+            ],
+            explain: [
+              "Trống 1: do suy giảm dân số và kinh tế → ‘쇠퇴해 갔다’.",
+              "Trống 2: sau khi tổ chức lễ hội và quảng bá → du khách tăng → ‘늘었다’."
+            ]
+          }
+        }
+      }
+    ];
+
+    // -------------------------
+    // State + Storage
+    // -------------------------
+    const LS_KEY = "blank_infer_quiz_v2_warm";
+    const defaultState = {
+      theme: "light",         // warm default
+      explainLang: "ko",      // "ko" | "vi"
+      inputMode: "select",    // "select" | "type"
+      highlightOn: true,
+      answers: {},
+      checked: {},
+      filterWrongOnly: false,
+      bookmarks: {}           // {"q1|문 쪽": true, ...} (match string as key)
+    };
+
+    let state = loadState();
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return structuredClone(defaultState);
+        const obj = JSON.parse(raw);
+        return { ...structuredClone(defaultState), ...obj };
+      }catch{
+        return structuredClone(defaultState);
+      }
+    }
+    function saveState(){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify(state));
+        document.getElementById("saveText").textContent = "ON";
+      }catch{
+        document.getElementById("saveText").textContent = "OFF";
+      }
+    }
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+    const $ = (sel)=>document.querySelector(sel);
+    const escapeHtml = (s)=> String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
+
+    function norm(s){
+      return String(s||"")
+        .trim()
+        .replaceAll(/\s+/g,"")
+        .replaceAll(/[.,!?]/g,"");
+    }
+
+    function getKey(qId, bKey){ return `q${qId}_${bKey}`; }
+
+    function isCorrect(q, bIndex, value){
+      const blank = q.blanks[bIndex];
+      const v = norm(value);
+      return blank.correct.some(c => norm(c) === v);
+    }
+
+    function computeScore(){
+      let okCount = 0;
+      QUIZ.forEach(q=>{
+        const checked = state.checked[`q${q.id}`];
+        if(checked?.ok) okCount++;
+      });
+      return okCount;
+    }
+
+    function computeProgress(){
+      let done = 0;
+      QUIZ.forEach(q=>{
+        if(state.checked[`q${q.id}`]) done++;
+      });
+      return done;
+    }
+
+    function bookmarkKey(qId, match){ return `q${qId}|${match}`; }
+    function isBookmarked(qId, match){ return !!state.bookmarks[bookmarkKey(qId, match)]; }
+    function toggleBookmark(qId, match){
+      const k = bookmarkKey(qId, match);
+      state.bookmarks[k] = !state.bookmarks[k];
+      if(!state.bookmarks[k]) delete state.bookmarks[k];
+      saveState();
+    }
+
+    // Highlight builder (exact match, longest-first)
+    function highlightText(q, text){
+      if(!state.highlightOn) return escapeHtml(text);
+
+      const terms = (q.terms || []).slice().sort((a,b)=> b.match.length - a.match.length);
+      let i = 0;
+      let out = "";
+
+      while(i < text.length){
+        let found = null;
+        for(const t of terms){
+          if(text.startsWith(t.match, i)){
+            found = t;
+            break;
+          }
+        }
+        if(found){
+          const m = found.match;
+          out += `<span class="hl" role="button" tabindex="0" data-qid="${q.id}" data-match="${escapeHtml(m)}">${escapeHtml(m)}</span>`;
+          i += m.length;
+        }else{
+          out += escapeHtml(text[i]);
+          i++;
+        }
+      }
+      return out;
+    }
+
+    // -------------------------
+    // Rendering
+    // -------------------------
+    function render(){
+      document.body.dataset.theme = state.theme;
+
+      // Toggle buttons
+      $("#langKoBtn").setAttribute("aria-pressed", state.explainLang === "ko");
+      $("#langViBtn").setAttribute("aria-pressed", state.explainLang === "vi");
+      $("#modeSelectBtn").setAttribute("aria-pressed", state.inputMode === "select");
+      $("#modeTypeBtn").setAttribute("aria-pressed", state.inputMode === "type");
+      $("#hlState").textContent = state.highlightOn ? "ON" : "OFF";
+      $("#highlightBtn").textContent = state.highlightOn ? "하이라이트" : "하이라이트(꺼짐)";
+
+      const root = $("#quizRoot");
+      root.innerHTML = "";
+
+      QUIZ.forEach(q=>{
+        const checked = state.checked[`q${q.id}`];
+        const showCard = !state.filterWrongOnly || (checked && !checked.ok);
+
+        const card = document.createElement("section");
+        card.className = "card";
+        card.dataset.qid = q.id;
+        card.style.display = showCard ? "" : "none";
+
+        const head = document.createElement("div");
+        head.className = "cardHead";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `
+          <p class="qno">문항 ${q.id}</p>
+          <p class="qtitle">${escapeHtml(q.title)}</p>
+        `;
+
+        const headBtns = document.createElement("div");
+        headBtns.className = "status";
+        headBtns.innerHTML = `
+          <button class="btn" type="button" data-act="study">학습</button>
+          <button class="btn secondary" type="button" data-act="tts">읽기</button>
+        `;
+
+        head.appendChild(meta);
+        head.appendChild(headBtns);
+
+        const body = document.createElement("div");
+        body.className = "cardBody";
+
+        const legend = document.createElement("div");
+        legend.className = "legend";
+        legend.innerHTML = state.explainLang === "ko"
+          ? `<b>학습</b>: 하이라이트된 표현을 터치하면 뜻/요령을 확인할 수 있습니다.`
+          : `<b>Học</b>: Chạm vào cụm được tô sáng để xem nghĩa/mẹo.`;
+
+        const passage = document.createElement("div");
+        passage.className = "passage";
+        passage.innerHTML = `<p>${buildPassageHtml(q)}</p>`;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        actions.innerHTML = `
+          <button class="btn primary" type="button" data-act="check">채점</button>
+          <button class="btn" type="button" data-act="showAnswer">정답 보기</button>
+          <button class="btn secondary" type="button" data-act="clear">이 문항 지우기</button>
+        `;
+
+        const result = document.createElement("div");
+        result.className = "result";
+        if(checked){
+          result.classList.toggle("good", !!checked.ok);
+          result.classList.toggle("bad", !checked.ok);
+          const msg = checked.ok
+            ? (state.explainLang==="ko" ? "정답입니다." : "Đúng.")
+            : (state.explainLang==="ko"
+                ? `오답이 있습니다. (${checked.perBlank.filter(x=>x).length}/${q.blanks.length}개 정답)`
+                : `Có câu sai. (Đúng ${checked.perBlank.filter(x=>x).length}/${q.blanks.length})`);
+          result.textContent = msg;
+        }else{
+          result.textContent = state.explainLang==="ko" ? "아직 채점하지 않았습니다." : "Chưa chấm.";
+        }
+
+        const hintRow = document.createElement("div");
+        hintRow.className = "hintRow";
+        hintRow.innerHTML = `
+          <span>${state.explainLang==="ko" ? "팁: ‘학습’에서 어휘/추론 요령 확인" : "Mẹo: xem từ vựng/mẹo ở ‘Học’"}</span>
+          <button class="linkBtn" type="button" data-act="study">${state.explainLang==="ko" ? "학습 열기" : "Mở học"}</button>
+        `;
+
+        body.appendChild(legend);
+        body.appendChild(passage);
+        body.appendChild(actions);
+        body.appendChild(result);
+        body.appendChild(hintRow);
+
+        card.appendChild(head);
+        card.appendChild(body);
+        root.appendChild(card);
+
+        // Restore values
+        q.blanks.forEach((b)=>{
+          const key = getKey(q.id, b.key);
+          const value = state.answers[key] ?? "";
+          const el = card.querySelector(`[data-blank="${b.key}"]`);
+          if(el){
+            if(el.tagName === "SELECT") el.value = value;
+            else el.value = value;
+          }
+        });
+
+        // Input events
+        card.addEventListener("change", (e)=>{
+          const t = e.target;
+          if(t && t.dataset && t.dataset.blank){
+            state.answers[getKey(q.id, t.dataset.blank)] = t.value;
+            saveState();
+          }
+        });
+        card.addEventListener("input", (e)=>{
+          const t = e.target;
+          if(t && t.dataset && t.dataset.blank && t.tagName === "INPUT"){
+            state.answers[getKey(q.id, t.dataset.blank)] = t.value;
+            saveState();
+          }
+        });
+
+        // Click actions + term taps
+        card.addEventListener("click", (e)=>{
+          const termEl = e.target.closest(".hl");
+          if(termEl){
+            const qid = Number(termEl.dataset.qid);
+            const match = termEl.dataset.match;
+            openTermSheet(qid, match);
+            return;
+          }
+
+          const btn = e.target.closest("button");
+          if(!btn) return;
+          const act = btn.dataset.act;
+          if(!act) return;
+          if(act === "check") checkQuestion(q.id);
+          if(act === "clear") clearQuestion(q.id);
+          if(act === "showAnswer") showAnswer(q.id);
+          if(act === "study") openStudyModal(q.id, "vocab");
+          if(act === "tts") speakKorean(q.id);
+        });
+
+        // Keyboard support for highlighted terms
+        card.addEventListener("keydown", (e)=>{
+          const el = e.target;
+          if(el && el.classList && el.classList.contains("hl")){
+            if(e.key === "Enter" || e.key === " "){
+              e.preventDefault();
+              openTermSheet(Number(el.dataset.qid), el.dataset.match);
+            }
+          }
+        });
+      });
+
+      // Update status
+      $("#scoreText").textContent = String(computeScore());
+      $("#progressText").textContent = `진행: ${computeProgress()}/${QUIZ.length}`;
+
+      $("#clearFilterBtn").disabled = !state.filterWrongOnly;
+    }
+
+    function buildPassageHtml(q){
+      let out = "";
+      for(let i=0;i<q.blanks.length;i++){
+        out += highlightText(q, q.passage[i]);
+        out += renderBlankWidget(q, q.blanks[i]);
+      }
+      out += highlightText(q, q.passage[q.blanks.length]);
+      return out;
+    }
+
+    function renderBlankWidget(q, blank){
+      const key = getKey(q.id, blank.key);
+      const saved = state.answers[key] ?? "";
+
+      if(state.inputMode === "type"){
+        return `
+          <span class="blank">
+            <input type="text"
+              data-blank="${escapeHtml(blank.key)}"
+              value="${escapeHtml(saved)}"
+              placeholder="${state.explainLang==="ko" ? "여기에 입력" : "Nhập ở đây"}"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              aria-label="${escapeHtml(blank.label)}"
+            />
+          </span>
+        `;
+      }
+
+      const opts = blank.options.map(v => {
+        const sel = v === saved ? "selected" : "";
+        return `<option value="${escapeHtml(v)}" ${sel}>${escapeHtml(v)}</option>`;
+      }).join("");
+
+      return `
+        <span class="blank">
+          <select data-blank="${escapeHtml(blank.key)}" aria-label="${escapeHtml(blank.label)}">
+            <option value="" ${saved==="" ? "selected":""} disabled>${state.explainLang==="ko" ? "선택" : "Chọn"}</option>
+            ${opts}
+          </select>
+        </span>
+      `;
+    }
+
+    // -------------------------
+    // Checking
+    // -------------------------
+    function checkQuestion(qId){
+      const q = QUIZ.find(x=>x.id===qId);
+      if(!q) return;
+
+      const perBlank = q.blanks.map((b, idx)=>{
+        const value = state.answers[getKey(q.id, b.key)] ?? "";
+        return isCorrect(q, idx, value);
+      });
+
+      const ok = perBlank.every(Boolean);
+      state.checked[`q${q.id}`] = { ok, perBlank, ts: Date.now() };
+      saveState();
+      render();
+
+      const card = document.querySelector(`.card[data-qid="${qId}"]`);
+      card?.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function gradeAll(){
+      QUIZ.forEach(q => checkQuestion(q.id));
+    }
+
+    function clearQuestion(qId){
+      const q = QUIZ.find(x=>x.id===qId);
+      if(!q) return;
+      q.blanks.forEach(b=>{
+        delete state.answers[getKey(q.id, b.key)];
+      });
+      delete state.checked[`q${q.id}`];
+      saveState();
+      render();
+    }
+
+    function showAnswer(qId){
+      const q = QUIZ.find(x=>x.id===qId);
+      if(!q) return;
+      q.blanks.forEach(b=>{
+        state.answers[getKey(q.id, b.key)] = b.correct[0];
+      });
+      saveState();
+      render();
+    }
+
+    // -------------------------
+    // Study Modal (with flashcards)
+    // -------------------------
+    let modalQId = null;
+    let modalTab = "vocab"; // vocab|tips|explain|cards
+    let cardPool = [];
+    let currentCard = null;
+    let cardReveal = false;
+
+    function openStudyModal(qId, tab="vocab"){
+      modalQId = qId;
+      modalTab = tab;
+      $("#modalBackdrop").classList.add("open");
+      $("#modalBackdrop").setAttribute("aria-hidden","false");
+      renderModal();
+    }
+    function closeStudyModal(){
+      $("#modalBackdrop").classList.remove("open");
+      $("#modalBackdrop").setAttribute("aria-hidden","true");
+      modalQId = null;
+      cardPool = [];
+      currentCard = null;
+      cardReveal = false;
+    }
+
+    function renderModal(){
+      const lang = state.explainLang;
+      const isGlobal = (modalQId === "global");
+      const isFav = (modalQId === "fav");
+
+      if(isGlobal){
+        $("#modalTitle").textContent = (lang==="ko") ? "단어장/요령 (전체)" : "Từ vựng/Mẹo (Tất cả)";
+      }else if(isFav){
+        $("#modalTitle").textContent = (lang==="ko") ? "내 단어장 (즐겨찾기)" : "Từ của tôi (Yêu thích)";
+      }else{
+        const q = QUIZ.find(x=>x.id===modalQId);
+        $("#modalTitle").textContent = (lang==="ko") ? `학습 (문항 ${q.id})` : `Học (Câu ${q.id})`;
+      }
+
+      // tabs state
+      const tabs = { vocab: $("#tabVocab"), tips: $("#tabTips"), explain: $("#tabExplain"), cards: $("#tabCards") };
+      Object.entries(tabs).forEach(([k, el])=>{
+        el.setAttribute("aria-selected", String(modalTab === k));
+      });
+
+      // render body
+      if(isGlobal) renderModalBodyGlobal(lang, false);
+      else if(isFav) renderModalBodyGlobal(lang, true);
+      else {
+        const q = QUIZ.find(x=>x.id===modalQId);
+        renderModalBodyPerQuestion(q, lang);
+      }
+    }
+
+    function renderModalBodyPerQuestion(q, lang){
+      const body = $("#modalBody");
+      const data = q.study[lang];
+
+      if(modalTab === "vocab"){
+        body.innerHTML = `
+          <p class="kicker">${lang==="ko" ? "주요 어휘/표현" : "Từ vựng/cụm quan trọng"}</p>
+          <div class="list">
+            ${data.vocab.map(([w, d])=>`
+              <div class="item">
+                <b>${escapeHtml(w)}</b>
+                <p class="desc">${escapeHtml(d)}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else if(modalTab === "tips"){
+        body.innerHTML = `
+          <p class="kicker">${lang==="ko" ? "빈칸 추론 요령" : "Mẹo suy luận chỗ trống"}</p>
+          <div class="list">
+            ${data.tips.map(t=>`
+              <div class="item">
+                <b>${lang==="ko" ? "포인트" : "Điểm cần nhớ"}</b>
+                <p class="desc">${escapeHtml(t)}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else if(modalTab === "explain"){
+        const correctPreview = q.blanks.map((b,i)=>`${i+1}) ${b.correct[0]}`).join(" / ");
+        body.innerHTML = `
+          <p class="kicker">${lang==="ko" ? "정답과 이유" : "Đáp án & lý do"}</p>
+          <div class="item">
+            <b>${lang==="ko" ? "정답" : "Đáp án"}</b>
+            <p class="desc">${escapeHtml(correctPreview)}</p>
+          </div>
+          <div class="list" style="margin-top:10px">
+            ${data.explain.map(t=>`
+              <div class="item">
+                <b>${lang==="ko" ? "해설" : "Giải thích"}</b>
+                <p class="desc">${escapeHtml(t)}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else {
+        renderFlashcards(body, collectCardsForQuestion(q, lang), lang);
+      }
+    }
+
+    function collectCardsForQuestion(q, lang){
+      const items = (q.terms || []).map(t=>({
+        qid: q.id,
+        match: t.match,
+        head: t[lang].head,
+        desc: t[lang].desc
+      }));
+      return items;
+    }
+
+    function collectCardsGlobal(lang, favoritesOnly){
+      const items = [];
+      for(const q of QUIZ){
+        for(const t of (q.terms||[])){
+          const fav = isBookmarked(q.id, t.match);
+          if(favoritesOnly && !fav) continue;
+          items.push({
+            qid: q.id,
+            match: t.match,
+            head: t[lang].head,
+            desc: t[lang].desc
+          });
+        }
+      }
+      return items;
+    }
+
+    function renderModalBodyGlobal(lang, favoritesOnly){
+      const body = $("#modalBody");
+
+      if(modalTab === "vocab"){
+        const items = collectCardsGlobal(lang, favoritesOnly);
+
+        body.innerHTML = `
+          <p class="kicker">${lang==="ko" ? (favoritesOnly ? "즐겨찾기 어휘/표현" : "전체 어휘/표현") : (favoritesOnly ? "Từ/cụm yêu thích" : "Tất cả từ/cụm")}</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+            <input id="vocabSearch" type="text" placeholder="${lang==="ko" ? "검색 (예: 온도, 반면에, 바탕으로)" : "Tìm (vd: 온도, 반면에, 바탕으로)"}" style="max-width:520px" />
+            <button class="btn" type="button" id="vocabSearchBtn">${lang==="ko" ? "검색" : "Tìm"}</button>
+            <button class="btn secondary" type="button" id="vocabSearchClearBtn">${lang==="ko" ? "지우기" : "Xóa"}</button>
+          </div>
+          <div class="list" id="vocabList">
+            ${items.map(it=>{
+              const starred = isBookmarked(it.qid, it.match);
+              return `
+                <div class="item">
+                  <b>${escapeHtml(`[${it.qid}] ${it.match}`)} <span style="float:right;">${starred ? "★" : "☆"}</span></b>
+                  <p class="desc"><b style="display:inline; font-weight:900">${escapeHtml(it.head)}</b> — ${escapeHtml(it.desc)}</p>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                    <button class="btn" type="button" data-act="openTerm" data-qid="${it.qid}" data-match="${escapeHtml(it.match)}">${lang==="ko" ? "열기" : "Mở"}</button>
+                    <button class="btn secondary" type="button" data-act="star" data-qid="${it.qid}" data-match="${escapeHtml(it.match)}">${starred ? (lang==="ko" ? "즐겨찾기 해제" : "Bỏ yêu thích") : (lang==="ko" ? "즐겨찾기" : "Yêu thích")}</button>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+
+        // search filter
+        const input = $("#vocabSearch");
+        const list = $("#vocabList");
+
+        const doFilter = ()=>{
+          const q = norm(input.value);
+          const itemsDom = [...list.querySelectorAll(".item")];
+          itemsDom.forEach(it=>{
+            const text = norm(it.textContent);
+            it.style.display = (q==="" || text.includes(q)) ? "" : "none";
+          });
+        };
+        $("#vocabSearchBtn").onclick = doFilter;
+        input.oninput = doFilter;
+        $("#vocabSearchClearBtn").onclick = ()=>{ input.value=""; doFilter(); };
+
+        // actions inside list
+        list.addEventListener("click", (e)=>{
+          const btn = e.target.closest("button");
+          if(!btn) return;
+          const act = btn.dataset.act;
+          const qid = Number(btn.dataset.qid);
+          const match = btn.dataset.match;
+          if(act === "openTerm"){
+            openTermSheet(qid, match);
+          }
+          if(act === "star"){
+            toggleBookmark(qid, match);
+            renderModal(); // refresh list
+          }
+        });
+
+      } else if(modalTab === "tips"){
+        // aggregate tips
+        const tips = [];
+        QUIZ.forEach(q=>{
+          q.study[lang].tips.forEach(t=> tips.push(`(${q.id}) ${t}`));
+        });
+        body.innerHTML = `
+          <p class="kicker">${lang==="ko" ? "전체 추론 요령" : "Tổng hợp mẹo suy luận"}</p>
+          <div class="list">
+            ${tips.map(t=>`
+              <div class="item">
+                <b>${lang==="ko" ? "요령" : "Mẹo"}</b>
+                <p class="desc">${escapeHtml(t)}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else if(modalTab === "explain"){
+        body.innerHTML = `
+          <div class="item">
+            <b>${lang==="ko" ? "안내" : "Ghi chú"}</b>
+            <p class="desc">${lang==="ko"
+              ? "정답 해설은 문항별 ‘학습’에서 확인하세요."
+              : "Hãy xem giải thích đáp án trong phần ‘Học’ của từng câu."}</p>
+          </div>
+        `;
+      } else {
+        const pool = collectCardsGlobal(lang, favoritesOnly);
+        renderFlashcards(body, pool, lang);
+      }
+    }
+
+    function renderFlashcards(bodyEl, pool, lang){
+      cardPool = pool.slice();
+      if(cardPool.length === 0){
+        bodyEl.innerHTML = `
+          <div class="item">
+            <b>${lang==="ko" ? "플래시카드" : "Flashcards"}</b>
+            <p class="desc">${lang==="ko" ? "카드가 없습니다. (즐겨찾기 또는 전체 단어장을 확인하세요.)" : "Không có thẻ. (Hãy kiểm tra danh sách từ/cụm.)"}</p>
+          </div>
+        `;
+        return;
+      }
+
+      // pick a card if none
+      if(!currentCard){
+        currentCard = cardPool[Math.floor(Math.random()*cardPool.length)];
+        cardReveal = false;
+      }
+
+      const starred = isBookmarked(currentCard.qid, currentCard.match);
+
+      bodyEl.innerHTML = `
+        <p class="kicker">${lang==="ko" ? "표현을 보고 뜻을 떠올린 뒤 ‘정답 보기’를 누르세요." : "Nhìn cụm từ, đoán nghĩa rồi bấm ‘Xem đáp án’."}</p>
+        <div class="item">
+          <b>${escapeHtml(`[${currentCard.qid}] ${currentCard.match}`)} <span style="float:right">${starred ? "★" : "☆"}</span></b>
+          <p class="desc" style="font-size:14px; color: var(--text); font-weight:950; margin-top:8px;">
+            ${escapeHtml(currentCard.head)}
+          </p>
+          <div class="item" style="margin-top:10px; background: var(--card);">
+            <b>${lang==="ko" ? "의미" : "Nghĩa"}</b>
+            <p class="desc" id="cardMeaning">${cardReveal ? escapeHtml(currentCard.desc) : (lang==="ko" ? "가려짐(정답 보기)" : "Đang ẩn (Xem đáp án)")}</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+            <button class="btn primary" type="button" id="revealBtn">${lang==="ko" ? "정답 보기" : "Xem đáp án"}</button>
+            <button class="btn" type="button" id="nextBtn">${lang==="ko" ? "다음" : "Tiếp"}</button>
+            <button class="btn secondary" type="button" id="starCardBtn">${starred ? (lang==="ko" ? "즐겨찾기 해제" : "Bỏ yêu thích") : (lang==="ko" ? "즐겨찾기" : "Yêu thích")}</button>
+          </div>
+        </div>
+      `;
+
+      $("#revealBtn").onclick = ()=>{
+        cardReveal = true;
+        $("#cardMeaning").textContent = currentCard.desc;
+      };
+      $("#nextBtn").onclick = ()=>{
+        currentCard = cardPool[Math.floor(Math.random()*cardPool.length)];
+        cardReveal = false;
+        renderModal(); // re-render cards tab
+      };
+      $("#starCardBtn").onclick = ()=>{
+        toggleBookmark(currentCard.qid, currentCard.match);
+        renderModal();
+      };
+    }
+
+    // -------------------------
+    // Term Sheet (tap on passage)
+    // -------------------------
+    function openTermSheet(qId, match){
+      const q = QUIZ.find(x=>x.id===qId);
+      if(!q) return;
+      const term = (q.terms || []).find(t=>t.match === match);
+      if(!term) return;
+
+      const lang = state.explainLang;
+      const data = term[lang];
+      const starred = isBookmarked(qId, match);
+
+      $("#sheetTitle").textContent = (lang==="ko") ? "표현 학습" : "Học cụm từ";
+      $("#sheetSub").textContent = (lang==="ko")
+        ? `문항 ${qId} · 터치한 표현`
+        : `Câu ${qId} · Cụm đã chạm`;
+
+      // build a short example (original text with blank markers)
+      const example = q.passage.join(" (빈칸) ");
+
+      $("#sheetBody").innerHTML = `
+        <div class="sheetTerm">
+          <div class="termChip">${escapeHtml(match)}</div>
+          <div class="item" style="margin:0; background: var(--card2);">
+            <b>${escapeHtml(data.head)}</b>
+            <p class="desc">${escapeHtml(data.desc)}</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+            <button class="starBtn" type="button" id="sheetStarBtn">${starred ? "★ " : "☆ "}${lang==="ko" ? "내 단어장" : "Yêu thích"}</button>
+            <button class="btn" type="button" id="openStudyHereBtn">${lang==="ko" ? "이 문항 학습 열기" : "Mở học (câu này)"}</button>
+          </div>
+          <div class="sheetExample">
+            <b style="display:block; color:var(--text); margin-bottom:6px;">${lang==="ko" ? "문맥(예문)" : "Ngữ cảnh"}</b>
+            ${escapeHtml(example)}
+          </div>
+        </div>
+      `;
+
+      $("#sheetStarBtn").onclick = ()=>{
+        toggleBookmark(qId, match);
+        openTermSheet(qId, match); // refresh
+        render();                 // refresh stars elsewhere
+      };
+      $("#openStudyHereBtn").onclick = ()=>{
+        closeTermSheet();
+        openStudyModal(qId, "vocab");
+      };
+
+      $("#sheetBackdrop").classList.add("open");
+      $("#sheetBackdrop").setAttribute("aria-hidden","false");
+    }
+
+    function closeTermSheet(){
+      $("#sheetBackdrop").classList.remove("open");
+      $("#sheetBackdrop").setAttribute("aria-hidden","true");
+    }
+
+    // -------------------------
+    // TTS (optional)
+    // -------------------------
+    function speakKorean(qId){
+      const q = QUIZ.find(x=>x.id===qId);
+      if(!q) return;
+      const text = q.passage.join(" (빈칸) ");
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "ko-KR";
+        u.rate = 1.0;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch{
+        alert(state.explainLang==="ko"
+          ? "이 기기/브라우저에서 음성 읽기가 지원되지 않습니다."
+          : "Thiết bị/trình duyệt này không hỗ trợ đọc giọng nói.");
+      }
+    }
+
+    // -------------------------
+    // UI Events
+    // -------------------------
+    $("#langKoBtn").addEventListener("click", ()=>{
+      state.explainLang = "ko";
+      saveState();
+      render();
+      if($("#modalBackdrop").classList.contains("open")) renderModal();
+    });
+    $("#langViBtn").addEventListener("click", ()=>{
+      state.explainLang = "vi";
+      saveState();
+      render();
+      if($("#modalBackdrop").classList.contains("open")) renderModal();
+    });
+
+    $("#modeSelectBtn").addEventListener("click", ()=>{
+      state.inputMode = "select";
+      saveState();
+      render();
+    });
+    $("#modeTypeBtn").addEventListener("click", ()=>{
+      state.inputMode = "type";
+      saveState();
+      render();
+    });
+
+    $("#highlightBtn").addEventListener("click", ()=>{
+      state.highlightOn = !state.highlightOn;
+      saveState();
+      render();
+    });
+
+    $("#themeBtn").addEventListener("click", ()=>{
+      state.theme = (state.theme === "dark") ? "light" : "dark";
+      saveState();
+      render();
+      if($("#modalBackdrop").classList.contains("open")) renderModal();
+    });
+
+    $("#gradeAllBtn").addEventListener("click", ()=>{
+      gradeAll();
+      const ok = computeScore();
+      alert(state.explainLang==="ko"
+        ? `전체 채점 완료: ${ok}/${QUIZ.length} 정답`
+        : `Chấm xong: đúng ${ok}/${QUIZ.length}`);
+    });
+
+    $("#resetBtn").addEventListener("click", ()=>{
+      if(!confirm(state.explainLang==="ko" ? "정말 초기화할까요?" : "Bạn chắc chắn muốn đặt lại?")) return;
+      state = structuredClone(defaultState);
+      saveState();
+      render();
+    });
+
+    $("#openVocabBtn").addEventListener("click", ()=>{
+      modalQId = "global";
+      modalTab = "vocab";
+      $("#modalBackdrop").classList.add("open");
+      $("#modalBackdrop").setAttribute("aria-hidden","false");
+      renderModal();
+    });
+
+    $("#openFavBtn").addEventListener("click", ()=>{
+      modalQId = "fav";
+      modalTab = "vocab";
+      $("#modalBackdrop").classList.add("open");
+      $("#modalBackdrop").setAttribute("aria-hidden","false");
+      renderModal();
+    });
+
+    $("#reviewWrongBtn").addEventListener("click", ()=>{
+      state.filterWrongOnly = true;
+      saveState();
+      render();
+    });
+    $("#clearFilterBtn").addEventListener("click", ()=>{
+      state.filterWrongOnly = false;
+      saveState();
+      render();
+    });
+
+    $("#closeModalBtn").addEventListener("click", closeStudyModal);
+    $("#modalBackdrop").addEventListener("click", (e)=>{
+      if(e.target === $("#modalBackdrop")) closeStudyModal();
+    });
+
+    $("#closeSheetBtn").addEventListener("click", closeTermSheet);
+    $("#sheetBackdrop").addEventListener("click", (e)=>{
+      if(e.target === $("#sheetBackdrop")) closeTermSheet();
+    });
+
+    window.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape"){
+        if($("#sheetBackdrop").classList.contains("open")) closeTermSheet();
+        if($("#modalBackdrop").classList.contains("open")) closeStudyModal();
+      }
+    });
+
+    $("#tabVocab").addEventListener("click", ()=>{ modalTab="vocab"; renderModal(); });
+    $("#tabTips").addEventListener("click", ()=>{ modalTab="tips"; renderModal(); });
+    $("#tabExplain").addEventListener("click", ()=>{
+      // global/fav still can show 안내 only
+      modalTab="explain"; renderModal();
+    });
+    $("#tabCards").addEventListener("click", ()=>{
+      modalTab="cards";
+      currentCard = null;
+      cardReveal = false;
+      renderModal();
+    });
+
+    // -------------------------
+    // Initial render
+    // -------------------------
+    render();
+  </script>
+</body>
+</html>
