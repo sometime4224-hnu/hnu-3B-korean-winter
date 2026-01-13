@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>빈칸 추론 퀴즈 (단일 지문)</title>
+  <style>
+    :root{
+      --bg:#FFF7ED;--card:#fff;--card2:#FFF1E3;--text:#1F2937;--muted:#6B7280;--line:#F2D8C2;
+      --accent:#F97316;--accent2:#FB923C;--good:#10B981;--bad:#EF4444;--chip:#FFF3E8;
+      --shadow:0 10px 26px rgba(31,41,55,.10);--r:18px;--r2:14px;
+    }
+    [data-theme="dark"]{
+      --bg:#1A1410;--card:#231B16;--card2:#2B211B;--text:#F9FAFB;--muted:#B9B4AE;--line:#3A2D25;
+      --accent:#FB923C;--accent2:#FDBA74;--good:#34D399;--bad:#FB7185;--chip:#2A2019;--shadow:0 12px 30px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;line-height:1.6;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+    header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    [data-theme="dark"] header{background:rgba(26,20,16,.72)}
+    .head{max-width:860px;margin:0 auto;padding:12px 14px 10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    h1{margin:0;font-size:18px;letter-spacing:-.2px}
+    .sub{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--chip)}
+    .seg button,.btn{appearance:none;cursor:pointer;user-select:none;min-height:40px;padding:10px 12px;border-radius:999px;font-weight:900;font-size:13px;line-height:1}
+    .seg button{border:none;background:transparent;border-right:1px solid var(--line)}
+    .seg button:last-child{border-right:none}
+    .seg button[aria-pressed="true"]{background:linear-gradient(135deg,rgba(249,115,22,.22),rgba(251,146,60,.18))}
+    .btn{border:1px solid var(--line);background:var(--chip);color:var(--text)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#111827}
+    .btn.secondary{background:var(--card2)}
+    .wrap{max-width:860px;margin:0 auto;padding:14px 14px 110px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:12px 0}
+    .status{display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
+    .pill{padding:7px 10px;background:var(--chip);border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;gap:8px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+    .cardHead{padding:14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--card2),var(--card));display:flex;justify-content:space-between;gap:10px}
+    .qno{margin:0;color:var(--muted);font-size:13px}
+    .qtitle{margin:2px 0 0;font-size:15px;font-weight:950;letter-spacing:-.2px}
+    .cardBody{padding:14px}
+    .legend{margin:0 0 10px;padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:var(--card2);color:var(--muted);font-size:13px}
+    .passage{padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:var(--r2)}
+    .hl{display:inline-block;padding:0 .18em;margin:0 .02em;border-radius:10px;background:rgba(249,115,22,.18);border-bottom:2px dotted rgba(249,115,22,.65);cursor:pointer;transition:transform .08s ease}
+    [data-theme="dark"] .hl{background:rgba(251,146,60,.20);border-bottom-color:rgba(251,146,60,.70)}
+    .hl:active{transform:scale(.98)}
+    .blank{display:inline-flex;align-items:center;gap:8px;margin:0 4px}
+    select,input[type="text"]{width:100%;max-width:340px;min-height:44px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:900;outline:none}
+    select{cursor:pointer}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .result{margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-size:13px}
+    .result.good{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.12);color:var(--text)}
+    .result.bad{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.10);color:var(--text)}
+    .bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.80);border-top:1px solid var(--line);backdrop-filter:blur(10px);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+    [data-theme="dark"] .bottom{background:rgba(26,20,16,.72)}
+    .bottomIn{max-width:860px;margin:0 auto;display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+    /* Modal */
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+    .backdrop.open{display:flex}
+    .modal{width:min(860px,100%);max-height:86vh;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+    .modalTop{padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--card2),var(--card));display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .modalTitle{margin:0;font-size:15px;font-weight:950;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .modalBody{padding:14px;overflow:auto;-webkit-overflow-scrolling:touch}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .tab{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:var(--chip);color:var(--text);font-weight:950;font-size:13px;cursor:pointer}
+    .tab[aria-selected="true"]{background:linear-gradient(135deg,rgba(249,115,22,.22),rgba(251,146,60,.18));border-color:rgba(249,115,22,.35)}
+    .list{display:grid;gap:10px}
+    .item{padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card2)}
+    .item b{display:block;font-size:14px;margin-bottom:4px}
+    .item .desc{margin:0;color:var(--muted);font-size:13px}
+    /* Term sheet */
+    .sheetBack{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:60;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+    .sheetBack.open{display:flex}
+    .sheet{width:min(680px,100%);background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+    .sheetTop{padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(249,115,22,.16),rgba(251,146,60,.10));display:flex;justify-content:space-between;gap:10px}
+    .sheetTitle{margin:0;font-size:15px;font-weight:950}
+    .sheetBody{padding:14px}
+    .chip{display:inline-flex;align-items:center;gap:8px;width:fit-content;padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:var(--chip);font-weight:950}
+    @media (max-width:420px){h1{font-size:16px} select,input[type="text"]{max-width:100%}}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="head">
+      <div style="min-width:0">
+        <h1 id="appTitle">빈칸 추론 퀴즈</h1>
+        <p class="sub" id="appSub">하이라이트된 표현을 터치하면 뜻/요령을 확인할 수 있습니다. (설명 KO/VI 전환)</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="설명 언어">
+          <button id="langKo" aria-pressed="true" type="button">설명: KO</button>
+          <button id="langVi" aria-pressed="false" type="button">Giải thích: VI</button>
+        </div>
+        <div class="seg" role="group" aria-label="입력 방식">
+          <button id="modeSel" aria-pressed="true" type="button">선택</button>
+          <button id="modeTyp" aria-pressed="false" type="button">직접입력</button>
+        </div>
+        <button class="btn" id="hlBtn" type="button">하이라이트</button>
+        <button class="btn secondary" id="themeBtn" type="button">테마</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="row">
+      <div class="status">
+        <span class="pill"><span class="dot"></span><span id="progress">진행: 0/1</span></span>
+        <span class="pill">정답: <b id="score">0</b>/1</span>
+        <span class="pill">표현 터치: <b id="hlState">ON</b></span>
+        <span class="pill">내 단어장: <b id="favCount">0</b></span>
+      </div>
+      <div class="status">
+        <button class="btn" id="studyBtn" type="button">단어/요령</button>
+        <button class="btn" id="favBtn" type="button">내 단어장</button>
+        <button class="btn" id="resetBtn" type="button">초기화</button>
+      </div>
+    </div>
+
+    <section class="card" id="card">
+      <div class="cardHead">
+        <div style="min-width:0">
+          <p class="qno" id="qno">문항</p>
+          <p class="qtitle" id="qtitle">제목</p>
+        </div>
+        <div class="status">
+          <button class="btn secondary" id="ttsBtn" type="button">읽기</button>
+        </div>
+      </div>
+      <div class="cardBody">
+        <div class="legend" id="legend"></div>
+        <div class="passage"><p id="passage"></p></div>
+
+        <div class="actions">
+          <button class="btn primary" id="checkBtn" type="button">채점</button>
+          <button class="btn" id="showBtn" type="button">정답 보기</button>
+          <button class="btn secondary" id="clearBtn" type="button">지우기</button>
+        </div>
+
+        <div class="result" id="result"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="bottom">
+    <div class="bottomIn">
+      <button class="btn primary" id="gradeAllBtn" type="button">채점(1문항)</button>
+      <button class="btn" id="openExplainBtn" type="button">정답 해설</button>
+      <button class="btn secondary" id="openCardsBtn" type="button">플래시카드</button>
+    </div>
+  </div>
+
+  <!-- Study Modal -->
+  <div class="backdrop" id="modalBack" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <h2 class="modalTitle" id="modalTitle">학습</h2>
+        <button class="btn" id="closeModal" type="button">닫기</button>
+      </div>
+      <div class="modalBody">
+        <div class="tabs">
+          <button class="tab" id="tabVocab" type="button" aria-selected="true">어휘/표현</button>
+          <button class="tab" id="tabTips" type="button" aria-selected="false">추론 요령</button>
+          <button class="tab" id="tabExplain" type="button" aria-selected="false">정답 해설</button>
+          <button class="tab" id="tabCards" type="button" aria-selected="false">플래시카드</button>
+        </div>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Term Sheet -->
+  <div class="sheetBack" id="sheetBack" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheetTop">
+        <div>
+          <p class="sheetTitle" id="sheetTitle">표현 학습</p>
+          <p class="sub" id="sheetSub" style="margin:4px 0 0;font-size:12px">터치한 표현의 뜻/요령</p>
+        </div>
+        <button class="btn" id="closeSheet" type="button">닫기</button>
+      </div>
+      <div class="sheetBody" id="sheetBody"></div>
+    </div>
+  </div>
+
+  <script>
+    /* (A) 여기에 Q 데이터 붙여넣기 */
+    const Q = null; // <-- 반드시 교체
+
+    /* ====== 앱 로직(공통) ====== */
+    const LS_KEY = () => "blank_infer_single_q" + Q.id + "_v1";
+    const defaultState = {theme:"light",lang:"ko",mode:"select",hl:true,answers:{},checked:null,bookmarks:{}};
+    let state = load();
+
+    function load(){ try{ const raw=localStorage.getItem(LS_KEY()); return raw?({...defaultState,...JSON.parse(raw)}):({...defaultState}); }catch{return({...defaultState});}}
+    function save(){ try{ localStorage.setItem(LS_KEY(), JSON.stringify(state)); }catch{} }
+
+    const $ = (s)=>document.querySelector(s);
+    const esc = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+    const norm = (s)=>String(s||"").trim().replaceAll(/\s+/g,"").replaceAll(/[.,!?]/g,"");
+
+    function isCorrect(i,val){ return Q.blanks[i].correct.some(c=>norm(c)===norm(val)); }
+    function favKey(match){ return "q"+Q.id+"|"+match; }
+    function isFav(match){ return !!state.bookmarks[favKey(match)]; }
+    function toggleFav(match){ const k=favKey(match); state.bookmarks[k]=!state.bookmarks[k]; if(!state.bookmarks[k]) delete state.bookmarks[k]; save(); render(); }
+
+    function highlight(text){
+      if(!state.hl) return esc(text);
+      const terms = (Q.terms||[]).slice().sort((a,b)=>b.match.length-a.match.length);
+      let i=0,out="";
+      while(i<text.length){
+        let found=null;
+        for(const t of terms){ if(text.startsWith(t.match,i)){ found=t; break; } }
+        if(found){
+          out += `<span class="hl" role="button" tabindex="0" data-match="${esc(found.match)}">${esc(found.match)}</span>`;
+          i += found.match.length;
+        }else{ out += esc(text[i]); i++; }
+      }
+      return out;
+    }
+
+    function blankWidget(blank){
+      const key=blank.key;
+      const saved=state.answers[key] ?? "";
+      if(state.mode==="type"){
+        return `<span class="blank"><input type="text" data-blank="${esc(key)}" value="${esc(saved)}" placeholder="${state.lang==="ko"?"여기에 입력":"Nhập ở đây"}" autocomplete="off" spellcheck="false"/></span>`;
+      }
+      const opts = blank.options.map(v=>`<option value="${esc(v)}"${v===saved?" selected":""}>${esc(v)}</option>`).join("");
+      return `<span class="blank"><select data-blank="${esc(key)}"><option value="" disabled ${saved===""?"selected":""}>${state.lang==="ko"?"선택":"Chọn"}</option>${opts}</select></span>`;
+    }
+
+    function buildPassage(){
+      let out="";
+      for(let i=0;i<Q.blanks.length;i++){
+        out += highlight(Q.passage[i]);
+        out += blankWidget(Q.blanks[i]);
+      }
+      out += highlight(Q.passage[Q.blanks.length]);
+      return out;
+    }
+
+    function updateTabs(tab){
+      const ids=["Vocab","Tips","Explain","Cards"];
+      ids.forEach(x=>$("#tab"+x).setAttribute("aria-selected", String(tab===x.toLowerCase())));
+    }
+
+    let modalTab="vocab";
+    let cardPool=[];
+    let currentCard=null;
+    let revealed=false;
+
+    function openModal(tab="vocab"){ modalTab=tab; $("#modalBack").classList.add("open"); $("#modalBack").setAttribute("aria-hidden","false"); renderModal(); }
+    function closeModal(){ $("#modalBack").classList.remove("open"); $("#modalBack").setAttribute("aria-hidden","true"); }
+    function renderModal(){
+      updateTabs(modalTab);
+      const lang=state.lang;
+      $("#modalTitle").textContent = (lang==="ko") ? `학습 (문항 ${Q.id})` : `Học (Câu ${Q.id})`;
+      const data = Q.study[lang];
+      const body=$("#modalBody");
+
+      if(modalTab==="vocab"){
+        body.innerHTML = `<div class="list">${data.vocab.map(([w,d])=>`<div class="item"><b>${esc(w)}</b><p class="desc">${esc(d)}</p></div>`).join("")}</div>`;
+      } else if(modalTab==="tips"){
+        body.innerHTML = `<div class="list">${data.tips.map(t=>`<div class="item"><b>${lang==="ko"?"포인트":"Điểm"}</b><p class="desc">${esc(t)}</p></div>`).join("")}</div>`;
+      } else if(modalTab==="explain"){
+        const ans = Q.blanks.map((b,i)=>`${i+1}) ${b.correct[0]}`).join(" / ");
+        body.innerHTML = `<div class="item"><b>${lang==="ko"?"정답":"Đáp án"}</b><p class="desc">${esc(ans)}</p></div>
+          <div class="list" style="margin-top:10px">${data.explain.map(t=>`<div class="item"><b>${lang==="ko"?"해설":"Giải thích"}</b><p class="desc">${esc(t)}</p></div>`).join("")}</div>`;
+      } else {
+        // cards
+        cardPool = (Q.terms||[]).map(t=>({match:t.match, head:t[lang].head, desc:t[lang].desc}));
+        if(cardPool.length===0){
+          body.innerHTML = `<div class="item"><b>Flashcards</b><p class="desc">${lang==="ko"?"카드가 없습니다.":"Không có thẻ."}</p></div>`; return;
+        }
+        if(!currentCard){ currentCard = cardPool[Math.floor(Math.random()*cardPool.length)]; revealed=false; }
+        const starred = isFav(currentCard.match);
+        body.innerHTML = `
+          <div class="item">
+            <b>${esc(currentCard.match)} <span style="float:right">${starred?"★":"☆"}</span></b>
+            <p class="desc" style="color:var(--text);font-weight:950;margin-top:8px">${esc(currentCard.head)}</p>
+            <div class="item" style="margin-top:10px;background:var(--card)">
+              <b>${lang==="ko"?"의미":"Nghĩa"}</b>
+              <p class="desc" id="cardMeaning">${revealed?esc(currentCard.desc):(lang==="ko"?"가려짐(정답 보기)":"Đang ẩn (Xem đáp án)")}</p>
+            </div>
+            <div class="actions" style="margin-top:12px">
+              <button class="btn primary" id="revealBtn" type="button">${lang==="ko"?"정답 보기":"Xem đáp án"}</button>
+              <button class="btn" id="nextBtn" type="button">${lang==="ko"?"다음":"Tiếp"}</button>
+              <button class="btn secondary" id="starBtn" type="button">${starred?(lang==="ko"?"즐겨찾기 해제":"Bỏ yêu thích"):(lang==="ko"?"즐겨찾기":"Yêu thích")}</button>
+            </div>
+          </div>`;
+        $("#revealBtn").onclick=()=>{ revealed=true; $("#cardMeaning").textContent=currentCard.desc; };
+        $("#nextBtn").onclick=()=>{ currentCard = cardPool[Math.floor(Math.random()*cardPool.length)]; revealed=false; renderModal(); };
+        $("#starBtn").onclick=()=>{ toggleFav(currentCard.match); renderModal(); };
+      }
+    }
+
+    function openSheet(match){
+      const term = (Q.terms||[]).find(t=>t.match===match);
+      if(!term) return;
+      const lang=state.lang;
+      const starred=isFav(match);
+      const example = Q.passage.join(" (빈칸) ");
+      $("#sheetTitle").textContent = (lang==="ko")?"표현 학습":"Học cụm từ";
+      $("#sheetSub").textContent = (lang==="ko")?`문항 ${Q.id} · 터치한 표현`:`Câu ${Q.id} · Cụm đã chạm`;
+      $("#sheetBody").innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="chip">${esc(match)}</div>
+          <div class="item" style="margin:0">
+            <b>${esc(term[lang].head)}</b>
+            <p class="desc">${esc(term[lang].desc)}</p>
+          </div>
+          <div class="actions" style="margin:0">
+            <button class="btn" id="sheetStar" type="button">${starred?"★ ":"☆ "}${lang==="ko"?"내 단어장":"Yêu thích"}</button>
+            <button class="btn secondary" id="sheetStudy" type="button">${lang==="ko"?"단어/요령 열기":"Mở học"}</button>
+          </div>
+          <div class="item" style="margin:0;background:var(--card2)">
+            <b>${lang==="ko"?"문맥(예문)":"Ngữ cảnh"}</b>
+            <p class="desc">${esc(example)}</p>
+          </div>
+        </div>`;
+      $("#sheetStar").onclick=()=>toggleFav(match);
+      $("#sheetStudy").onclick=()=>{ closeSheet(); openModal("vocab"); };
+      $("#sheetBack").classList.add("open"); $("#sheetBack").setAttribute("aria-hidden","false");
+    }
+    function closeSheet(){ $("#sheetBack").classList.remove("open"); $("#sheetBack").setAttribute("aria-hidden","true"); }
+
+    function check(){
+      const per = Q.blanks.map((b,i)=>isCorrect(i, state.answers[b.key] ?? ""));
+      const ok = per.every(Boolean);
+      state.checked = {ok, per};
+      save(); render();
+    }
+    function showAnswer(){
+      Q.blanks.forEach(b=> state.answers[b.key]=b.correct[0]);
+      save(); render();
+    }
+    function clear(){
+      state.answers={}; state.checked=null; save(); render();
+    }
+    function resetAll(){
+      if(!confirm(state.lang==="ko"?"정말 초기화할까요?":"Bạn chắc chắn muốn đặt lại?")) return;
+      state = {...defaultState}; save(); render();
+    }
+
+    function speak(){
+      const text = Q.passage.join(" (빈칸) ");
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang="ko-KR"; u.rate=1.0;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      }catch{
+        alert(state.lang==="ko"?"이 기기/브라우저에서 음성 읽기가 지원되지 않습니다.":"Thiết bị/trình duyệt này không hỗ trợ đọc giọng nói.");
+      }
+    }
+
+    function render(){
+      if(!Q) { alert("Q 데이터가 없습니다. 템플릿의 (A) 영역에 Q 데이터를 붙여넣으세요."); return; }
+
+      document.body.dataset.theme = state.theme;
+      $("#langKo").setAttribute("aria-pressed", String(state.lang==="ko"));
+      $("#langVi").setAttribute("aria-pressed", String(state.lang==="vi"));
+      $("#modeSel").setAttribute("aria-pressed", String(state.mode==="select"));
+      $("#modeTyp").setAttribute("aria-pressed", String(state.mode==="type"));
+      $("#hlState").textContent = state.hl ? "ON" : "OFF";
+      $("#hlBtn").textContent = state.hl ? "하이라이트" : "하이라이트(꺼짐)";
+      $("#qno").textContent = "문항 " + Q.id;
+      $("#qtitle").textContent = Q.title;
+
+      $("#legend").innerHTML = (state.lang==="ko")
+        ? "<b>학습</b>: 하이라이트된 표현을 터치하면 뜻/요령을 확인할 수 있습니다."
+        : "<b>Học</b>: Chạm vào cụm được tô sáng để xem nghĩa/mẹo.";
+
+      $("#passage").innerHTML = buildPassage();
+
+      // restore values after rebuild
+      Q.blanks.forEach(b=>{
+        const el = document.querySelector(`[data-blank="${CSS.escape(b.key)}"]`);
+        if(el) el.value = state.answers[b.key] ?? "";
+      });
+
+      // result
+      if(!state.checked){
+        $("#progress").textContent = (state.lang==="ko") ? "진행: 0/1" : "Tiến độ: 0/1";
+        $("#score").textContent = "0";
+        $("#result").className = "result";
+        $("#result").textContent = (state.lang==="ko") ? "아직 채점하지 않았습니다." : "Chưa chấm.";
+      } else {
+        $("#progress").textContent = (state.lang==="ko") ? "진행: 1/1" : "Tiến độ: 1/1";
+        $("#score").textContent = state.checked.ok ? "1" : "0";
+        $("#result").className = "result " + (state.checked.ok ? "good" : "bad");
+        const okN = state.checked.per.filter(Boolean).length;
+        $("#result").textContent = state.checked.ok
+          ? (state.lang==="ko" ? "정답입니다." : "Đúng.")
+          : (state.lang==="ko" ? `오답이 있습니다. (${okN}/${Q.blanks.length}개 정답)` : `Có câu sai. (Đúng ${okN}/${Q.blanks.length})`);
+      }
+
+      // favorites count
+      const favN = Object.keys(state.bookmarks).filter(k=>k.startsWith("q"+Q.id+"|")).length;
+      $("#favCount").textContent = String(favN);
+    }
+
+    // events
+    document.addEventListener("change",(e)=>{
+      const t=e.target;
+      if(t?.dataset?.blank){ state.answers[t.dataset.blank]=t.value; save(); }
+    });
+    document.addEventListener("input",(e)=>{
+      const t=e.target;
+      if(t?.dataset?.blank && t.tagName==="INPUT"){ state.answers[t.dataset.blank]=t.value; save(); }
+    });
+    document.addEventListener("click",(e)=>{
+      const hl = e.target.closest(".hl");
+      if(hl){ openSheet(hl.dataset.match); return; }
+    });
+    document.addEventListener("keydown",(e)=>{
+      const el=e.target;
+      if(el?.classList?.contains("hl") && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); openSheet(el.dataset.match); }
+      if(e.key==="Escape"){ if($("#sheetBack").classList.contains("open")) closeSheet(); if($("#modalBack").classList.contains("open")) closeModal(); }
+    });
+
+    $("#langKo").onclick=()=>{ state.lang="ko"; save(); render(); if($("#modalBack").classList.contains("open")) renderModal(); };
+    $("#langVi").onclick=()=>{ state.lang="vi"; save(); render(); if($("#modalBack").classList.contains("open")) renderModal(); };
+
+    $("#modeSel").onclick=()=>{ state.mode="select"; save(); render(); };
+    $("#modeTyp").onclick=()=>{ state.mode="type"; save(); render(); };
+
+    $("#hlBtn").onclick=()=>{ state.hl=!state.hl; save(); render(); };
+    $("#themeBtn").onclick=()=>{ state.theme = (state.theme==="dark")?"light":"dark"; save(); render(); if($("#modalBack").classList.contains("open")) renderModal(); };
+
+    $("#checkBtn").onclick=check;
+    $("#gradeAllBtn").onclick=check;
+    $("#showBtn").onclick=showAnswer;
+    $("#clearBtn").onclick=clear;
+    $("#resetBtn").onclick=resetAll;
+    $("#ttsBtn").onclick=speak;
+
+    $("#studyBtn").onclick=()=>openModal("vocab");
+    $("#openExplainBtn").onclick=()=>openModal("explain");
+    $("#openCardsBtn").onclick=()=>{ currentCard=null; revealed=false; openModal("cards"); };
+
+    $("#favBtn").onclick=()=>{
+      // favorites list in modal(vocab tab) 형태로 표시
+      const lang=state.lang;
+      const favMatches = Object.keys(state.bookmarks).filter(k=>k.startsWith("q"+Q.id+"|")).map(k=>k.split("|")[1]);
+      const data = Q.terms.filter(t=>favMatches.includes(t.match)).map(t=>({m:t.match, h:t[lang].head, d:t[lang].desc}));
+      $("#modalBack").classList.add("open"); $("#modalBack").setAttribute("aria-hidden","false");
+      modalTab="vocab"; updateTabs("vocab");
+      $("#modalTitle").textContent = (lang==="ko")?"내 단어장":"Từ của tôi";
+      $("#modalBody").innerHTML = data.length
+        ? `<div class="list">${data.map(x=>`
+            <div class="item">
+              <b>${esc(x.m)} <span style="float:right">★</span></b>
+              <p class="desc"><b style="display:inline;font-weight:950;color:var(--text)">${esc(x.h)}</b> — ${esc(x.d)}</p>
+              <div class="actions" style="margin-top:10px">
+                <button class="btn" type="button" onclick="(${toggleFav.toString()})(${JSON.stringify(x.m)})">${lang==="ko"?"즐겨찾기 해제":"Bỏ yêu thích"}</button>
+              </div>
+            </div>`).join("")}</div>`
+        : `<div class="item"><b>${lang==="ko"?"비어 있습니다.":"Trống."}</b><p class="desc">${lang==="ko"?"하이라이트 표현을 터치해 ★로 저장하세요.":"Chạm cụm được tô sáng để lưu ★."}</p></div>`;
+    };
+
+    $("#closeModal").onclick=closeModal;
+    $("#modalBack").addEventListener("click",(e)=>{ if(e.target===$("#modalBack")) closeModal(); });
+
+    $("#closeSheet").onclick=closeSheet;
+    $("#sheetBack").addEventListener("click",(e)=>{ if(e.target===$("#sheetBack")) closeSheet(); });
+
+    $("#tabVocab").onclick=()=>{ modalTab="vocab"; renderModal(); };
+    $("#tabTips").onclick=()=>{ modalTab="tips"; renderModal(); };
+    $("#tabExplain").onclick=()=>{ modalTab="explain"; renderModal(); };
+    $("#tabCards").onclick=()=>{ modalTab="cards"; currentCard=null; revealed=false; renderModal(); };
+
+    // init
+    render();
+  </script>
+</body>
+</html>
