@@ -185,8 +185,81 @@
   </div>
 
   <script>
-    /* (A) 여기에 Q 데이터 붙여넣기 */
-    const Q = null; // <-- 반드시 교체
+   const Q = {
+  id: 2,
+  title: "성적과 자기 점검 능력",
+  blanks: [
+    {
+      key: "b1",
+      correct: ["차이가 있는지", "차이가 있는가"],
+      options: ["차이가 있는지", "가격이 얼마인지", "언제 시작했는지", "어디에 있는지"]
+    },
+    {
+      key: "b2",
+      correct: ["능력이 뛰어난 반면", "능력이 뛰어난 반면에", "능력이 뛰어났지만"],
+      options: ["능력이 뛰어난 반면", "능력이 없는 대신", "능력을 잃었기 때문에", "능력이 높아져서"]
+    }
+  ],
+  passage: [
+    "한 방송 프로그램에서 학업 성적이 우수한 학생과 그렇지 않은 학생들 사이에 어떤 (",
+    ") 조사했다. 조사 결과 성적이 우수한 학생들과 그렇지 않은 학생들의 기억력과 아이큐(IQ)는 큰 차이가 없는 것으로 나타났다. 반면에 성적이 우수한 학생들은 자신이 아는 것과 모르는 것을 파악하는 (",
+    ") 성적이 우수하지 않은 학생들은 그 능력이 부족했다."
+  ],
+  terms: [
+    {match:"방송 프로그램", ko:{head:"방송 프로그램", desc:"TV/라디오 등에서 하는 기획된 방송."}, vi:{head:"chương trình", desc:"chương trình phát sóng."}},
+    {match:"학업 성적", ko:{head:"학업 성적", desc:"공부 성적(학업 결과)."}, vi:{head:"thành tích học tập", desc:"kết quả học tập/điểm số."}},
+    {match:"우수한", ko:{head:"우수하다", desc:"매우 좋다/뛰어나다."}, vi:{head:"xuất sắc", desc:"rất tốt, vượt trội."}},
+    {match:"그렇지 않은", ko:{head:"그렇지 않다", desc:"앞에서 말한 정도가 아니다."}, vi:{head:"không như vậy", desc:"không đạt mức như đã nói."}},
+    {match:"조사 결과", ko:{head:"조사 결과", desc:"조사해서 나온 결론/내용."}, vi:{head:"kết quả khảo sát", desc:"kết luận sau khảo sát."}},
+    {match:"큰 차이가 없는", ko:{head:"차이가 없다", desc:"서로 다르지 않다."}, vi:{head:"không khác biệt lớn", desc:"hầu như không khác đáng kể."}},
+    {match:"반면에", ko:{head:"반면에", desc:"대조되는 내용을 이어 줌."}, vi:{head:"ngược lại", desc:"nối ý đối chiếu."}},
+    {match:"파악하는", ko:{head:"파악하다", desc:"확실히 알아보다/이해하다."}, vi:{head:"nắm rõ", desc:"nhận ra rõ, nắm được."}},
+    {match:"능력이 부족했다", ko:{head:"능력이 부족하다", desc:"할 수 있는 힘이 모자라다."}, vi:{head:"thiếu năng lực", desc:"khả năng chưa đủ."}}
+  ],
+  study: {
+    ko: {
+      vocab: [
+        ["학업 성적", "공부 성적."],
+        ["우수하다 / 그렇지 않다", "아주 좋다 / 그 정도가 아니다."],
+        ["조사하다", "알아보기 위해 자료를 모으다."],
+        ["-로 나타나다", "결과가 그렇게 드러나다."],
+        ["반면에", "앞과 다른 점(대조)을 말할 때."],
+        ["파악하다", "확실히 알아보다."],
+        ["능력 / 부족하다", "할 수 있는 힘 / 모자라다."]
+      ],
+      tips: [
+        "빈칸 1: ‘두 집단 사이’ + 뒤에 비교 결과 → ‘차이가 있는지’가 자연스럽다.",
+        "빈칸 2: 바로 뒤에 다른 집단이 오므로 대조 연결 필요(‘반면’).",
+        "문장 끝 ‘그 능력’과 연결되므로 빈칸 2에 ‘능력’이 들어갈 가능성이 높다."
+      ],
+      explain: [
+        "빈칸 1: 두 집단의 차이를 확인하는 조사 → ‘차이가 있는지’.",
+        "빈칸 2: ‘파악하는 능력’에서 집단 간 대조 → ‘능력이 뛰어난 반면’."
+      ]
+    },
+    vi: {
+      vocab: [
+        ["학업 성적", "thành tích học tập/điểm số."],
+        ["우수하다 / 그렇지 않다", "xuất sắc / không như vậy."],
+        ["조사하다", "khảo sát, điều tra."],
+        ["-로 나타나다", "cho thấy/được thể hiện là."],
+        ["반면에", "ngược lại/trong khi đó."],
+        ["파악하다", "nắm rõ, nhận ra chính xác."],
+        ["능력 / 부족하다", "năng lực / thiếu, không đủ."]
+      ],
+      tips: [
+        "Trống 1: so sánh giữa hai nhóm → ‘có khác nhau không’ (차이가 있는지).",
+        "Trống 2: ngay sau đó là nhóm đối lập → cần cụm nối đối chiếu (반면).",
+        "Cuối câu có ‘그 능력’ → trống 2 rất dễ chứa từ ‘능력’."
+      ],
+      explain: [
+        "Trống 1: mục tiêu khảo sát là sự khác nhau → ‘차이가 있는지’.",
+        "Trống 2: tạo đối chiếu về năng lực tự nhận biết biết/không biết → ‘능력이 뛰어난 반면’."
+      ]
+    }
+  }
+};
+
 
     /* ====== 앱 로직(공통) ====== */
     const LS_KEY = () => "blank_infer_single_q" + Q.id + "_v1";
