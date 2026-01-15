@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>변화 서술 문법 - 난이도별 정리(초급-중고급)</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#111826; --card2:#0f1520; --text:#e8eef7; --muted:#a9b6c7;
+      --line:#223049; --accent:#7dd3fc; --accent2:#a7f3d0; --warn:#fbbf24;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --r:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans KR", sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(125,211,252,.15), transparent 60%),
+                  radial-gradient(900px 500px at 80% 10%, rgba(167,243,208,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    header{
+      padding:28px 18px 14px;
+      max-width:1100px; margin:0 auto;
+    }
+    .title{
+      display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;
+    }
+    h1{margin:0; font-size:22px; letter-spacing:-.2px}
+    .sub{color:var(--muted); font-size:13px}
+    .bar{
+      margin-top:16px; background:rgba(255,255,255,.03); border:1px solid var(--line);
+      border-radius: var(--r); padding:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .chip{
+      border:1px solid var(--line); background:rgba(255,255,255,.02);
+      color:var(--text); padding:8px 10px; border-radius:999px; font-size:13px;
+      cursor:pointer; user-select:none;
+      display:inline-flex; align-items:center; gap:8px;
+      transition:.15s transform, .15s background, .15s border-color;
+    }
+    .chip:hover{transform:translateY(-1px); background:rgba(255,255,255,.04)}
+    .chip[data-active="true"]{border-color:rgba(125,211,252,.6); box-shadow:0 0 0 3px rgba(125,211,252,.12) inset}
+    .chip small{color:var(--muted)}
+    .spacer{flex:1}
+    input[type="search"]{
+      flex: 1 1 260px;
+      background:rgba(255,255,255,.03); border:1px solid var(--line);
+      border-radius: 12px; padding:10px 12px; color:var(--text);
+      outline:none;
+    }
+    input[type="search"]::placeholder{color:rgba(169,182,199,.7)}
+    main{max-width:1100px; margin:0 auto; padding:12px 18px 36px}
+    .grid{
+      display:grid; grid-template-columns: 1.15fr .85fr; gap:14px;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line); border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0; padding:14px 16px; font-size:16px; letter-spacing:-.2px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background:rgba(0,0,0,.12);
+    }
+    .card h2 .hint{font-size:12px; color:var(--muted); font-weight:500}
+    .card .content{padding:14px 16px}
+    .sec{margin:14px 0}
+    .sec:first-child{margin-top:0}
+    .tag{
+      display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px;
+      background: rgba(125,211,252,.12); color: var(--accent);
+      border:1px solid rgba(125,211,252,.25);
+      margin-right:6px;
+    }
+    .tag.level-mid{background: rgba(167,243,208,.12); color: var(--accent2); border-color: rgba(167,243,208,.25)}
+    .tag.level-high{background: rgba(251,191,36,.10); color: var(--warn); border-color: rgba(251,191,36,.25)}
+    .item{
+      padding:12px; border:1px solid var(--line); border-radius:14px;
+      background: rgba(0,0,0,.12);
+      margin-top:10px;
+    }
+    .item .top{
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .pat{font-weight:700; letter-spacing:-.2px}
+    .meta{color:var(--muted); font-size:12px}
+    .ex{margin-top:8px; padding:10px; border-radius:12px; background: rgba(255,255,255,.03); border:1px solid rgba(34,48,73,.8)}
+    .ex code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size:12.5px; color:#dbeafe;
+    }
+    .btn{
+      border:1px solid var(--line); background:rgba(255,255,255,.03); color:var(--text);
+      padding:8px 10px; border-radius:12px; cursor:pointer; font-size:13px;
+      transition:.15s transform, .15s background;
+    }
+    .btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.05)}
+    .btn:active{transform:translateY(0)}
+    .mini{font-size:12px; color:var(--muted)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size:12px; padding:2px 6px; border-radius:8px;
+      border:1px solid var(--line); background:rgba(255,255,255,.03); color:var(--text);
+    }
+    .note{
+      padding:12px; border-radius:14px;
+      border:1px solid rgba(251,191,36,.25);
+      background: rgba(251,191,36,.06);
+      color: rgba(255,255,255,.92);
+    }
+    .practice{
+      display:grid; grid-template-columns:1fr; gap:10px;
+    }
+    .q{
+      padding:12px; border:1px solid var(--line); border-radius:14px; background:rgba(0,0,0,.12);
+    }
+    .q .qtop{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .q textarea{
+      width:100%; min-height:86px; resize:vertical;
+      margin-top:10px; padding:10px 12px; border-radius:12px;
+      border:1px solid var(--line); background:rgba(255,255,255,.03); color:var(--text);
+      outline:none;
+    }
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:18px; padding:10px 12px; border-radius:12px;
+      background:rgba(17,24,38,.92); border:1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-size:13px; color:var(--text);
+      opacity:0; pointer-events:none; transition:.2s opacity, .2s transform;
+    }
+    .toast.on{opacity:1; transform:translateX(-50%) translateY(-2px)}
+    footer{max-width:1100px; margin:0 auto; padding:0 18px 30px; color:var(--muted); font-size:12px}
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <h1>변화 서술 문법(초급-중고급) 난이도별 정리</h1>
+    <div class="sub">그래프/표 → 글 변환에 바로 쓰는 표현. 필터/검색/복사/연습 포함.</div>
+  </div>
+
+  <div class="bar">
+    <div class="row" id="levelChips">
+      <div class="chip" data-level="all" data-active="true">전체 <small>(All)</small></div>
+      <div class="chip" data-level="basic">초급</div>
+      <div class="chip" data-level="mid">중급</div>
+      <div class="chip" data-level="high">중고급</div>
+    </div>
+    <div class="spacer"></div>
+    <input id="search" type="search" placeholder="검색: 증가, 감소, 유지, 최고치, 반면, -기 시작하다..." />
+    <button class="btn" id="copyVisible">보이는 항목만 복사</button>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2>
+      <span>문법 목록</span>
+      <span class="hint">각 항목의 예문은 그래프 서술에 바로 쓰도록 구성</span>
+    </h2>
+    <div class="content" id="list"></div>
+  </section>
+
+  <aside class="card">
+    <h2>
+      <span>빠른 사용 규칙</span>
+      <span class="hint">실수 방지</span>
+    </h2>
+    <div class="content">
+      <div class="note">
+        <div style="font-weight:700; margin-bottom:6px;">핵심</div>
+        <div>그래프 서술은 ① 대상(N) ② 시점/기간 ③ 변화(증가·감소·유지) ④ 정도(완만·급격) ⑤ 비교(선택) 순으로 쓰면 안정적입니다.</div>
+      </div>
+
+      <div class="sec">
+        <div class="mini" style="margin-bottom:6px;">권장 연결어</div>
+        <div class="item" style="margin-top:0;">
+          <div class="meta">도입</div>
+          <div class="ex"><code>그래프에 따르면, N은/는 2020년부터 2024년까지 전반적으로 증가하는 경향을 보였다.</code></div>
+          <div class="meta" style="margin-top:10px;">전환</div>
+          <div class="ex"><code>반면(에), 2023년 이후에는 감소하는 추세로 전환되었다.</code></div>
+          <div class="meta" style="margin-top:10px;">정리</div>
+          <div class="ex"><code>정리하면, N은/는 중간에 일시적으로 하락했으나 전체적으로는 상승했다고 볼 수 있다.</code></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3 style="margin:0 0 8px; font-size:14px;">연습(즉시 작성)</h3>
+        <div class="practice" id="practice"></div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" id="newPractice">새 연습문항</button>
+          <button class="btn" id="copyPractice">연습 답안 복사</button>
+          <span class="mini">팁: <span class="kbd">-기 시작하다</span>, <span class="kbd">-아지다</span>, <span class="kbd">-게 되다</span>를 반드시 포함</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <div>사용법: 난이도 필터 선택 → 검색 → 필요한 항목의 <b>복사</b> 버튼 사용. 문장 틀은 그대로 외워서 치환하세요.</div>
+</footer>
+
+<div class="toast" id="toast">복사되었습니다.</div>
+
+<script>
+  // ---- Data (난이도별 변화 서술 문법) ----
+  const ITEMS = [
+    // BASIC (초급)
+    {
+      level: "basic",
+      group: "기본 변화 동사/형용사",
+      pattern: "N이/가 증가하다 · 늘어나다",
+      tip: "수치가 올라갈 때",
+      examples: [
+        "2020년부터 2024년까지 N이/가 증가했다.",
+        "N이/가 점점 늘어났다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "기본 변화 동사/형용사",
+      pattern: "N이/가 감소하다 · 줄어들다",
+      tip: "수치가 내려갈 때",
+      examples: [
+        "2022년 이후 N이/가 감소했다.",
+        "N이/가 점점 줄어들었다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "기본 변화 동사/형용사",
+      pattern: "N이/가 높아지다 · 낮아지다",
+      tip: "비율/수준 표현에 자연스러움",
+      examples: [
+        "2023년에 N이/가 높아졌다.",
+        "2024년에 N이/가 낮아졌다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "유지/정체",
+      pattern: "N이/가 유지되다 · 변함이 없다",
+      tip: "큰 변화가 없을 때",
+      examples: [
+        "해당 기간 동안 N이/가 비슷한 수준을 유지했다.",
+        "N은/는 큰 변화가 없었다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "정도(부사)",
+      pattern: "서서히/점차/급격히/크게 + V",
+      tip: "변화 속도/폭",
+      examples: [
+        "N이/가 서서히 증가했다.",
+        "N이/가 급격히 감소했다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "비교",
+      pattern: "A보다 B가 더 V",
+      tip: "집단/항목 비교",
+      examples: [
+        "A보다 B가 더 높았다.",
+        "A보다 B가 더 낮았다."
+      ]
+    },
+    {
+      level: "basic",
+      group: "시간 표현",
+      pattern: "N년부터 N년까지 / N년에는 / N년 이후",
+      tip: "그래프 서술 필수 뼈대",
+      examples: [
+        "2020년부터 2024년까지",
+        "2022년에는",
+        "2023년 이후"
+      ]
+    },
+
+    // MID (중급)
+    {
+      level: "mid",
+      group: "추세(경향) 표현",
+      pattern: "V-(으)ㄴ/는 경향이 있다",
+      tip: "전반적 흐름 요약",
+      examples: [
+        "N은/는 전반적으로 증가하는 경향이 있다.",
+        "최근 N이/가 감소하는 경향을 보였다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "추세(동사) 다양화",
+      pattern: "상승하다 / 하락하다",
+      tip: "보고서 톤(서면체)",
+      examples: [
+        "N이/가 2022년에 상승했다.",
+        "N이/가 2023년에 하락했다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "변화 시작/전환",
+      pattern: "V-기 시작하다",
+      tip: "변화가 시작되는 지점",
+      examples: [
+        "2021년부터 N이/가 증가하기 시작했다.",
+        "2023년 이후 N이/가 감소하기 시작했다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "상태 변화",
+      pattern: "V-아/어지다",
+      tip: "수준/상태 변화(자연스러운 서술)",
+      examples: [
+        "N이/가 높아졌다.",
+        "N이/가 낮아졌다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "결과 상태",
+      pattern: "V-게 되다",
+      tip: "변화의 결과를 정리",
+      examples: [
+        "그 결과, N이/가 낮아지게 되었다.",
+        "N이/가 감소하게 되었다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "대조/전환",
+      pattern: "반면(에) / 그러나 / 하지만",
+      tip: "상반된 흐름 연결",
+      examples: [
+        "반면(에), B는 감소했다.",
+        "그러나 2024년에는 다시 증가했다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "일시적 변화",
+      pattern: "일시적으로 / 잠시 / 한때",
+      tip: "중간에 꺾이는 구간",
+      examples: [
+        "N이/가 일시적으로 감소했다.",
+        "N이/가 한때 상승했다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "유지/정체 고급화",
+      pattern: "V-(으)ㄴ/는 수준을 유지하다",
+      tip: "같은 값 근처 유지",
+      examples: [
+        "N은/는 일정한 수준을 유지했다.",
+        "N은/는 비슷한 수준을 유지했다."
+      ]
+    },
+    {
+      level: "mid",
+      group: "최고/최저",
+      pattern: "최고치를 기록하다 / 최저 수준을 보이다",
+      tip: "최댓값/최솟값",
+      examples: [
+        "2022년에 최고치를 기록했다.",
+        "2020년에 최저 수준을 보였다."
+      ]
+    },
+
+    // HIGH (중고급)
+    {
+      level: "high",
+      group: "명사화(서면체)",
+      pattern: "N의 증가/감소 + (가) 나타나다",
+      tip: "보고서 문장에 적합",
+      examples: [
+        "2021년 이후 N의 증가가 나타났다.",
+        "최근 N의 감소가 두드러졌다."
+      ]
+    },
+    {
+      level: "high",
+      group: "두드러짐/뚜렷함",
+      pattern: "V-이/가 두드러지다 / 뚜렷하다",
+      tip: "변화가 눈에 띌 때",
+      examples: [
+        "2022년에는 증가세가 두드러졌다.",
+        "감소 추세가 뚜렷하게 나타났다."
+      ]
+    },
+    {
+      level: "high",
+      group: "전반-부분 구조",
+      pattern: "전반적으로 V-지만, 일부 구간에서는 V",
+      tip: "전체 요약 + 예외 구간",
+      examples: [
+        "전반적으로 증가했지만, 2023년에는 일시적으로 감소했다.",
+        "전체적으로는 상승했으나 일부 시기에는 하락했다."
+      ]
+    },
+    {
+      level: "high",
+      group: "대조 심화",
+      pattern: "A는 V-는 데 반해, B는 V",
+      tip: "그래프 비교 핵심",
+      examples: [
+        "A는 증가하는 데 반해, B는 감소했다.",
+        "남성은 유지되는 데 반해, 여성은 증가했다."
+      ]
+    },
+    {
+      level: "high",
+      group: "원인 연결(조심스럽게)",
+      pattern: "이는 N과 관련이 있는 것으로 보이다",
+      tip: "과도한 단정 금지",
+      examples: [
+        "이는 정책 변화와 관련이 있는 것으로 보인다.",
+        "이러한 변화는 소비 패턴과 관련이 있는 것으로 해석할 수 있다."
+      ]
+    },
+    {
+      level: "high",
+      group: "정도 명확화",
+      pattern: "큰 폭으로 / 소폭 / 완만한 + 증가·감소",
+      tip: "정량적 뉘앙스",
+      examples: [
+        "N이/가 큰 폭으로 증가했다.",
+        "N이/가 소폭 감소했다.",
+        "완만한 증가세를 보였다."
+      ]
+    },
+    {
+      level: "high",
+      group: "추세 전환",
+      pattern: "V-(으)ㄴ/는 추세로 전환되다",
+      tip: "상승→하락, 하락→상승",
+      examples: [
+        "2023년 이후 감소 추세로 전환되었다.",
+        "중반 이후 증가세로 전환되었다."
+      ]
+    },
+    {
+      level: "high",
+      group: "상대적 평가(중립)",
+      pattern: "상대적으로 V",
+      tip: "다른 항목 대비",
+      examples: [
+        "A는 다른 항목에 비해 상대적으로 높았다.",
+        "B는 상대적으로 낮은 수준을 유지했다."
+      ]
+    }
+  ];
+
+  // ---- UI State ----
+  let activeLevel = "all";
+  let keyword = "";
+
+  const listEl = document.getElementById("list");
+  const searchEl = document.getElementById("search");
+  const toastEl = document.getElementById("toast");
+
+  function levelTag(level){
+    if(level === "basic") return `<span class="tag">초급</span>`;
+    if(level === "mid") return `<span class="tag level-mid">중급</span>`;
+    if(level === "high") return `<span class="tag level-high">중고급</span>`;
+    return "";
+  }
+
+  function matches(item){
+    const inLevel = (activeLevel === "all") || (item.level === activeLevel);
+    if(!inLevel) return false;
+
+    if(!keyword.trim()) return true;
+    const k = keyword.trim().toLowerCase();
+    const hay = [
+      item.group, item.pattern, item.tip,
+      ...(item.examples || [])
+    ].join(" ").toLowerCase();
+    return hay.includes(k);
+  }
+
+  function render(){
+    const visible = ITEMS.filter(matches);
+
+    // group by group name (keeping order)
+    const groups = [];
+    const map = new Map();
+    visible.forEach(it => {
+      if(!map.has(it.group)){
+        map.set(it.group, []);
+        groups.push(it.group);
+      }
+      map.get(it.group).push(it);
+    });
+
+    const html = groups.map(g => {
+      const items = map.get(g).map(it => {
+        const ex = (it.examples || []).map(e => `<div><code>${escapeHtml(e)}</code></div>`).join("");
+        return `
+          <div class="item" data-visible="true">
+            <div class="top">
+              <div>
+                ${levelTag(it.level)}
+                <span class="pat">${escapeHtml(it.pattern)}</span>
+                <div class="meta">${escapeHtml(it.tip)}</div>
+              </div>
+              <div class="row">
+                <button class="btn" data-copy="${escapeAttr(it.pattern)}" data-copytype="pattern">문법 복사</button>
+                <button class="btn" data-copy="${escapeAttr((it.examples||[]).join("\\n"))}" data-copytype="examples">예문 복사</button>
+              </div>
+            </div>
+            <div class="ex" aria-label="examples">${ex}</div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="sec">
+          <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(g)}</div>
+          ${items}
+        </div>
+      `;
+    }).join("");
+
+    listEl.innerHTML = html || `<div class="mini">조건에 맞는 항목이 없습니다.</div>`;
+
+    // bind copy buttons
+    listEl.querySelectorAll("button[data-copy]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const text = btn.getAttribute("data-copy") || "";
+        copyText(text.replaceAll("\\n","\n"));
+      });
+    });
+
+    // store for global copy
+    window.__visibleItems = visible;
+  }
+
+  // ---- Copy helpers ----
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      toast("복사되었습니다.");
+    }catch(e){
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      toast("복사되었습니다.");
+    }
+  }
+
+  let toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toastEl.classList.remove("on"), 1200);
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+  }
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("\n","\\n");
+  }
+
+  // ---- Level chips ----
+  document.getElementById("levelChips").querySelectorAll(".chip").forEach(ch => {
+    ch.addEventListener("click", () => {
+      activeLevel = ch.getAttribute("data-level");
+      document.getElementById("levelChips").querySelectorAll(".chip").forEach(x => x.dataset.active = "false");
+      ch.dataset.active = "true";
+      render();
+    });
+  });
+
+  // ---- Search ----
+  searchEl.addEventListener("input", (e) => {
+    keyword = e.target.value || "";
+    render();
+  });
+
+  // ---- Copy visible items ----
+  document.getElementById("copyVisible").addEventListener("click", () => {
+    const v = (window.__visibleItems || []);
+    if(!v.length){ toast("복사할 항목이 없습니다."); return; }
+
+    const lines = [];
+    v.forEach(it => {
+      const lvl = it.level === "basic" ? "[초급]" : it.level === "mid" ? "[중급]" : "[중고급]";
+      lines.push(`${lvl} ${it.group} - ${it.pattern}`);
+      (it.examples || []).forEach(ex => lines.push(`  예: ${ex}`));
+      lines.push("");
+    });
+    copyText(lines.join("\n").trim());
+  });
+
+  // ---- Practice generator ----
+  const PRACTICE_BANK = [
+    { prompt: "대상: 온라인 쇼핑 이용률(%) / 흐름: 2020-2024 전반적 증가, 2023 소폭 하락 후 재상승", must: ["-기 시작하다", "-아/어지다", "-게 되다"] },
+    { prompt: "대상: 출생아 수(명) / 흐름: 2019-2024 지속 감소, 2022 이후 감소폭 확대", must: ["큰 폭으로", "추세", "반면(에) 또는 그러나"] },
+    { prompt: "대상: 대중교통 이용자 수(명) / 흐름: 2020 급감, 2021-2024 회복(증가)", must: ["일시적으로", "전환", "전반적으로"] },
+    { prompt: "대상: 독서 시간(분) / 흐름: 큰 변화 없이 유지, 2024 소폭 증가", must: ["유지하다", "소폭", "특히"] },
+    { prompt: "대상: 재활용률(%) / 흐름: 점진적 증가, 2023 최고치 기록", must: ["점차", "최고치", "정리하면"] }
+  ];
+
+  const practiceEl = document.getElementById("practice");
+  function renderPractice(){
+    const p = PRACTICE_BANK[Math.floor(Math.random()*PRACTICE_BANK.length)];
+    practiceEl.innerHTML = `
+      <div class="q">
+        <div class="qtop">
+          <div>
+            <div style="font-weight:700;">문항</div>
+            <div class="mini">${escapeHtml(p.prompt)}</div>
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom:6px;">반드시 포함</div>
+            <div class="row">
+              ${p.must.map(x => `<span class="kbd">${escapeHtml(x)}</span>`).join("")}
+            </div>
+          </div>
+        </div>
+        <textarea id="answer" placeholder="여기에 그래프 설명 글을 3-5문장으로 작성하세요.&#10;예: 그래프에 따르면..."></textarea>
+      </div>
+    `;
+  }
+
+  document.getElementById("newPractice").addEventListener("click", renderPractice);
+  document.getElementById("copyPractice").addEventListener("click", () => {
+    const ta = document.getElementById("answer");
+    if(!ta || !ta.value.trim()){ toast("복사할 답안이 없습니다."); return; }
+    copyText(ta.value.trim());
+  });
+
+  // ---- init ----
+  render();
+  renderPractice();
+</script>
+</body>
+</html>
