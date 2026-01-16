@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>분위기 표현 학습 (한국어-베트남어)</title>
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --card:#121a2a;
+      --card2:#0f1626;
+      --text:#e8eefc;
+      --muted:#b7c3e6;
+      --line:rgba(255,255,255,.08);
+      --accent:#7aa2ff;
+      --ok:#61d095;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 0%, rgba(122,162,255,.18), transparent 60%),
+                  radial-gradient(900px 500px at 90% 20%, rgba(97,208,149,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+    header{
+      padding:22px 16px 10px;
+      max-width:1000px;
+      margin:0 auto;
+    }
+    h1{font-size:20px;margin:0 0 6px}
+    .sub{color:var(--muted);font-size:13px;margin:0}
+    .wrap{max-width:1000px;margin:0 auto;padding:12px 16px 28px}
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center; justify-content:space-between;
+      margin:10px 0 14px;
+      padding:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius:14px;
+    }
+    .left, .right{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    input[type="search"]{
+      width:min(420px, 82vw);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      outline:none;
+    }
+    input[type="search"]::placeholder{color:rgba(183,195,230,.75)}
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      padding:9px 11px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{border-color:rgba(122,162,255,.45)}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:13px;
+      color:var(--muted);
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip input{accent-color: var(--accent)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media (min-width: 860px){
+      .grid{grid-template-columns: 1fr 1fr;}
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      overflow:hidden;
+    }
+    .card h2{
+      font-size:15px;
+      margin:0;
+      padding:12px 14px;
+      background: rgba(255,255,255,.03);
+      border-bottom:1px solid var(--line);
+      color:var(--text);
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px;
+    }
+    .count{color:var(--muted); font-size:12px}
+    .list{padding:12px 14px; display:flex; flex-direction:column; gap:10px;}
+    .item{
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(255,255,255,.03);
+    }
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
+    }
+    .ko{font-weight:700}
+    .vi{color:var(--muted)}
+    .tagline{color:rgba(183,195,230,.75); font-size:12px; margin-top:6px}
+    .pill{
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background: rgba(255,255,255,.03);
+    }
+    .ex{
+      margin-top:8px;
+      padding:8px 10px;
+      border-radius:12px;
+      background: rgba(0,0,0,.18);
+      border:1px dashed rgba(255,255,255,.14);
+      font-size:13px;
+    }
+    .ex .label{color:rgba(183,195,230,.85); font-size:12px; margin-bottom:6px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+    .note{
+      margin-top:14px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:13px;
+    }
+    .hide{display:none !important}
+    .sr{position:absolute;left:-9999px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>분위기 표현 학습 자료 (한국어 · 베트남어 병기)</h1>
+  <p class="sub">중급 글쓰기용: 분위기 형용사 / 완화·조절 / 원인 / 변화 / 감각화 / 대비 / 묶음 표현</p>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="left">
+      <input id="q" type="search" placeholder="검색: 한국어/베트남어/예문 (예: 차분, căng thẳng, 분위기)" />
+      <button class="btn" id="clearBtn" type="button">검색 지우기</button>
+    </div>
+    <div class="right">
+      <label class="chip" title="한국어/베트남어를 모두 표시합니다.">
+        <input id="showBoth" type="checkbox" checked />
+        <span>한국어+베트남어</span>
+      </label>
+      <label class="chip" title="예문을 표시합니다.">
+        <input id="showExamples" type="checkbox" checked />
+        <span>예문 표시</span>
+      </label>
+      <button class="btn" id="toggleAll" type="button">전체 접기/펼치기</button>
+    </div>
+  </div>
+
+  <div id="grid" class="grid" aria-live="polite"></div>
+
+  <div class="note">
+    <div class="mono">수업 팁</div>
+    <div style="margin-top:6px">
+      1) “좋다/나쁘다” 대신 <span class="mono">차분하다/긴장되다/어색하다/활기차다</span>처럼 구체화<br/>
+      2) 묘사 글쓰기에서 <span class="mono">완화(다소/비교적/-(으)ㄴ 편이다)</span> + <span class="mono">원인(탓에/때문에)</span> + <span class="mono">변화(점점/서서히 + 달라지다/풀리다)</span> 조합을 최소 1회 요구
+    </div>
+  </div>
+</div>
+
+<script>
+  // 데이터: 한국어(KO) - 베트남어(VI) - 설명/태그 - 예문
+  const SECTIONS = [
+    {
+      title: "1) 분위기 핵심 형용사",
+      items: [
+        { ko:"차분하다", vi:"điềm tĩnh, trầm", tag:"정서", exKo:"교실은 전체적으로 차분한 분위기였다.", exVi:"Lớp học nhìn chung có bầu không khí trầm và điềm tĩnh." },
+        { ko:"조용하다", vi:"yên tĩnh", tag:"정서", exKo:"복도는 조용해서 발소리도 크게 들렸다.", exVi:"Hành lang yên tĩnh nên cả tiếng bước chân cũng nghe rất rõ." },
+        { ko:"편안하다", vi:"thoải mái, dễ chịu", tag:"정서", exKo:"처음 만남인데도 분위기가 편안했다.", exVi:"Dù là lần gặp đầu nhưng bầu không khí vẫn thoải mái." },
+        { ko:"따뜻하다", vi:"ấm áp", tag:"정서", exKo:"조명이 따뜻해서 공간이 더 아늑하게 느껴졌다.", exVi:"Ánh đèn ấm áp nên không gian cảm thấy dễ chịu hơn." },
+        { ko:"긴장되다", vi:"căng thẳng", tag:"정서", exKo:"발표 직전이라 분위기가 긴장돼 있었다.", exVi:"Vì ngay trước khi thuyết trình nên bầu không khí khá căng thẳng." },
+        { ko:"어색하다", vi:"gượng gạo, ngượng ngùng", tag:"정서", exKo:"인사를 하고도 한동안 분위기가 어색했다.", exVi:"Dù đã chào hỏi nhưng một lúc sau bầu không khí vẫn gượng gạo." },
+        { ko:"냉랭하다", vi:"lạnh nhạt, lạnh lẽo", tag:"정서", exKo:"대화가 끊기자 분위기가 냉랭해졌다.", exVi:"Khi cuộc trò chuyện bị ngắt quãng, bầu không khí trở nên lạnh nhạt." },
+        { ko:"무겁다", vi:"nặng nề", tag:"정서", exKo:"좋지 않은 소식 때문에 분위기가 무거웠다.", exVi:"Vì tin không hay nên bầu không khí trở nên nặng nề." },
+        { ko:"활기차다", vi:"sôi nổi, tràn đầy sức sống", tag:"정서", exKo:"아침에는 학생들이 많아서 분위기가 활기찼다.", exVi:"Buổi sáng có nhiều sinh viên nên không khí rất sôi nổi." },
+        { ko:"밝다", vi:"sáng sủa; (không khí) vui tươi", tag:"겸용", exKo:"창이 커서 공간이 밝고 개방적이었다.", exVi:"Vì cửa sổ lớn nên không gian sáng sủa và thoáng đãng." },
+        { ko:"어둡다", vi:"tối; (không khí) u ám", tag:"겸용", exKo:"조명이 어두워서 분위기가 조금 무거워 보였다.", exVi:"Đèn tối nên bầu không khí trông có phần nặng nề." },
+      ]
+    },
+    {
+      title: "2) 분위기 완화·조절 표현",
+      items: [
+        { ko:"A-(으)ㄴ 편이다", vi:"khá là…, tương đối…", tag:"완화", exKo:"이 카페는 조용한 편이다.", exVi:"Quán cà phê này khá yên tĩnh." },
+        { ko:"A-아/어 보이다", vi:"trông có vẻ…, có vẻ như…", tag:"관찰", exKo:"분위기가 조금 긴장돼 보인다.", exVi:"Bầu không khí trông có vẻ hơi căng thẳng." },
+        { ko:"다소", vi:"hơi, phần nào", tag:"정도", exKo:"분위기가 다소 어색했다.", exVi:"Bầu không khí hơi gượng gạo." },
+        { ko:"비교적", vi:"tương đối", tag:"정도", exKo:"오늘은 비교적 차분한 분위기였다.", exVi:"Hôm nay bầu không khí tương đối trầm." },
+        { ko:"꽤", vi:"khá, khá là", tag:"정도", exKo:"생각보다 분위기가 꽤 편안했다.", exVi:"Không khí thoải mái hơn mình nghĩ, khá dễ chịu." },
+        { ko:"상당히", vi:"khá nhiều, đáng kể", tag:"정도", exKo:"발표가 시작되자 분위기가 상당히 긴장됐다.", exVi:"Khi bắt đầu thuyết trình, không khí trở nên căng thẳng đáng kể." },
+      ]
+    },
+    {
+      title: "3) 분위기 형성 원인 제시",
+      items: [
+        { ko:"N-탓에", vi:"vì…, do… (mang sắc thái trách/tiêu cực)", tag:"이유", exKo:"시험 탓에 분위기가 무거웠다.", exVi:"Vì kỳ thi nên bầu không khí nặng nề." },
+        { ko:"N-때문에", vi:"vì…, do…", tag:"이유", exKo:"비 때문에 분위기가 차분해졌다.", exVi:"Do mưa nên bầu không khí trở nên trầm hơn." },
+        { ko:"V-(으)ㄴ 영향으로", vi:"do ảnh hưởng của…", tag:"이유", exKo:"음악의 영향으로 분위기가 편안해졌다.", exVi:"Do ảnh hưởng của âm nhạc, bầu không khí trở nên dễ chịu." },
+        { ko:"V-아/어서", vi:"vì… nên…", tag:"이유", exKo:"조명이 어두워서 공간이 차분해 보였다.", exVi:"Vì đèn tối nên không gian trông có vẻ trầm." },
+      ]
+    },
+    {
+      title: "4) 분위기 변화 표현",
+      items: [
+        { ko:"바뀌다", vi:"thay đổi", tag:"변화", exKo:"한마디로 분위기가 바뀌었다.", exVi:"Chỉ một câu nói mà bầu không khí đã thay đổi." },
+        { ko:"달라지다", vi:"trở nên khác đi", tag:"변화", exKo:"사람이 많아지자 분위기가 달라졌다.", exVi:"Khi đông người hơn, không khí đã khác đi." },
+        { ko:"풀리다", vi:"(không khí) dịu lại, bớt căng", tag:"변화", exKo:"농담이 나오면서 분위기가 풀렸다.", exVi:"Khi có câu đùa, bầu không khí dịu lại." },
+        { ko:"가라앉다", vi:"lắng xuống, trầm xuống", tag:"변화", exKo:"갑자기 분위기가 가라앉았다.", exVi:"Đột nhiên bầu không khí lắng xuống." },
+        { ko:"살아나다", vi:"sôi động trở lại, trở nên rộn ràng", tag:"변화", exKo:"음악이 나오자 분위기가 살아났다.", exVi:"Khi có nhạc, không khí sôi động trở lại." },
+        { ko:"점점", vi:"dần dần", tag:"부사", exKo:"분위기가 점점 편안해졌다.", exVi:"Bầu không khí dần dần trở nên thoải mái." },
+        { ko:"서서히", vi:"từ từ", tag:"부사", exKo:"대화가 이어지면서 분위기가 서서히 풀렸다.", exVi:"Cuộc trò chuyện tiếp diễn và không khí từ từ dịu lại." },
+        { ko:"갑자기", vi:"đột nhiên", tag:"부사", exKo:"전화 한 통으로 분위기가 갑자기 달라졌다.", exVi:"Chỉ một cuộc gọi mà không khí đột nhiên thay đổi." },
+        { ko:"어느 순간", vi:"vào một lúc nào đó", tag:"부사", exKo:"어느 순간 다들 웃기 시작했다.", exVi:"Vào một lúc nào đó, mọi người bắt đầu cười." },
+      ]
+    },
+    {
+      title: "5) 분위기 감각화·추정 표현",
+      items: [
+        { ko:"A-(으)ㄴ 느낌이 들다", vi:"có cảm giác là…, cảm thấy…", tag:"감각", exKo:"전체적으로 차분한 느낌이 들었다.", exVi:"Nhìn chung mình có cảm giác khá trầm." },
+        { ko:"마치 … 같은", vi:"giống như…, cứ như là…", tag:"비유", exKo:"마치 회의실 같은 분위기였다.", exVi:"Bầu không khí giống như phòng họp vậy." },
+        { ko:"… 듯하다", vi:"có vẻ như…, dường như…", tag:"추정", exKo:"비가 오는 듯한 소리가 들렸다.", exVi:"Nghe tiếng như thể đang mưa." },
+        { ko:"… 것 같다", vi:"có vẻ…, hình như…", tag:"추정", exKo:"분위기가 조금 무거운 것 같다.", exVi:"Có vẻ bầu không khí hơi nặng nề." },
+      ]
+    },
+    {
+      title: "6) 대비를 통한 분위기 표현",
+      items: [
+        { ko:"A-기보다는 B-(으)ㄴ 편이다", vi:"thay vì A thì khá là B", tag:"대비", exKo:"활기차기보다는 차분한 편이다.", exVi:"Thay vì sôi nổi thì khá là trầm." },
+        { ko:"N-에 비해", vi:"so với…", tag:"대비", exKo:"낮에 비해 밤은 훨씬 조용하다.", exVi:"So với ban ngày, ban đêm yên tĩnh hơn nhiều." },
+        { ko:"반면에", vi:"ngược lại, trái lại", tag:"대비", exKo:"밖은 시끄러운 반면에 안은 조용했다.", exVi:"Bên ngoài ồn ào, trái lại bên trong lại yên tĩnh." },
+      ]
+    },
+    {
+      title: "7) 자주 쓰는 ‘분위기’ 묶음 표현",
+      items: [
+        { ko:"차분한 분위기", vi:"bầu không khí trầm, điềm tĩnh", tag:"묶음", exKo:"차분한 분위기라 집중하기 좋았다.", exVi:"Không khí trầm nên dễ tập trung." },
+        { ko:"조용한 분위기", vi:"bầu không khí yên tĩnh", tag:"묶음", exKo:"조용한 분위기에서 공부하고 싶다.", exVi:"Mình muốn học trong không khí yên tĩnh." },
+        { ko:"답답한 분위기", vi:"bầu không khí ngột ngạt", tag:"묶음", exKo:"회의가 길어지자 분위기가 답답해졌다.", exVi:"Cuộc họp kéo dài khiến không khí trở nên ngột ngạt." },
+        { ko:"아늑한 분위기", vi:"bầu không khí ấm cúng", tag:"묶음", exKo:"작은 조명 덕분에 아늑한 분위기가 났다.", exVi:"Nhờ đèn nhỏ nên tạo cảm giác ấm cúng." },
+        { ko:"긴장된 분위기", vi:"bầu không khí căng thẳng", tag:"묶음", exKo:"긴장된 분위기에서 발표를 시작했다.", exVi:"Mình bắt đầu thuyết trình trong bầu không khí căng thẳng." },
+        { ko:"어색한 분위기", vi:"bầu không khí gượng gạo", tag:"묶음", exKo:"처음에는 어색한 분위기였지만 곧 나아졌다.", exVi:"Lúc đầu khá gượng gạo nhưng rồi ổn hơn." },
+        { ko:"무거운 분위기", vi:"bầu không khí nặng nề", tag:"묶음", exKo:"무거운 분위기라 말이 적어졌다.", exVi:"Vì không khí nặng nề nên mọi người nói ít hơn." },
+        { ko:"자유로운 분위기", vi:"bầu không khí thoải mái, tự do", tag:"묶음", exKo:"자유로운 분위기에서 의견을 나눴다.", exVi:"Mọi người trao đổi ý kiến trong không khí thoải mái." },
+        { ko:"분위기가 풀리다", vi:"bầu không khí dịu lại / bớt căng", tag:"묶음", exKo:"웃음이 터지면서 분위기가 풀렸다.", exVi:"Khi bật cười, bầu không khí dịu lại." },
+        { ko:"분위기가 가라앉다", vi:"bầu không khí lắng xuống", tag:"묶음", exKo:"갑자기 분위기가 가라앉았다.", exVi:"Đột nhiên bầu không khí lắng xuống." },
+        { ko:"분위기가 살아나다", vi:"không khí sôi động trở lại", tag:"묶음", exKo:"음악이 바뀌자 분위기가 살아났다.", exVi:"Khi đổi nhạc, không khí sôi động trở lại." },
+      ]
+    }
+  ];
+
+  const els = {
+    grid: document.getElementById("grid"),
+    q: document.getElementById("q"),
+    clearBtn: document.getElementById("clearBtn"),
+    showBoth: document.getElementById("showBoth"),
+    showExamples: document.getElementById("showExamples"),
+    toggleAll: document.getElementById("toggleAll")
+  };
+
+  let collapsed = new Set(); // section indices
+  let allCollapsed = false;
+
+  function norm(s){ return (s||"").toLowerCase().trim(); }
+
+  function itemMatches(item, query){
+    if(!query) return true;
+    const hay = [
+      item.ko, item.vi, item.tag,
+      item.exKo, item.exVi
+    ].join(" ").toLowerCase();
+    return hay.includes(query);
+  }
+
+  function render(){
+    const query = norm(els.q.value);
+    const showBoth = els.showBoth.checked;
+    const showExamples = els.showExamples.checked;
+
+    els.grid.innerHTML = "";
+
+    SECTIONS.forEach((sec, si) => {
+      const matched = sec.items.filter(it => itemMatches(it, query));
+      if(matched.length === 0) return;
+
+      const card = document.createElement("section");
+      card.className = "card";
+
+      const h2 = document.createElement("h2");
+      const title = document.createElement("span");
+      title.textContent = sec.title;
+
+      const count = document.createElement("span");
+      count.className = "count";
+      count.textContent = `${matched.length}개`;
+
+      h2.appendChild(title);
+      h2.appendChild(count);
+
+      h2.style.cursor = "pointer";
+      h2.addEventListener("click", () => {
+        if(collapsed.has(si)) collapsed.delete(si);
+        else collapsed.add(si);
+        render();
+      });
+
+      const list = document.createElement("div");
+      list.className = "list";
+      if(collapsed.has(si)) list.classList.add("hide");
+
+      matched.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "item";
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const left = document.createElement("div");
+        const ko = document.createElement("div");
+        ko.className = "ko";
+        ko.textContent = it.ko;
+
+        const vi = document.createElement("div");
+        vi.className = "vi";
+        vi.textContent = it.vi;
+
+        left.appendChild(ko);
+        if(showBoth) left.appendChild(vi);
+
+        const right = document.createElement("span");
+        right.className = "pill";
+        right.textContent = it.tag || "표현";
+
+        row.appendChild(left);
+        row.appendChild(right);
+
+        div.appendChild(row);
+
+        if(showExamples && (it.exKo || it.exVi)){
+          const ex = document.createElement("div");
+          ex.className = "ex";
+          const lab = document.createElement("div");
+          lab.className = "label";
+          lab.textContent = "예문";
+          ex.appendChild(lab);
+
+          const exKo = document.createElement("div");
+          exKo.textContent = it.exKo || "";
+          ex.appendChild(exKo);
+
+          if(showBoth){
+            const exVi = document.createElement("div");
+            exVi.className = "vi";
+            exVi.style.marginTop = "4px";
+            exVi.textContent = it.exVi || "";
+            ex.appendChild(exVi);
+          }
+
+          div.appendChild(ex);
+        }
+
+        list.appendChild(div);
+      });
+
+      card.appendChild(h2);
+      card.appendChild(list);
+      els.grid.appendChild(card);
+    });
+
+    // 검색 결과가 없을 때
+    if(!els.grid.children.length){
+      const empty = document.createElement("div");
+      empty.className = "note";
+      empty.textContent = "검색 결과가 없습니다.";
+      els.grid.appendChild(empty);
+    }
+  }
+
+  els.q.addEventListener("input", render);
+  els.showBoth.addEventListener("change", render);
+  els.showExamples.addEventListener("change", render);
+
+  els.clearBtn.addEventListener("click", () => {
+    els.q.value = "";
+    els.q.focus();
+    render();
+  });
+
+  els.toggleAll.addEventListener("click", () => {
+    allCollapsed = !allCollapsed;
+    collapsed = new Set();
+    if(allCollapsed){
+      for(let i=0;i<SECTIONS.length;i++) collapsed.add(i);
+    }
+    render();
+  });
+
+  // 초기 렌더
+  render();
+</script>
+</body>
+</html>
