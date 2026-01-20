@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>교실 어휘 퀴즈</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>교실 어휘 퀴즈 (모바일)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
@@ -11,87 +11,106 @@
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            overflow: hidden; /* 스크롤 방지 */
+            /* 모바일에서 터치 시 하이라이트 제거 */
+            -webkit-tap-highlight-color: transparent;
         }
-        /* 버튼 비활성화 시 스타일 */
+        
+        /* 커스텀 스크롤바 숨기기 (카테고리 영역용) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 버튼 스타일 */
         .option-btn:disabled {
             opacity: 0.7;
         }
-        /* 정답 버튼 */
         .option-btn.correct {
-            background-color: #22c55e; /* green-500 */
+            background-color: #22c55e;
             color: white;
-            transform: scale(1.05);
-            border-color: #16a34a; /* green-600 */
+            border-color: #16a34a;
+            font-weight: bold;
         }
-        /* 오답 버튼 */
         .option-btn.wrong {
-            background-color: #ef4444; /* red-500 */
+            background-color: #ef4444;
             color: white;
-            border-color: #dc2626; /* red-600 */
+            border-color: #dc2626;
         }
-        /* 선택되지 않은 버튼 (정답 공개 후) */
         .option-btn.faded {
-            background-color: #f3f4f6; /* gray-100 */
-            color: #9ca3af; /* gray-400 */
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            border-color: #e5e7eb;
         }
-        /* 빈칸을 눈에 띄게 표시 */
+
+        /* 빈칸 스타일 반응형 조정 */
         #quiz-question .blank {
-            color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
             font-weight: 700;
             display: inline-block;
-            width: 150px; /* 빈칸의 너비 */
+            min-width: 60px;
+            width: auto;
+            padding: 0 5px;
             border-bottom: 3px solid #3b82f6;
-            margin: 0 8px;
+            margin: 0 4px;
         }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col justify-between items-center p-8">
+<body class="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden">
 
-    <!-- 1. 선택지 (상단) -->
-    <div id="quiz-options-container" class="w-full flex flex-wrap justify-center gap-4 mb-6">
-        <!-- 선택지 버튼이 여기에 동적으로 생성됩니다 -->
-    </div>
-
-    <!-- 2. 퀴즈 메인 콘텐츠 (중앙) -->
-    <div id="quiz-main-content" class="flex-grow flex flex-col justify-center items-center w-full max-w-5xl text-center">
-        <p id="quiz-category" class="text-3xl font-bold text-blue-600 mb-4"></p>
-        <p id="quiz-question-number" class="text-xl text-gray-500 mb-6"></p>
+    <!-- 메인 컨텐츠 영역 (스크롤 가능하게 처리하여 넘침 방지) -->
+    <main class="flex-grow flex flex-col w-full max-w-lg mx-auto p-4 overflow-y-auto">
         
-        <!-- 질문 (빈칸 채우기 또는 정의) -->
-        <h2 id="quiz-question" class="text-5xl font-bold text-gray-800 my-8 leading-relaxed">
-            <!-- 퀴즈 질문이 여기에 표시됩니다 -->
-        </h2>
-
-        <!-- 피드백 (중앙 하단) -->
-        <div id="feedback-container" class="mt-8 h-32">
-            <p id="quiz-feedback-message" class="text-4xl font-bold"></p>
-            <p id="quiz-correct-answer" class="text-3xl text-gray-700 mt-4 hidden"></p>
-        </div>
-    </div>
-
-    <!-- 3. 네비게이션 (하단) -->
-    <div id="navigation-container" class="w-full flex justify-between items-center">
-        <!-- 카테고리 바로가기 버튼 (왼쪽/중앙 정렬) -->
-        <div id="category-jump-container" class="flex-grow flex flex-col justify-center gap-2">
-            <!-- 카테고리 버튼이 여기에 동적으로 생성됩니다 (2줄로) -->
+        <!-- 1. 퀴즈 질문 영역 (상단) -->
+        <div id="quiz-main-content" class="flex flex-col justify-center items-center w-full text-center mt-4 mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span id="quiz-category" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md"></span>
+                <span id="quiz-question-number" class="text-xs text-gray-400"></span>
+            </div>
+            
+            <!-- 질문 텍스트: 모바일에서는 적당히 크게, 데스크탑에선 더 크게 -->
+            <h2 id="quiz-question" class="text-2xl md:text-3xl font-bold text-gray-800 my-4 leading-relaxed break-keep">
+                <!-- 질문 내용 -->
+            </h2>
         </div>
 
-        <!-- 다음 문제 버튼 (오른쪽 정렬) -->
-        <div class="flex-shrink-0">
-            <button id="next-question-btn" class="px-8 py-4 text-2xl font-bold bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition-colors hidden">
-                다음 문제 →
+        <!-- 2. 피드백 영역 (중앙) -->
+        <div id="feedback-container" class="min-h-[3rem] flex flex-col justify-center items-center mb-4">
+            <p id="quiz-feedback-message" class="text-2xl font-bold transition-all duration-300"></p>
+            <p id="quiz-correct-answer" class="text-lg text-gray-600 mt-1 hidden font-medium"></p>
+        </div>
+
+        <!-- 3. 선택지 영역 (하단) -->
+        <div id="quiz-options-container" class="grid grid-cols-1 gap-3 w-full mb-6">
+            <!-- 선택지 버튼 동적 생성 -->
+        </div>
+
+        <!-- 다음 문제 버튼 (퀴즈 풀면 나타남) -->
+        <div class="w-full flex justify-center mb-4">
+            <button id="next-question-btn" class="w-full md:w-auto px-8 py-4 text-xl font-bold bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 transition-all hidden">
+                다음 문제 <span class="ml-2">→</span>
             </button>
         </div>
-    </div>
+    </main>
+
+    <!-- 4. 네비게이션 (하단 고정) -->
+    <footer class="flex-shrink-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10">
+        <div class="max-w-lg mx-auto">
+            <!-- 카테고리 스크롤 영역 -->
+            <div id="category-jump-container" class="flex flex-col gap-2 p-3 overflow-x-auto hide-scrollbar">
+                <!-- 카테고리 버튼들이 여기에 동적으로 생성됩니다 -->
+            </div>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // 1. 퀴즈 데이터 정의 (카테고리별 순서 고정 + 쉬운 표현)
             const allQuizData = [
                 {
-                    category: "생활 시설 문제",
+                    category: "생활 시설",
                     quizzes: [
                         { korean: "수돗물이 안 나오다", type: "definition", question: "물 안 나와요." },
                         { korean: "수돗물이 안 나오다", type: "fill-in-the-blank", question: "샤워를 하려는데 갑자기 [ ](이)가 안 나왔어요." },
@@ -157,7 +176,6 @@
                 }
             ];
 
-            // 2. DOM 요소 가져오기
             const quizOptionsContainer = document.getElementById('quiz-options-container');
             const quizCategoryEl = document.getElementById('quiz-category');
             const quizQuestionNumberEl = document.getElementById('quiz-question-number');
@@ -165,16 +183,14 @@
             const quizFeedbackMessageEl = document.getElementById('quiz-feedback-message');
             const quizCorrectAnswerEl = document.getElementById('quiz-correct-answer');
             const nextQuestionBtn = document.getElementById('next-question-btn');
-            const categoryJumpContainer = document.getElementById('category-jump-container'); // New
+            const categoryJumpContainer = document.getElementById('category-jump-container');
 
-            // 3. 퀴즈 상태 변수
             let allVocabularyWords = [];
             let quizList = [];
             let currentQuestionIndex = 0;
             let isAnswered = false;
-            let categoryStartIndices = {}; // New: Will store {fill: index, def: index}
+            let categoryStartIndices = {};
 
-            // 4. 헬퍼 함수
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -183,76 +199,64 @@
                 return array;
             }
 
-            // 모든 고유 어휘 목록 생성 (선택지용)
             function getAllWords() {
                 const words = allQuizData.flatMap(category => 
                     category.quizzes.map(q => q.korean)
                 );
-                return [...new Set(words)]; // Set을 사용해 고유한 값만 추출
+                return [...new Set(words)];
             }
 
-            // 5. 퀴즈 핵심 로직
-            
-            // 퀴즈 시작
             function startQuiz() {
-                // *** 변경된 퀴즈 순서 로직 ***
                 let fillInBlankQuizzes = [];
                 let definitionQuizzes = [];
 
-                categoryStartIndices = {}; // Reset
-                let fillInBlankIndex = 0; // Index counter for fill-in-the-blank quizzes
-                let definitionIndex = 0; // Relative index counter for definition quizzes
+                categoryStartIndices = {};
+                let fillInBlankIndex = 0;
+                let definitionIndex = 0;
 
-                // 1. 카테고리별로 퀴즈를 분리하고 섞음
                 allQuizData.forEach(categoryObj => {
                     const categoryName = categoryObj.category;
-                    categoryStartIndices[categoryName] = {}; // Initialize object for category
+                    categoryStartIndices[categoryName] = {};
 
-                    // --- Fill in the Blank ---
                     let fillIns = categoryObj.quizzes.filter(q => q.type === 'fill-in-the-blank');
                     let shuffledFillIns = shuffleArray(fillIns);
                     
-                    categoryStartIndices[categoryName].fill = fillInBlankIndex; // Store start index
+                    categoryStartIndices[categoryName].fill = fillInBlankIndex;
                     fillInBlankQuizzes.push(...shuffledFillIns);
-                    fillInBlankIndex += shuffledFillIns.length; // Increment for next category
+                    fillInBlankIndex += shuffledFillIns.length;
 
-                    // --- Definition ---
                     let defs = categoryObj.quizzes.filter(q => q.type === 'definition');
                     let shuffledDefs = shuffleArray(defs);
 
-                    categoryStartIndices[categoryName].def = definitionIndex; // Store *relative* start index
+                    categoryStartIndices[categoryName].def = definitionIndex;
                     definitionQuizzes.push(...shuffledDefs);
-                    definitionIndex += shuffledDefs.length; // Increment for next category
+                    definitionIndex += shuffledDefs.length;
                 });
 
-                // Now, offset all definition indices by the total number of fill-in-blanks
                 const totalFillInBlanks = fillInBlankQuizzes.length;
                 allQuizData.forEach(categoryObj => {
                     const categoryName = categoryObj.category;
                     categoryStartIndices[categoryName].def += totalFillInBlanks;
                 });
 
-                // 2. 빈칸 채우기 문제 먼저, 그 다음 뜻 맞추기 문제
                 quizList = [...fillInBlankQuizzes, ...definitionQuizzes];
-                
                 allVocabularyWords = getAllWords();
                 currentQuestionIndex = 0;
                 
-                createCategoryButtons(); // New
+                createCategoryButtons();
                 showQuestion(currentQuestionIndex);
             }
 
-            // New function: 카테고리 바로가기 버튼 생성
             function createCategoryButtons() {
-                categoryJumpContainer.innerHTML = ''; // Clear container
+                categoryJumpContainer.innerHTML = '';
 
-                // Create Row 1: 빈칸 고르기
+                // Row 1: 빈칸
                 const fillRow = document.createElement('div');
-                fillRow.className = "flex-grow flex justify-center items-center gap-4";
+                fillRow.className = "flex items-center gap-2 whitespace-nowrap min-w-max";
                 
                 const fillLabel = document.createElement('span');
-                fillLabel.className = "px-4 py-3 text-lg font-bold text-gray-600 w-20 text-right";
-                fillLabel.textContent = "빈칸:";
+                fillLabel.className = "text-xs font-bold text-gray-500 mr-1 w-8 text-right";
+                fillLabel.textContent = "빈칸";
                 fillRow.appendChild(fillLabel);
 
                 allQuizData.forEach(categoryObj => {
@@ -261,10 +265,9 @@
                     
                     const buttonEl = document.createElement('button');
                     buttonEl.textContent = categoryName;
-                    // Styling for category buttons
-                    buttonEl.className = "category-btn px-6 py-3 text-lg font-semibold bg-white border-2 border-gray-300 rounded-lg shadow-md hover:bg-gray-100 hover:border-blue-400 transition-all duration-200";
-                    buttonEl.dataset.category = categoryName; // Store category
-                    buttonEl.dataset.type = 'fill-in-the-blank'; // Store type
+                    buttonEl.className = "category-btn px-3 py-1.5 text-xs font-medium bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 transition-colors";
+                    buttonEl.dataset.category = categoryName;
+                    buttonEl.dataset.type = 'fill-in-the-blank';
                     
                     buttonEl.onclick = () => {
                         currentQuestionIndex = jumpIndex;
@@ -274,13 +277,13 @@
                 });
                 categoryJumpContainer.appendChild(fillRow);
 
-                // Create Row 2: 뜻 맞추기
+                // Row 2: 뜻
                 const defRow = document.createElement('div');
-                defRow.className = "flex-grow flex justify-center items-center gap-4";
+                defRow.className = "flex items-center gap-2 whitespace-nowrap min-w-max";
 
                 const defLabel = document.createElement('span');
-                defLabel.className = "px-4 py-3 text-lg font-bold text-gray-600 w-20 text-right";
-                defLabel.textContent = "뜻:";
+                defLabel.className = "text-xs font-bold text-gray-500 mr-1 w-8 text-right";
+                defLabel.textContent = "뜻";
                 defRow.appendChild(defLabel);
 
                 allQuizData.forEach(categoryObj => {
@@ -289,9 +292,9 @@
                     
                     const buttonEl = document.createElement('button');
                     buttonEl.textContent = categoryName;
-                    buttonEl.className = "category-btn px-6 py-3 text-lg font-semibold bg-white border-2 border-gray-300 rounded-lg shadow-md hover:bg-gray-100 hover:border-blue-400 transition-all duration-200";
-                    buttonEl.dataset.category = categoryName; // Store category
-                    buttonEl.dataset.type = 'definition'; // Store type
+                    buttonEl.className = "category-btn px-3 py-1.5 text-xs font-medium bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 transition-colors";
+                    buttonEl.dataset.category = categoryName;
+                    buttonEl.dataset.type = 'definition';
                     
                     buttonEl.onclick = () => {
                         currentQuestionIndex = jumpIndex;
@@ -302,7 +305,6 @@
                 categoryJumpContainer.appendChild(defRow);
             }
 
-            // 질문 표시
             function showQuestion(index) {
                 if (index >= quizList.length) {
                     showQuizComplete();
@@ -314,17 +316,15 @@
                 const currentCategory = allQuizData.find(cat => 
                     cat.quizzes.some(q => q.korean === currentItem.korean)
                 ).category;
-                const currentType = currentItem.type; // Get the type
+                const currentType = currentItem.type;
 
-                // UI 업데이트
-                quizCategoryEl.textContent = `[${currentCategory}]`;
-                quizQuestionNumberEl.textContent = `문제 ${index + 1} / ${quizList.length}`;
+                quizCategoryEl.textContent = currentCategory;
+                quizQuestionNumberEl.textContent = `${index + 1}/${quizList.length}`;
                 
-                // 빈칸 채우기 질문 형식 변경
                 if (currentItem.type === 'fill-in-the-blank') {
                     quizQuestionEl.innerHTML = currentItem.question.replace(
                         /\[ \]/, 
-                        '<span class="blank"></span>'
+                        '<span class="blank">&nbsp;&nbsp;&nbsp;</span>'
                     );
                 } else {
                     quizQuestionEl.textContent = currentItem.question;
@@ -334,7 +334,6 @@
                 quizCorrectAnswerEl.classList.add('hidden');
                 nextQuestionBtn.classList.add('hidden');
 
-                // 선택지 생성 (정답 1 + 오답 3)
                 const correctAnswer = currentItem.korean;
                 const distractors = [];
                 while (distractors.length < 3) {
@@ -346,88 +345,99 @@
 
                 const options = shuffleArray([correctAnswer, ...distractors]);
                 
-                // 선택지 버튼 렌더링 (상단)
                 quizOptionsContainer.innerHTML = '';
                 options.forEach(option => {
                     const buttonEl = document.createElement('button');
                     buttonEl.textContent = option;
-                    buttonEl.className = "option-btn px-6 py-4 text-2xl font-semibold bg-white border-2 border-gray-300 rounded-lg shadow-md hover:bg-gray-100 hover:border-blue-400 transition-all duration-200";
+                    // 모바일 친화적 버튼 스타일 (더 크고 누르기 쉽게)
+                    buttonEl.className = "option-btn w-full px-4 py-4 text-lg font-medium bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 active:scale-[0.99] transition-all duration-200";
                     buttonEl.onclick = () => handleAnswer(option, correctAnswer);
                     quizOptionsContainer.appendChild(buttonEl);
                 });
 
-                // 카테고리 버튼 활성/비활성 스타일
+                // 카테고리 버튼 활성 상태 표시
                 Array.from(categoryJumpContainer.querySelectorAll('.category-btn')).forEach(btn => {
                     if (btn.dataset.category === currentCategory && btn.dataset.type === currentType) {
-                        btn.classList.add('bg-blue-100', 'border-blue-400');
+                        btn.className = "category-btn px-3 py-1.5 text-xs font-bold bg-blue-100 border border-blue-400 text-blue-700 rounded-full transition-colors shadow-sm";
                     } else {
-                        btn.classList.remove('bg-blue-100', 'border-blue-400');
+                        btn.className = "category-btn px-3 py-1.5 text-xs font-medium bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors";
+                    }
+                    
+                    // 활성화된 카테고리 버튼이 화면에 보이도록 자동 스크롤
+                    if (btn.classList.contains('bg-blue-100')) {
+                        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }
                 });
             }
 
-            // 답안 처리
             function handleAnswer(selectedAnswer, correctAnswer) {
-                if (isAnswered) return; // 중복 클릭 방지
+                if (isAnswered) return;
                 isAnswered = true;
 
                 const isCorrect = selectedAnswer === correctAnswer;
 
-                // 버튼 스타일링 (정답/오답/비활성)
                 Array.from(quizOptionsContainer.children).forEach(btn => {
                     btn.disabled = true;
                     if (btn.textContent === correctAnswer) {
                         btn.classList.add('correct');
+                        btn.classList.remove('bg-white', 'border-gray-200');
                     } else if (btn.textContent === selectedAnswer) {
                         btn.classList.add('wrong');
+                        btn.classList.remove('bg-white', 'border-gray-200');
                     } else {
                         btn.classList.add('faded');
                     }
                 });
 
-                // 피드백 메시지 표시
                 if (isCorrect) {
-                    quizFeedbackMessageEl.textContent = '정답입니다! 👏';
-                    quizFeedbackMessageEl.className = 'text-4xl font-bold text-green-600';
+                    quizFeedbackMessageEl.textContent = '정답! 👏';
+                    quizFeedbackMessageEl.className = 'text-3xl font-bold text-green-600';
                 } else {
                     quizFeedbackMessageEl.textContent = '아쉽네요!';
-                    quizFeedbackMessageEl.className = 'text-4xl font-bold text-red-600';
+                    quizFeedbackMessageEl.className = 'text-3xl font-bold text-red-500';
                     quizCorrectAnswerEl.textContent = `정답: ${correctAnswer}`;
                     quizCorrectAnswerEl.classList.remove('hidden');
                 }
 
-                // 다음 문제 버튼 표시
                 nextQuestionBtn.classList.remove('hidden');
+                // 다음 버튼으로 스크롤 부드럽게 이동 (작은 화면 대응)
+                nextQuestionBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            // 다음 문제로 이동
             nextQuestionBtn.addEventListener('click', () => {
                 currentQuestionIndex++;
                 showQuestion(currentQuestionIndex);
+                // 새 문제 시작 시 맨 위로 스크롤
+                document.querySelector('main').scrollTop = 0;
             });
 
-            // 퀴즈 완료 처리
             function showQuizComplete() {
                 quizOptionsContainer.innerHTML = '';
-                categoryJumpContainer.innerHTML = ''; // Hide category buttons
-                quizCategoryEl.textContent = '퀴즈 완료!';
-                quizQuestionNumberEl.textContent = `총 ${quizList.length}개의 문제를 모두 풀었습니다.`;
-                quizQuestionEl.textContent = '🎉 수고하셨습니다! 🎉';
+                categoryJumpContainer.parentElement.style.display = 'none'; // 하단 네비게이션 숨김
+                quizCategoryEl.textContent = '';
+                quizQuestionNumberEl.textContent = '';
+                
+                quizQuestionEl.innerHTML = `
+                    <div class="py-10">
+                        <div class="text-6xl mb-4">🎉</div>
+                        <div class="text-2xl font-bold text-gray-800">모든 문제를 풀었습니다!</div>
+                        <div class="text-gray-500 mt-2">총 ${quizList.length}문제</div>
+                    </div>
+                `;
+                
                 quizFeedbackMessageEl.textContent = '';
                 quizCorrectAnswerEl.classList.add('hidden');
                 
-                nextQuestionBtn.textContent = '다시 풀기';
+                nextQuestionBtn.innerHTML = '다시 풀기 <span class="ml-2">↻</span>';
+                nextQuestionBtn.className = "w-full px-8 py-4 text-xl font-bold bg-green-500 text-white rounded-xl shadow-lg hover:bg-green-600 transition-colors";
                 nextQuestionBtn.onclick = () => {
-                    location.reload(); // 페이지 새로고침으로 간단히 다시 시작
+                    location.reload();
                 };
             }
 
-            // 6. 퀴즈 시작
             startQuiz();
         });
     </script>
 </body>
 </html>
-
-
 
