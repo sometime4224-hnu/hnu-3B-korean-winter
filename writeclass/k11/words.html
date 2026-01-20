@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서사 표현 학습 도우미 (Học Tiếng Hàn)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+JP&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+        .vietnamese-text {
+            color: #6b7280;
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold mb-2">한국어 서사(Narrative) 표현 학습</h1>
+            <p class="text-blue-100">시간의 순서대로 설명하기 (Giải thích theo trình tự thời gian)</p>
+        </div>
+
+        <!-- Definition Section -->
+        <div class="p-6 bg-blue-50 border-b border-blue-100 text-center">
+            <p class="text-blue-800 font-medium">
+                '서사'란 어떤 사건이나 과정을 <strong>시간의 흐름</strong>에 따라 설명하는 방식입니다.<br>
+                <span class="text-sm font-normal">'Tự sự' là phương pháp giải thích một sự việc hoặc quá trình theo trình tự thời gian.</span>
+            </p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex border-b">
+            <button onclick="showTab('vocab')" id="btn-vocab" class="flex-1 py-4 text-center tab-active transition">어휘 (Từ vựng)</button>
+            <button onclick="showTab('expression')" id="btn-expression" class="flex-1 py-4 text-center transition">표현 (Biểu hiện)</button>
+            <button onclick="showTab('grammar')" id="btn-grammar" class="flex-1 py-4 text-center transition">문법 (Ngữ pháp)</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-6">
+            <!-- Vocabulary Tab -->
+            <div id="tab-vocab" class="space-y-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📍 핵심 어휘 (10개)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">순서 <span class="vietnamese-text font-normal ml-2">(Thứ tự)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 일의 순서를 정합니다.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">과정 <span class="vietnamese-text font-normal ml-2">(Quá trình)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 발전하는 과정이 중요해요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">단계 <span class="vietnamese-text font-normal ml-2">(Giai đoạn)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 다음 단계로 넘어갑니다.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">변화 <span class="vietnamese-text font-normal ml-2">(Biến đổi)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 계절의 변화를 느껴요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">흐름 <span class="vietnamese-text font-normal ml-2">(Dòng chảy)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 대화의 흐름을 따라가세요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">초기 <span class="vietnamese-text font-normal ml-2">(Đầu kỳ)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 사업 초기에는 힘들었어요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">말기 <span class="vietnamese-text font-normal ml-2">(Cuối kỳ)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 19세기 말기에 일어난 일입니다.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">당시 <span class="vietnamese-text font-normal ml-2">(Lúc đó/Đương thời)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 당시에는 전화기가 귀했어요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">발달 <span class="vietnamese-text font-normal ml-2">(Phát triển)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 기술이 비약적으로 발달했어요.</p>
+                    </div>
+                    <div class="border p-3 rounded-lg hover:bg-gray-50 transition">
+                        <div class="font-bold text-blue-700">계기 <span class="vietnamese-text font-normal ml-2">(Cơ hội/Dịp)</span></div>
+                        <p class="text-sm text-gray-600 mt-1">예: 한국 드라마가 유학의 계기가 됐어요.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expression Tab -->
+            <div id="tab-expression" class="hidden space-y-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📍 주요 표현 (10개)</h3>
+                <div class="bg-white border rounded-lg overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="p-3 border-b">한국어 표현</th>
+                                <th class="p-3 border-b">Nghĩa tiếng Việt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-3 border-b font-medium">처음에는</td><td class="p-3 border-b vietnamese-text">Lúc đầu</td></tr>
+                            <tr><td class="p-3 border-b font-medium">시간이 지나면서</td><td class="p-3 border-b vietnamese-text">Theo thời gian</td></tr>
+                            <tr><td class="p-3 border-b font-medium">그 후로 / 그 뒤로</td><td class="p-3 border-b vietnamese-text">Sau đó</td></tr>
+                            <tr><td class="p-3 border-b font-medium">점차적으로</td><td class="p-3 border-b vietnamese-text">Dần dần</td></tr>
+                            <tr><td class="p-3 border-b font-medium">마침내 / 드디어</td><td class="p-3 border-b vietnamese-text">Cuối cùng</td></tr>
+                            <tr><td class="p-3 border-b font-medium">~을/를 거쳐서</td><td class="p-3 border-b vietnamese-text">Thông qua / Trải qua</td></tr>
+                            <tr><td class="p-3 border-b font-medium">어느덧</td><td class="p-3 border-b vietnamese-text">Thấm thoát / Từ lúc nào không hay</td></tr>
+                            <tr><td class="p-3 border-b font-medium">마지막 단계로</td><td class="p-3 border-b vietnamese-text">Bước cuối cùng</td></tr>
+                            <tr><td class="p-3 border-b font-medium">이와 같은 과정을 통해</td><td class="p-3 border-b vietnamese-text">Thông qua quá trình như thế này</td></tr>
+                            <tr><td class="p-3 border-b font-medium">결과적으로</td><td class="p-3 border-b vietnamese-text">Kết quả là</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grammar Tab -->
+            <div id="tab-grammar" class="hidden space-y-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📍 필수 문법 (6개)</h3>
+                <div class="space-y-4">
+                    <div class="p-4 bg-orange-50 border-l-4 border-orange-400 rounded">
+                        <div class="font-bold">-고 나서 <span class="text-sm font-normal ml-2 text-gray-500">(Sau khi hoàn thành...)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 밥을 먹<strong>고 나서</strong> 커피를 마셨어요.</p>
+                    </div>
+                    <div class="p-4 bg-green-50 border-l-4 border-green-400 rounded">
+                        <div class="font-bold">-(으)ㄴ/는 후에 <span class="text-sm font-normal ml-2 text-gray-500">(Sau khi...)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 수업이 끝<strong>난 후에</strong> 만납시다.</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 border-l-4 border-purple-400 rounded">
+                        <div class="font-bold">-다가 <span class="text-sm font-normal ml-2 text-gray-500">(Đang... thì chuyển sang)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 편지를 쓰<strong>다가</strong> 잠이 들었어요.</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+                        <div class="font-bold">-아/어/여 가다 <span class="text-sm font-normal ml-2 text-gray-500">(Đang dần trở nên...)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 한국 생활에 익숙해<strong>져 갑니다</strong>.</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                        <div class="font-bold">-(으)면서 <span class="text-sm font-normal ml-2 text-gray-500">(Vừa... vừa...)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 라디오를 들<strong>으면서</strong> 운전해요.</p>
+                    </div>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded">
+                        <div class="font-bold">-기 시작하다 <span class="text-sm font-normal ml-2 text-gray-500">(Bắt đầu làm gì...)</span></div>
+                        <p class="text-sm text-gray-700 mt-1">예문: 3년 전부터 한국어를 배우<strong>기 시작했어요</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Section -->
+        <div class="bg-gray-100 p-6">
+            <h3 class="font-bold text-gray-800 mb-2">✍️ 연습해 봅시다 (Hãy thử tập viết)</h3>
+            <p class="text-sm text-gray-600 mb-4">위의 어휘와 문법을 사용하여 자신의 일과를 순서대로 말해 보세요.</p>
+            <div id="quiz-area" class="bg-white p-4 rounded-lg border border-gray-200">
+                <p id="writing-prompt" class="italic text-gray-500">배운 표현을 사용하여 다음 빈칸을 채워보세요:</p>
+                <div class="mt-2 text-lg">
+                    "처음에는 한국말을 잘 못했지만, 시간이 _________ 한국 친구들을 많이 사귀게 되었습니다."
+                </div>
+                <button onclick="checkAnswer()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">정답 확인</button>
+                <p id="answer-box" class="mt-2 hidden text-green-600 font-bold">정답: 지나면서</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 text-center text-xs text-gray-400">
+            © 2024 한국어 교육 프로그램 - 베트남 유학생을 위한 중급 서사 학습
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.getElementById('tab-vocab').classList.add('hidden');
+            document.getElementById('tab-expression').classList.add('hidden');
+            document.getElementById('tab-grammar').classList.add('hidden');
+            
+            // Remove active style from all buttons
+            document.getElementById('btn-vocab').classList.remove('tab-active');
+            document.getElementById('btn-expression').classList.remove('tab-active');
+            document.getElementById('btn-grammar').classList.remove('tab-active');
+            
+            // Show selected tab and add active style
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('btn-' + tabName).classList.add('tab-active');
+        }
+
+        function checkAnswer() {
+            const box = document.getElementById('answer-box');
+            box.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
