@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>한국어 접속사 마라톤</title>
+    <title>한국어 접속사 마라톤 V3 (정교한 피드백)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -13,45 +13,219 @@
         body { font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* Custom scrollbar hide */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen relative">
 
     <!-- App Container -->
     <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
-        <!-- Content will be injected here by JavaScript -->
+        <!-- Content injected by JS -->
     </div>
 
     <!-- JavaScript Logic -->
     <script>
-        // --- Data ---
+        // --- Data Construction (Review for Triangle Answers) ---
+        // triangle: { index: { "UserAnswer": "Specific Feedback" } }
+        
         const basicQuestions = [
-            { id: 1, type: 'basic', sentences: [{ kr: "비가 많이 옵니다.", vn: "Trời mưa to." }, { kr: "우산을 썼습니다.", vn: "Tôi đã che ô." }], answers: ["그래서"], options: [["그리고", "그래서", "하지만", "그런데"]], explanation: "원인(비)과 결과(우산) 사이에는 '그래서'를 씁니다." },
-            { id: 2, type: 'basic', sentences: [{ kr: "김치를 좋아합니다.", vn: "Tôi thích Kimchi." }, { kr: "너무 맵습니다.", vn: "Nó quá cay." }], answers: ["하지만"], options: [["그리고", "그래서", "하지만", "그러니까"]], explanation: "좋아하지만 맵다는 대조적인 상황입니다." },
-            { id: 3, type: 'basic', sentences: [{ kr: "아침에 일어났습니다.", vn: "Tôi thức dậy vào buổi sáng." }, { kr: "세수를 했습니다.", vn: "Tôi rửa mặt." }], answers: ["그리고"], options: [["그리고", "그래서", "왜냐하면", "그렇지만"]], explanation: "시간 순서대로 일어난 일은 '그리고'를 씁니다." },
-            { id: 4, type: 'basic', sentences: [{ kr: "백화점에 갔습니다.", vn: "Tôi đã đến trung tâm thương mại." }, { kr: "사람이 정말 많았습니다.", vn: "Ở đó thực sự rất đông người." }], answers: ["그런데"], options: [["그리고", "그래서", "그런데", "그러면"]], explanation: "과거 상황을 제시하거나 화제를 전환할 때 '그런데'를 씁니다." },
-            { id: 5, type: 'basic', sentences: [{ kr: "시간이 없습니다.", vn: "Tôi không có thời gian." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }], answers: ["그래서"], options: [["하지만", "그리고", "그래서", "그런데"]], explanation: "시간이 없어서(원인) 택시를 탔습니다(결과)." },
-            { id: 6, type: 'basic', sentences: [{ kr: "한국어를 공부합니다.", vn: "Tôi học tiếng Hàn." }, { kr: "어렵습니다.", vn: "Nó khó." }], answers: ["하지만"], options: [["그리고", "하지만", "그래서", "그러면"]], explanation: "공부하지만 어렵다는 내용은 서로 반대됩니다." },
-            { id: 7, type: 'basic', sentences: [{ kr: "형은 키가 큽니다.", vn: "Anh trai tôi cao." }, { kr: "동생은 키가 작습니다.", vn: "Em trai tôi thấp." }], answers: ["그런데"], options: [["그래서", "그러니까", "그리고", "그런데"]], explanation: "두 대상을 대조하여 비교할 때 '그런데'를 자주 씁니다." },
-            { id: 8, type: 'basic', sentences: [{ kr: "노래를 부릅니다.", vn: "Tôi hát." }, { kr: "춤을 춥니다.", vn: "Tôi nhảy." }], answers: ["그리고"], options: [["하지만", "그리고", "그래서", "왜냐하면"]], explanation: "두 가지 행동을 동시에 하거나 나열할 때 '그리고'를 씁니다." },
-            { id: 9, type: 'basic', sentences: [{ kr: "약속이 있습니다.", vn: "Tôi có hẹn." }, { kr: "먼저 가겠습니다.", vn: "Tôi sẽ đi trước." }], answers: ["그러니까"], options: [["하지만", "그런데", "그러니까", "그리고"]], explanation: "앞 내용이 뒤 행동의 이유나 판단 근거가 될 때 '그러니까'를 씁니다." },
-            { id: 10, type: 'basic', sentences: [{ kr: "이 옷은 비쌉니다.", vn: "Cái áo này đắt." }, { kr: "예쁘지 않습니다.", vn: "Nó không đẹp." }], answers: ["게다가"], options: [["게다가", "하지만", "그래서", "왜냐하면"]], explanation: "나쁜 점에 더해 또 다른 나쁜 점을 추가할 때 '게다가'를 씁니다." }
+            { 
+                id: 1, type: 'basic', 
+                sentences: [{ kr: "비가 많이 옵니다.", vn: "Trời mưa to." }, { kr: "우산을 썼습니다.", vn: "Tôi đã che ô." }], 
+                answers: ["그래서"], 
+                // 그리고: Sequence possible, but 'So' is better for cause-effect.
+                triangle: { 0: { "그리고": "순서로는 맞지만, 원인과 결과이므로 '그래서'가 더 자연스럽습니다." } },
+                options: [["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "비가 오는 '원인' 때문에 우산을 쓰는 '결과'가 생겼으므로 '그래서'가 가장 적절합니다." 
+            },
+            { 
+                id: 2, type: 'basic', 
+                sentences: [{ kr: "김치를 좋아합니다.", vn: "Tôi thích Kimchi." }, { kr: "너무 맵습니다.", vn: "Nó quá cay." }], 
+                answers: ["하지만"], 
+                // 그런데: Weak contrast/topic shift possible.
+                triangle: { 0: { "그런데": "'그런데'도 가능하지만, 앞뒤 내용이 강하게 반대될 때는 '하지만'이 더 좋습니다." } },
+                options: [["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "좋아한다는 긍정적 내용과 맵다는 부정적 내용이 대조되므로 '하지만'을 씁니다." 
+            },
+            { 
+                id: 3, type: 'basic', 
+                sentences: [{ kr: "아침에 일어났습니다.", vn: "Tôi thức dậy vào buổi sáng." }, { kr: "세수를 했습니다.", vn: "Tôi rửa mặt." }], 
+                answers: ["그리고"], 
+                // 그래서: Weak cause-effect (woke up so I washed), but usually just sequence.
+                triangle: { 0: { "그래서": "일어나서 세수한 것은 자연스러운 순서(그리고)에 가깝습니다." } },
+                options: [["그리고", "그래서", "왜냐하면", "그렇지만"]], 
+                explanation: "시간의 순서대로 일어나는 일들을 나열할 때는 '그리고'를 사용합니다." 
+            },
+            { 
+                id: 4, type: 'basic', 
+                sentences: [{ kr: "백화점에 갔습니다.", vn: "Tôi đã đến trung tâm thương mại." }, { kr: "사람이 정말 많았습니다.", vn: "Ở đó thực sự rất đông người." }], 
+                answers: ["그런데"], 
+                // 그리고: Simple addition.
+                triangle: { 0: { "그리고": "단순 나열도 가능하지만, 상황 전개상 '그런데'가 훨씬 자연스럽습니다." } },
+                options: [["그리고", "그래서", "그런데", "그러면"]], 
+                explanation: "과거의 상황(배경)을 제시하면서 뒤의 내용을 소개할 때 '그런데'를 자주 씁니다." 
+            },
+            { 
+                id: 5, type: 'basic', 
+                sentences: [{ kr: "시간이 없습니다.", vn: "Tôi không có thời gian." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }], 
+                answers: ["그래서"], 
+                // 그러니까: Similar logic.
+                triangle: { 0: { "그러니까": "'그러니까'는 보통 상대방에게 제안하거나 자신의 의지를 말할 때 더 많이 씁니다." } },
+                options: [["하지만", "그러니까", "그래서", "그런데"]], 
+                explanation: "시간이 없는 것이 직접적인 원인이 되어 택시를 탔으므로 '그래서'가 적절합니다." 
+            },
+            { 
+                id: 6, type: 'basic', 
+                sentences: [{ kr: "한국어를 공부합니다.", vn: "Tôi học tiếng Hàn." }, { kr: "어렵습니다.", vn: "Nó khó." }], 
+                answers: ["하지만"], 
+                triangle: { 0: { "그런데": "배경 설명으로는 가능하지만, '어렵다'는 대조적 의미가 강해 '하지만'이 좋습니다." } },
+                options: [["그리고", "하지만", "그래서", "그런데"]], 
+                explanation: "공부한다는 사실과 어렵다는 사실은 서로 상반되는 느낌이 있으므로 '하지만'을 씁니다." 
+            },
+            { 
+                id: 7, type: 'basic', 
+                sentences: [{ kr: "형은 키가 큽니다.", vn: "Anh trai tôi cao." }, { kr: "동생은 키가 작습니다.", vn: "Em trai tôi thấp." }], 
+                answers: ["그런데"], 
+                // 하지만: Contrast.
+                triangle: { 0: { "하지만": "대조의 의미로 쓸 수 있습니다. 다만 두 대상을 비교/나열할 땐 '그런데'가 매우 자연스럽습니다." } },
+                options: [["그래서", "그러니까", "그리고", "그런데"]], 
+                explanation: "두 대상을 대조하여 비교 설명할 때는 '그런데'나 '반면에'를 주로 사용합니다." 
+            },
+            { 
+                id: 8, type: 'basic', 
+                sentences: [{ kr: "노래를 부릅니다.", vn: "Tôi hát." }, { kr: "춤을 춥니다.", vn: "Tôi nhảy." }], 
+                answers: ["그리고"], 
+                triangle: {},
+                options: [["하지만", "그리고", "그래서", "왜냐하면"]], 
+                explanation: "노래와 춤, 두 가지 행동을 동시에 하거나 나열하는 상황이므로 '그리고'입니다." 
+            },
+            { 
+                id: 9, type: 'basic', 
+                sentences: [{ kr: "약속이 있습니다.", vn: "Tôi có hẹn." }, { kr: "먼저 가겠습니다.", vn: "Tôi sẽ đi trước." }], 
+                answers: ["그러니까"], 
+                // 그래서: Very common in speech.
+                triangle: { 0: { "그래서": "말하기에서는 '그래서'도 많이 쓰지만, 뒤에 의지/행동이 올 땐 '그러니까'가 논리적입니다." } },
+                options: [["하지만", "그런데", "그러니까", "그리고"]], 
+                explanation: "앞의 사실이 뒤의 행동(가겠다)의 판단 근거가 될 때는 '그러니까'가 가장 정확합니다." 
+            },
+            { 
+                id: 10, type: 'basic', 
+                sentences: [{ kr: "이 옷은 비쌉니다.", vn: "Cái áo này đắt." }, { kr: "예쁘지 않습니다.", vn: "Nó không đẹp." }], 
+                answers: ["게다가"], 
+                // 그리고: Listing.
+                triangle: { 0: { "그리고": "단순 나열도 맞지만, 부정적인 점을 '더하는' 느낌을 살리려면 '게다가'가 좋습니다." } },
+                options: [["게다가", "하지만", "그래서", "왜냐하면"]], 
+                explanation: "안 좋은 점(비쌈)에 또 다른 안 좋은 점(안 예쁨)을 덧붙일 때는 '게다가'를 씁니다." 
+            }
         ];
 
         const advancedQuestions = [
-            { id: 11, type: 'advanced', sentences: [{ kr: "늦잠을 잤습니다.", vn: "Tôi đã ngủ dậy muộn." }, { kr: "버스를 놓쳤습니다.", vn: "Tôi đã lỡ xe buýt." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }, { kr: "지각하지 않았습니다.", vn: "Tôi đã không đi trễ." }], answers: ["그래서", "그래서", "하지만"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "왜냐하면", "하지만"], ["그리고", "그래서", "하지만", "그러니까"]], explanation: "늦잠(원인)→놓침(결과/그래서). 놓침(원인)→택시(결과/그래서). 택시 탔음(상황)↔지각 안 함(반대/하지만)." },
-            { id: 12, type: 'advanced', sentences: [{ kr: "불고기를 만들고 싶었습니다.", vn: "Tôi muốn làm món Bulgogi." }, { kr: "고기를 샀습니다.", vn: "Tôi đã mua thịt." }, { kr: "간장이 없었습니다.", vn: "Không có nước tương." }, { kr: "마트에 다시 갔습니다.", vn: "Tôi đã đi lại siêu thị." }], answers: ["그래서", "그런데", "그래서"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "만들고 싶어서 샀습니다(그래서). 샀는데 간장이 없는 상황(그런데). 없어서 다시 갔습니다(그래서)." },
-            { id: 13, type: 'advanced', sentences: [{ kr: "소풍을 가려고 했습니다.", vn: "Tôi định đi dã ngoại." }, { kr: "비가 많이 왔습니다.", vn: "Trời mưa to." }, { kr: "소풍을 취소했습니다.", vn: "Tôi đã hủy chuyến dã ngoại." }, { kr: "집에서 영화를 봤습니다.", vn: "Tôi đã xem phim ở nhà." }], answers: ["그런데", "그래서", "대신에"], options: [["그리고", "그런데", "그래서", "그러면"], ["그리고", "그런데", "그래서", "하지만"], ["그리고", "하지만", "대신에", "왜냐하면"]], explanation: "가려고 했지만 비가 왔습니다(그런데). 그래서 취소했습니다(그래서). 취소하고 그 대신에 영화를 봤습니다(대신에)." },
-            { id: 14, type: 'advanced', sentences: [{ kr: "열심히 공부했습니다.", vn: "Tôi đã học chăm chỉ." }, { kr: "시험이 쉬웠습니다.", vn: "Kỳ thi dễ." }, { kr: "100점을 받았습니다.", vn: "Tôi đã được 100 điểm." }, { kr: "기분이 정말 좋습니다.", vn: "Tâm trạng tôi rất tốt." }], answers: ["그런데", "그래서", "그래서"], options: [["그리고", "그런데", "하지만", "그러면"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "공부했는데 의외로 시험도 쉬웠습니다(그런데). 그래서 100점을 받았고(그래서), 결과적으로 기분이 좋습니다(그래서)." },
-            { id: 15, type: 'advanced', sentences: [{ kr: "친구를 만났습니다.", vn: "Tôi đã gặp bạn." }, { kr: "점심을 먹었습니다.", vn: "Tôi đã ăn trưa." }, { kr: "카페에 갔습니다.", vn: "Tôi đã đi cà phê." }, { kr: "자리가 없었습니다.", vn: "Không có chỗ ngồi." }], answers: ["그리고", "그리고", "그런데"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "만나서 밥 먹고(그리고), 카페에 갔습니다(그리고). 갔는데 자리가 없었습니다(그런데)." },
-            { id: 16, type: 'advanced', sentences: [{ kr: "머리가 아팠습니다.", vn: "Tôi bị đau đầu." }, { kr: "약을 먹었습니다.", vn: "Tôi đã uống thuốc." }, { kr: "계속 아팠습니다.", vn: "Nó vẫn đau." }, { kr: "병원에 갔습니다.", vn: "Tôi đã đến bệnh viện." }], answers: ["그래서", "하지만", "그래서"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "아파서 약을 먹었습니다(그래서). 먹었지만 계속 아팠습니다(하지만). 그래서 병원에 갔습니다(그래서)." },
-            { id: 17, type: 'advanced', sentences: [{ kr: "제주도에 갔습니다.", vn: "Tôi đã đi đảo Jeju." }, { kr: "날씨가 좋았습니다.", vn: "Thời tiết đẹp." }, { kr: "사진을 많이 찍었습니다.", vn: "Tôi đã chụp nhiều ảnh." }, { kr: "카메라를 잃어버렸습니다.", vn: "Tôi đã làm mất máy ảnh." }], answers: ["그리고", "그래서", "그런데"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "가서 날씨가 좋았습니다(그리고). 좋아서 사진을 찍었습니다(그래서). 그런데 카메라를 잃어버리는 일이 생겼습니다(그런데)." },
-            { id: 18, type: 'advanced', sentences: [{ kr: "생일이었습니다.", vn: "Đó là sinh nhật của tôi." }, { kr: "선물을 받았습니다.", vn: "Tôi đã nhận được quà." }, { kr: "상자를 열었습니다.", vn: "Tôi đã mở hộp." }, { kr: "아무것도 없었습니다.", vn: "Không có gì cả." }], answers: ["그래서", "그리고", "그런데"], options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "생일이라 선물을 받았습니다(그래서). 받고 나서 열었습니다(그리고). 열었는데 비어 있었습니다(그런데)." },
-            { id: 19, type: 'advanced', sentences: [{ kr: "버스를 탔습니다.", vn: "Tôi đã lên xe buýt." }, { kr: "잠이 들었습니다.", vn: "Tôi đã ngủ thiếp đi." }, { kr: "종점까지 갔습니다.", vn: "Tôi đã đi đến trạm cuối." }, { kr: "집에 늦게 왔습니다.", vn: "Tôi đã về nhà muộn." }], answers: ["그리고", "그래서", "그래서"], options: [["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"]], explanation: "타고 나서 잠들었습니다(그리고). 잠들어서 종점까지 갔고(그래서), 그 결과 늦었습니다(그래서)." },
-            { id: 20, type: 'advanced', sentences: [{ kr: "쇼핑을 했습니다.", vn: "Tôi đã đi mua sắm." }, { kr: "돈을 다 썼습니다.", vn: "Tôi đã tiêu hết tiền." }, { kr: "배가 고팠습니다.", vn: "Tôi đói bụng." }, { kr: "밥을 먹지 못했습니다.", vn: "Tôi đã không thể ăn cơm." }], answers: ["그래서", "그런데", "그래서"], options: [["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "쇼핑을 해서 돈을 다 썼습니다(그래서). 돈이 없는데 배가 고픈 상황이 되었습니다(그런데). 돈이 없어서 못 먹었습니다(그래서)." }
+            { 
+                id: 11, type: 'advanced', 
+                sentences: [{ kr: "늦잠을 잤습니다.", vn: "Tôi đã ngủ dậy muộn." }, { kr: "버스를 놓쳤습니다.", vn: "Tôi đã lỡ xe buýt." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }, { kr: "지각하지 않았습니다.", vn: "Tôi đã không đi trễ." }], 
+                answers: ["그래서", "그래서", "하지만"], 
+                triangle: { 
+                    0: { "그리고": "원인과 결과 관계이므로 '그래서'가 더 좋습니다." },
+                    2: { "그런데": "상황 전환도 되지만, 기대와 반대되는 결과이므로 '하지만'이 명확합니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "왜냐하면", "하지만"], ["그리고", "그래서", "하지만", "그러니까"]], 
+                explanation: "늦잠→놓침(원인/결과 '그래서'), 놓침→택시(원인/결과 '그래서'), 택시 탐↔지각 안 함(반대 '하지만')." 
+            },
+            { 
+                id: 12, type: 'advanced', 
+                sentences: [{ kr: "불고기를 만들고 싶었습니다.", vn: "Tôi muốn làm món Bulgogi." }, { kr: "고기를 샀습니다.", vn: "Tôi đã mua thịt." }, { kr: "간장이 없었습니다.", vn: "Không có nước tương." }, { kr: "마트에 다시 갔습니다.", vn: "Tôi đã đi lại siêu thị." }], 
+                answers: ["그래서", "그런데", "그래서"], 
+                triangle: {
+                    1: { "하지만": "대조보다는 상황의 발견/전환이므로 '그런데'가 조금 더 자연스럽습니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], 
+                explanation: "하고 싶어서 샀고(그래서), 샀는데 없는 상황을 발견했고(그런데), 없어서 다시 갔습니다(그래서)." 
+            },
+            { 
+                id: 13, type: 'advanced', 
+                sentences: [{ kr: "소풍을 가려고 했습니다.", vn: "Tôi định đi dã ngoại." }, { kr: "비가 많이 왔습니다.", vn: "Trời mưa to." }, { kr: "소풍을 취소했습니다.", vn: "Tôi đã hủy chuyến dã ngoại." }, { kr: "집에서 영화를 봤습니다.", vn: "Tôi đã xem phim ở nhà." }], 
+                answers: ["그런데", "그래서", "대신에"], 
+                triangle: {
+                    0: { "하지만": "의도와 다른 상황 발생이므로 '하지만'도 가능합니다." },
+                    2: { "그리고": "단순 순서로 볼 수도 있지만, 소풍 '대신' 영화를 본 것이므로 '대신에'가 가장 적절합니다." }
+                },
+                options: [["그리고", "그런데", "그래서", "그러면"], ["그리고", "그런데", "그래서", "하지만"], ["그리고", "하지만", "대신에", "왜냐하면"]], 
+                explanation: "가려 했는데 비가 왔고(그런데), 그래서 취소했고(그래서), 소풍 대신 영화를 봤습니다(대신에)." 
+            },
+            { 
+                id: 14, type: 'advanced', 
+                sentences: [{ kr: "열심히 공부했습니다.", vn: "Tôi đã học chăm chỉ." }, { kr: "시험이 쉬웠습니다.", vn: "Kỳ thi dễ." }, { kr: "100점을 받았습니다.", vn: "Tôi đã được 100 điểm." }, { kr: "기분이 정말 좋습니다.", vn: "Tâm trạng tôi rất tốt." }], 
+                answers: ["그런데", "그래서", "그래서"], 
+                triangle: {
+                    0: { "그리고": "나열도 가능하지만, '공부했는데(예상 외로) 쉬웠다'는 뉘앙스인 '그런데'가 맛깔납니다." },
+                    0: { "하지만": "공부한 것과 쉬운 것이 꼭 반대는 아니지만 대조될 수 있어 허용됩니다." }
+                },
+                options: [["그리고", "그런데", "하지만", "그러면"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "공부했는데 의외로 시험도 쉬웠습니다(그런데/배경). 그래서 점수를 잘 받았고(그래서), 결과적으로 기쁩니다(그래서)." 
+            },
+            { 
+                id: 15, type: 'advanced', 
+                sentences: [{ kr: "친구를 만났습니다.", vn: "Tôi đã gặp bạn." }, { kr: "점심을 먹었습니다.", vn: "Tôi đã ăn trưa." }, { kr: "카페에 갔습니다.", vn: "Tôi đã đi cà phê." }, { kr: "자리가 없었습니다.", vn: "Không có chỗ ngồi." }], 
+                answers: ["그리고", "그리고", "그런데"], 
+                triangle: {
+                    0: { "그래서": "만나서(원인) 먹었다? 보통은 만나서(순서) 먹습니다. '그리고'가 좋습니다." },
+                    2: { "하지만": "자리가 없는 부정적 상황이므로 '하지만'도 가능합니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "만나고 밥 먹고(그리고), 그 다음 카페에 갔는데(그리고), 자리가 없는 상황(그런데)입니다." 
+            },
+            { 
+                id: 16, type: 'advanced', 
+                sentences: [{ kr: "머리가 아팠습니다.", vn: "Tôi bị đau đầu." }, { kr: "약을 먹었습니다.", vn: "Tôi đã uống thuốc." }, { kr: "계속 아팠습니다.", vn: "Nó vẫn đau." }, { kr: "병원에 갔습니다.", vn: "Tôi đã đến bệnh viện." }], 
+                answers: ["그래서", "하지만", "그래서"], 
+                triangle: {
+                    1: { "그런데": "약 먹었는데 계속 아픈 상황 제시로 '그런데'도 훌륭한 답입니다." },
+                    1: { "그렇지만": "'하지만'과 같습니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그렇지만", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], 
+                explanation: "아파서 약을 먹었고(그래서), 먹었지만 효과가 없었고(하지만), 결국 병원에 갔습니다(그래서)." 
+            },
+            { 
+                id: 17, type: 'advanced', 
+                sentences: [{ kr: "제주도에 갔습니다.", vn: "Tôi đã đi đảo Jeju." }, { kr: "날씨가 좋았습니다.", vn: "Thời tiết đẹp." }, { kr: "사진을 많이 찍었습니다.", vn: "Tôi đã chụp nhiều ảnh." }, { kr: "카메라를 잃어버렸습니다.", vn: "Tôi đã làm mất máy ảnh." }], 
+                answers: ["그런데", "그래서", "그런데"], 
+                triangle: {
+                    0: { "그리고": "단순 나열 가능." },
+                    2: { "하지만": "좋은 일 뒤에 나쁜 일이 생겼으므로 '하지만'도 정답입니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "갔는데(배경) 날씨가 좋았고(그런데), 좋아서 찍었고(그래서), 그런데 잃어버리는 사건 발생(그런데)." 
+            },
+            { 
+                id: 18, type: 'advanced', 
+                sentences: [{ kr: "생일이었습니다.", vn: "Đó là sinh nhật của tôi." }, { kr: "선물을 받았습니다.", vn: "Tôi đã nhận được quà." }, { kr: "상자를 열었습니다.", vn: "Tôi đã mở hộp." }, { kr: "아무것도 없었습니다.", vn: "Không có gì cả." }], 
+                answers: ["그래서", "그리고", "그런데"], 
+                triangle: {
+                    2: { "하지만": "반전이 강하므로 '하지만'도 가능합니다." }
+                },
+                options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], 
+                explanation: "생일이라 받았고(그래서), 받고 열었고(그리고), 열었는데 비어 있었습니다(그런데)." 
+            },
+            { 
+                id: 19, type: 'advanced', 
+                sentences: [{ kr: "버스를 탔습니다.", vn: "Tôi đã lên xe buýt." }, { kr: "잠이 들었습니다.", vn: "Tôi đã ngủ thiếp đi." }, { kr: "종점까지 갔습니다.", vn: "Tôi đã đi đến trạm cuối." }, { kr: "집에 늦게 왔습니다.", vn: "Tôi đã về nhà muộn." }], 
+                answers: ["그리고", "그래서", "그래서"], 
+                triangle: {
+                    0: { "그런데": "탔는데 잠들었다는 상황 묘사로 '그런데'도 가능합니다." }
+                },
+                options: [["그리고", "그런데", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"]], 
+                explanation: "타고 나서 잠들었고(그리고/그런데), 잠들어서 종점까지 갔고(그래서), 그 결과 늦었습니다(그래서)." 
+            },
+            { 
+                id: 20, type: 'advanced', 
+                sentences: [{ kr: "쇼핑을 했습니다.", vn: "Tôi đã đi mua sắm." }, { kr: "돈을 다 썼습니다.", vn: "Tôi đã tiêu hết tiền." }, { kr: "배가 고팠습니다.", vn: "Tôi đói bụng." }, { kr: "밥을 먹지 못했습니다.", vn: "Tôi đã không thể ăn cơm." }], 
+                answers: ["그래서", "그런데", "그래서"], 
+                triangle: {
+                    0: { "그리고": "쇼핑하고 돈을 썼다(순서)도 가능하지만, 쇼핑해서 썼다(인과)가 더 강합니다." },
+                    1: { "하지만": "돈 없는데 배고픈 역설적 상황." }
+                },
+                options: [["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], 
+                explanation: "쇼핑을 해서 다 썼고(그래서), 다 썼는데 배가 고픈 상황이고(그런데), 돈이 없어서 못 먹었습니다(그래서)." 
+            }
         ];
 
         const allQuestions = [...basicQuestions, ...advancedQuestions];
@@ -61,14 +235,14 @@
             currentStep: 0,
             score: 0,
             showFeedback: false,
-            isCorrect: false,
-            selectedOptions: {}, // { 0: "그리고", 1: "그래서" ... }
-            answerHistory: [] // [{ id: 1, isCorrect: true, userSelection: [], explanation: "" }, ...]
+            resultStatus: 'correct', // 'correct' (O), 'triangle' (△), 'wrong' (X)
+            selectedOptions: {}, 
+            answerHistory: []
         };
 
         const app = document.getElementById('app');
 
-        // --- Methods ---
+        // --- Logic ---
         function handleSelect(option, index) {
             if (state.showFeedback) return;
             state.selectedOptions[index] = option;
@@ -79,31 +253,60 @@
             const currentQ = allQuestions[state.currentStep];
             const slotsNeeded = currentQ.type === 'basic' ? 1 : 3;
             
-            // Validate completeness
             if (Object.keys(state.selectedOptions).length < slotsNeeded) return;
 
-            let correct = true;
+            let allCorrect = true;
+            let anyWrong = false;
+            let triangleMessages = [];
             let userSelectionArray = [];
+
             for (let i = 0; i < slotsNeeded; i++) {
-                userSelectionArray.push(state.selectedOptions[i]);
-                if (state.selectedOptions[i] !== currentQ.answers[i]) {
-                    correct = false;
+                const userChoice = state.selectedOptions[i];
+                const bestAnswer = currentQ.answers[i];
+                userSelectionArray.push(userChoice);
+
+                if (userChoice === bestAnswer) {
+                    // Correct slot
+                } else if (currentQ.triangle && currentQ.triangle[i] && currentQ.triangle[i][userChoice]) {
+                    // Triangle slot
+                    allCorrect = false;
+                    triangleMessages.push(currentQ.triangle[i][userChoice]);
+                } else {
+                    // Wrong slot
+                    allCorrect = false;
+                    anyWrong = true;
                 }
+            }
+
+            // Determine final status
+            let finalStatus = 'wrong';
+            let scoreAdd = 0;
+
+            if (allCorrect) {
+                finalStatus = 'correct';
+                scoreAdd = 1;
+            } else if (!anyWrong) { // Mixed Correct and Triangle, NO Wrong
+                finalStatus = 'triangle';
+                scoreAdd = 0.5;
+            } else {
+                finalStatus = 'wrong';
+                scoreAdd = 0;
             }
 
             // Save history
             state.answerHistory.push({
                 id: currentQ.id,
                 type: currentQ.type,
-                isCorrect: correct,
+                status: finalStatus, // correct, triangle, wrong
                 userSelection: userSelectionArray,
                 correctSelection: currentQ.answers,
                 explanation: currentQ.explanation,
-                title: currentQ.sentences[0].kr // Use first sentence as title
+                triangleInfos: triangleMessages,
+                title: currentQ.sentences[0].kr
             });
 
-            state.isCorrect = correct;
-            if (correct) state.score += 1;
+            state.resultStatus = finalStatus;
+            state.score += scoreAdd;
             state.showFeedback = true;
             render();
             
@@ -116,7 +319,6 @@
         function nextQuestion() {
             state.showFeedback = false;
             state.selectedOptions = {};
-            state.isCorrect = false;
             state.currentStep += 1;
             window.scrollTo(0, 0);
             render();
@@ -127,13 +329,13 @@
             state.score = 0;
             state.showFeedback = false;
             state.selectedOptions = {};
-            state.isCorrect = false;
             state.answerHistory = [];
             window.scrollTo(0, 0);
             render();
         }
 
-        // --- Render Helpers ---
+        // --- Render Views ---
+        
         function renderHeader() {
             const progress = ((state.currentStep + 1) / allQuestions.length) * 100;
             return `
@@ -152,15 +354,35 @@
         function renderConnector(index, currentQ) {
             const userAns = state.selectedOptions[index];
             const correctAns = currentQ.answers[index];
-            const isSlotCorrect = userAns === correctAns;
-
+            
             if (state.showFeedback) {
+                // Determine slot specific status
+                let slotStatus = 'wrong';
+                let triangleMsg = null;
+
+                if (userAns === correctAns) {
+                    slotStatus = 'correct';
+                } else if (currentQ.triangle && currentQ.triangle[index] && currentQ.triangle[index][userAns]) {
+                    slotStatus = 'triangle';
+                    triangleMsg = currentQ.triangle[index][userAns];
+                }
+
+                let borderColor = 'border-red-500 bg-red-50 text-red-700';
+                if (slotStatus === 'correct') borderColor = 'border-green-500 bg-green-50 text-green-700';
+                if (slotStatus === 'triangle') borderColor = 'border-yellow-500 bg-yellow-50 text-yellow-800';
+
                 return `
-                    <div class="relative z-20 my-2 flex justify-center">
-                        <div class="px-4 py-2 rounded-lg border-2 font-bold text-lg shadow-sm ${isSlotCorrect ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700'}">
+                    <div class="relative z-20 my-2 flex flex-col items-center">
+                        <div class="px-4 py-2 rounded-lg border-2 font-bold text-lg shadow-sm ${borderColor}">
                             ${userAns}
-                            ${!isSlotCorrect ? `<span class="block text-xs font-normal text-slate-500 mt-1">정답: ${correctAns}</span>` : ''}
+                            ${slotStatus === 'correct' ? '<i data-lucide="check" class="inline w-4 h-4 ml-1"></i>' : ''}
+                            ${slotStatus === 'triangle' ? '<span class="ml-1 text-sm">△</span>' : ''}
                         </div>
+                        ${slotStatus !== 'correct' ? `
+                            <div class="mt-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
+                                정답: ${correctAns}
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             } else {
@@ -187,73 +409,46 @@
         function renderQuestionCard(currentQ) {
             const arrowIcon = `<div class="flex justify-center items-center py-2 text-slate-300"><i data-lucide="arrow-down" class="w-5 h-5"></i></div>`;
             
-            let contentHtml = '';
+            // Build parts dynamically based on type
+            let parts = [];
             
             // Sentence 1
-            contentHtml += `
+            parts.push(`
                 <div class="relative z-10 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2 text-center shadow-sm">
                     <p class="text-xl font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[0].kr}</p>
                     <p class="text-sm text-slate-500">${currentQ.sentences[0].vn}</p>
                 </div>
-            `;
+            `);
 
-            // Connector 0
-            contentHtml += `
-                <div class="relative z-10">
-                    ${arrowIcon}
-                    ${renderConnector(0, currentQ)}
-                    ${arrowIcon}
-                </div>
-            `;
-
-            // Sentence 2
-            contentHtml += `
-                <div class="relative z-10 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2 text-center shadow-sm">
-                    <p class="text-xl font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[1].kr}</p>
-                    <p class="text-sm text-slate-500">${currentQ.sentences[1].vn}</p>
-                </div>
-            `;
-
-            // Advanced parts
-            if (currentQ.type === 'advanced') {
-                // Connector 1
-                contentHtml += `
+            // Loop for connectors and subsequent sentences
+            const slots = currentQ.type === 'basic' ? 1 : 3;
+            // Sentences count is slots + 1
+            for (let i = 0; i < slots; i++) {
+                parts.push(`
                     <div class="relative z-10">
                         ${arrowIcon}
-                        ${renderConnector(1, currentQ)}
+                        ${renderConnector(i, currentQ)}
                         ${arrowIcon}
                     </div>
-                `;
-                // Sentence 3
-                contentHtml += `
-                    <div class="relative z-10 bg-purple-50/50 p-4 rounded-xl border border-purple-100 mb-2 text-center shadow-sm">
-                        <p class="text-xl font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[2].kr}</p>
-                        <p class="text-sm text-slate-500">${currentQ.sentences[2].vn}</p>
+                `);
+                
+                // Next Sentence
+                const sentenceIndex = i + 1;
+                const style = i >= 1 ? 'bg-purple-50/50 border-purple-100' : 'bg-blue-50/50 border-blue-100';
+                
+                parts.push(`
+                    <div class="relative z-10 ${style} p-4 rounded-xl border mb-2 text-center shadow-sm">
+                        <p class="text-xl font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[sentenceIndex].kr}</p>
+                        <p class="text-sm text-slate-500">${currentQ.sentences[sentenceIndex].vn}</p>
                     </div>
-                `;
-                // Connector 2
-                contentHtml += `
-                    <div class="relative z-10">
-                        ${arrowIcon}
-                        ${renderConnector(2, currentQ)}
-                        ${arrowIcon}
-                    </div>
-                `;
-                // Sentence 4
-                contentHtml += `
-                    <div class="relative z-10 bg-purple-50/50 p-4 rounded-xl border border-purple-100 mb-2 text-center shadow-sm">
-                        <p class="text-xl font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[3].kr}</p>
-                        <p class="text-sm text-slate-500">${currentQ.sentences[3].vn}</p>
-                    </div>
-                `;
+                `);
             }
 
             return `
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-20 mb-4 mx-4">
                     <div class="p-5 flex flex-col relative">
-                        <!-- Vertical Line -->
                         <div class="absolute left-1/2 top-10 bottom-10 w-0.5 bg-slate-100 -translate-x-1/2 z-0 hidden sm:block"></div>
-                        ${contentHtml}
+                        ${parts.join('')}
                     </div>
                 </div>
             `;
@@ -262,18 +457,47 @@
         function renderFeedback(currentQ) {
             if (!state.showFeedback) return '';
             
-            const isCorrect = state.isCorrect;
-            return `
-                <div id="feedback-section" class="mx-4 mb-24 rounded-xl p-5 border-2 animate-fade-in ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="${isCorrect ? 'check-circle' : 'x-circle'}" class="${isCorrect ? 'text-green-600' : 'text-red-600'} w-6 h-6"></i>
-                        <span class="font-bold text-lg ${isCorrect ? 'text-green-700' : 'text-red-700'}">
-                            ${isCorrect ? "정답입니다!" : "다시 확인해보세요."}
-                        </span>
+            const status = state.resultStatus; // correct, triangle, wrong
+            let bgClass, borderClass, textClass, icon, title;
+            
+            if (status === 'correct') {
+                bgClass = 'bg-green-50'; borderClass = 'border-green-200'; textClass = 'text-green-700';
+                icon = 'circle-check'; title = "정답입니다! (O)";
+            } else if (status === 'triangle') {
+                bgClass = 'bg-yellow-50'; borderClass = 'border-yellow-200'; textClass = 'text-yellow-700';
+                icon = 'triangle-alert'; title = "아쉬워요! (△)";
+            } else {
+                bgClass = 'bg-red-50'; borderClass = 'border-red-200'; textClass = 'text-red-700';
+                icon = 'circle-x'; title = "오답입니다. (X)";
+            }
+
+            // Collect specific feedback messages for Triangles
+            let triangleFeedbackHtml = '';
+            const lastHistory = state.answerHistory[state.answerHistory.length - 1];
+            if (lastHistory && lastHistory.triangleInfos && lastHistory.triangleInfos.length > 0) {
+                 triangleFeedbackHtml = `
+                    <div class="mt-3 bg-white/60 p-3 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                        <p class="font-bold mb-1">💡 왜 세모(△)인가요?</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${lastHistory.triangleInfos.map(msg => `<li>${msg}</li>`).join('')}
+                        </ul>
                     </div>
-                    <p class="text-slate-700 text-sm leading-relaxed bg-white/60 p-3 rounded-lg border border-black/5">
+                 `;
+            }
+
+            return `
+                <div id="feedback-section" class="mx-4 mb-24 rounded-xl p-5 border-2 animate-fade-in ${bgClass} ${borderClass}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="${icon}" class="${textClass} w-6 h-6"></i>
+                        <span class="font-bold text-lg ${textClass}">${title}</span>
+                    </div>
+                    
+                    ${triangleFeedbackHtml}
+
+                    <div class="mt-3 text-slate-700 text-sm leading-relaxed bg-white/60 p-3 rounded-lg border border-black/5">
+                        <p class="font-bold text-slate-800 mb-1">해설:</p>
                         ${currentQ.explanation}
-                    </p>
+                    </div>
                 </div>
             `;
         }
@@ -292,10 +516,12 @@
                     </button>
                 `;
             } else {
-                const isSuccess = state.isCorrect;
+                const status = state.resultStatus;
+                let btnColor = status === 'correct' ? 'bg-green-600' : (status === 'triangle' ? 'bg-yellow-600' : 'bg-red-500');
+                
                 buttonHtml = `
                     <button onclick="nextQuestion()"
-                        class="w-full py-4 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all ${isSuccess ? 'bg-green-600' : 'bg-red-500'}">
+                        class="w-full py-4 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all ${btnColor}">
                         다음 문제 <i data-lucide="chevron-right"></i>
                     </button>
                 `;
@@ -308,85 +534,90 @@
             `;
         }
 
-        function renderReviewList() {
-            return state.answerHistory.map((item, idx) => {
-                const isCorrect = item.isCorrect;
+        function renderCompletion() {
+            // Calculate final score
+            const finalScore = state.score;
+            const maxScore = allQuestions.length; // 20
+            const percentage = (finalScore / maxScore) * 100;
+            
+            let gradeIcon, gradeColor;
+            if (percentage >= 90) { gradeIcon = '🏆'; gradeColor = 'bg-yellow-100'; }
+            else if (percentage >= 70) { gradeIcon = '👏'; gradeColor = 'bg-blue-100'; }
+            else { gradeIcon = '💪'; gradeColor = 'bg-slate-100'; }
+
+            // Render History List
+            const historyHtml = state.answerHistory.map((item, idx) => {
+                let statusIcon, statusClass, borderColor, bgClass;
                 
-                // 정답(파란색) vs 오답(붉은색) 카드 스타일
-                const borderColor = isCorrect ? 'border-blue-100 bg-blue-50' : 'border-red-200 bg-red-50';
-                const icon = isCorrect 
-                    ? `<i data-lucide="check" class="text-blue-500 w-5 h-5"></i>` 
-                    : `<i data-lucide="x" class="text-red-500 w-5 h-5"></i>`;
-                
-                // 오답일 때만 사용자 답안 vs 정답 비교 표시
-                let comparisonHtml = '';
-                if (!isCorrect) {
-                    comparisonHtml = `
-                        <div class="mt-3 bg-white/60 p-3 rounded-lg text-sm space-y-2">
-                            <div class="flex items-start gap-2">
-                                <span class="font-bold text-red-600 shrink-0 w-16">나의 답:</span>
-                                <span class="text-slate-700">${item.userSelection.join(', ')}</span>
-                            </div>
-                            <div class="flex items-start gap-2">
-                                <span class="font-bold text-green-600 shrink-0 w-16">정답:</span>
-                                <span class="text-slate-800 font-bold">${item.correctSelection.join(', ')}</span>
-                            </div>
+                if (item.status === 'correct') {
+                    statusIcon = 'check'; statusClass = 'text-blue-500'; 
+                    borderColor = 'border-blue-100'; bgClass = 'bg-blue-50';
+                } else if (item.status === 'triangle') {
+                    statusIcon = 'triangle-alert'; statusClass = 'text-yellow-500';
+                    borderColor = 'border-yellow-200'; bgClass = 'bg-yellow-50';
+                } else {
+                    statusIcon = 'x'; statusClass = 'text-red-500';
+                    borderColor = 'border-red-200'; bgClass = 'bg-red-50';
+                }
+
+                // Comparison block for non-perfect answers
+                let detailHtml = '';
+                if (item.status !== 'correct') {
+                    detailHtml = `
+                        <div class="mt-2 bg-white/60 p-2 rounded text-sm space-y-1">
+                            <div class="flex gap-2"><span class="font-bold text-red-500 w-12">선택:</span> <span>${item.userSelection.join(', ')}</span></div>
+                            <div class="flex gap-2"><span class="font-bold text-green-600 w-12">정답:</span> <span>${item.correctSelection.join(', ')}</span></div>
                         </div>
                     `;
+                    // If triangle, add why
+                    if (item.status === 'triangle' && item.triangleInfos.length > 0) {
+                        detailHtml += `
+                            <div class="mt-2 text-xs text-yellow-800 font-medium">
+                                👉 ${item.triangleInfos[0]}
+                            </div>
+                        `;
+                    }
                 }
 
                 return `
-                    <div class="border ${borderColor} rounded-xl p-4 mb-3">
+                    <div class="border ${borderColor} ${bgClass} rounded-xl p-4 mb-3">
                         <div class="flex justify-between items-start mb-1">
                             <div class="flex items-center gap-2">
                                 <span class="text-slate-500 font-bold text-sm">#${idx + 1}</span>
-                                ${icon}
+                                <i data-lucide="${statusIcon}" class="${statusClass} w-4 h-4"></i>
                             </div>
-                            <span class="text-xs text-slate-400 font-medium">${item.type === 'basic' ? '기초' : '심화'}</span>
                         </div>
-                        
-                        <p class="font-medium text-slate-800 text-sm mb-2">"${item.title}..."</p>
-                        
-                        ${comparisonHtml}
-
-                        <!-- 오답이거나 정답이어도 해설을 보고 싶을 수 있으니 항상 표시 (오답은 더 강조) -->
-                        <div class="mt-2 text-xs text-slate-600 leading-relaxed ${isCorrect ? 'text-slate-500' : 'font-medium text-slate-700'}">
-                            💡 ${item.explanation}
-                        </div>
+                        <p class="font-medium text-slate-800 text-sm truncate">${item.title}...</p>
+                        ${detailHtml}
                     </div>
                 `;
             }).join('');
-        }
 
-        function renderCompletion() {
-            const isHighScorer = state.score >= 18;
             return `
                 <div class="min-h-screen bg-white flex flex-col p-6 font-sans">
-                    <div class="w-full max-w-sm mx-auto text-center mb-8 pt-8">
-                        <div class="w-24 h-24 ${isHighScorer ? 'bg-yellow-100' : 'bg-blue-100'} rounded-full flex items-center justify-center text-5xl mx-auto mb-4 ${isHighScorer ? 'animate-bounce' : ''}">
-                            ${isHighScorer ? '🏆' : '👍'}
+                    <div class="w-full max-w-sm mx-auto text-center pt-8 pb-24">
+                        <div class="w-24 h-24 ${gradeColor} rounded-full flex items-center justify-center text-5xl mx-auto mb-4 animate-bounce">
+                            ${gradeIcon}
                         </div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-1">학습 완료!</h2>
-                        <p class="text-slate-500 text-sm mb-6">결과를 확인하고 부족한 부분을 복습하세요.</p>
                         
-                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8">
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 mt-4">
                             <p class="text-slate-600 mb-1 text-sm">총 점수</p>
-                            <p class="text-4xl font-bold text-blue-600">${state.score} / ${allQuestions.length}</p>
+                            <p class="text-4xl font-bold text-blue-600">${finalScore} <span class="text-lg text-slate-400 font-normal">/ ${maxScore}</span></p>
                         </div>
 
-                        <!-- Review Section -->
-                        <div class="text-left mb-6">
+                        <div class="text-left">
                             <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
                                 <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
-                                상세 학습 리뷰
+                                상세 리뷰
                             </h3>
-                            <div class="space-y-3">
-                                ${renderReviewList()}
-                            </div>
+                            ${historyHtml}
                         </div>
-
+                    </div>
+                    
+                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50 max-w-md mx-auto">
                         <button onclick="restartQuiz()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 text-lg shadow-lg active:scale-95 transition-transform sticky bottom-6">
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 text-lg shadow-lg active:scale-95 transition-transform">
                             <i data-lucide="refresh-cw"></i>
                             다시 시작하기
                         </button>
@@ -395,7 +626,7 @@
             `;
         }
 
-        // --- Main Render Function ---
+        // --- Main Render ---
         function render() {
             if (state.currentStep >= allQuestions.length) {
                 app.innerHTML = renderCompletion();
@@ -411,9 +642,7 @@
             lucide.createIcons();
         }
 
-        // Initial Render
         render();
-
     </script>
 </body>
 </html>
