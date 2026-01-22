@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>한국어 접속사 마라톤 V4 (UI 전환)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Scrollbar for Horizontal View */
+        .horizontal-scroll::-webkit-scrollbar { height: 8px; }
+        .horizontal-scroll::-webkit-scrollbar-track { bg-slate-100; border-radius: 4px; }
+        .horizontal-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen relative transition-colors duration-300">
+
+    <!-- App Container -->
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Content injected by JS -->
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data (Same as V3) ---
+        const basicQuestions = [
+            { id: 1, type: 'basic', sentences: [{ kr: "비가 많이 옵니다.", vn: "Trời mưa to." }, { kr: "우산을 썼습니다.", vn: "Tôi đã che ô." }], answers: ["그래서"], triangle: { 0: { "그리고": "순서로는 맞지만, 원인과 결과이므로 '그래서'가 더 자연스럽습니다." } }, options: [["그리고", "그래서", "하지만", "그런데"]], explanation: "비가 오는 '원인' 때문에 우산을 쓰는 '결과'가 생겼으므로 '그래서'가 가장 적절합니다." },
+            { id: 2, type: 'basic', sentences: [{ kr: "김치를 좋아합니다.", vn: "Tôi thích Kimchi." }, { kr: "너무 맵습니다.", vn: "Nó quá cay." }], answers: ["하지만"], triangle: { 0: { "그런데": "'그런데'도 가능하지만, 앞뒤 내용이 강하게 반대될 때는 '하지만'이 더 좋습니다." } }, options: [["그리고", "그래서", "하지만", "그런데"]], explanation: "좋아한다는 긍정적 내용과 맵다는 부정적 내용이 대조되므로 '하지만'을 씁니다." },
+            { id: 3, type: 'basic', sentences: [{ kr: "아침에 일어났습니다.", vn: "Tôi thức dậy vào buổi sáng." }, { kr: "세수를 했습니다.", vn: "Tôi rửa mặt." }], answers: ["그리고"], triangle: { 0: { "그래서": "일어나서 세수한 것은 자연스러운 순서(그리고)에 가깝습니다." } }, options: [["그리고", "그래서", "왜냐하면", "그렇지만"]], explanation: "시간의 순서대로 일어나는 일들을 나열할 때는 '그리고'를 사용합니다." },
+            { id: 4, type: 'basic', sentences: [{ kr: "백화점에 갔습니다.", vn: "Tôi đã đến trung tâm thương mại." }, { kr: "사람이 정말 많았습니다.", vn: "Ở đó thực sự rất đông người." }], answers: ["그런데"], triangle: { 0: { "그리고": "단순 나열도 가능하지만, 상황 전개상 '그런데'가 훨씬 자연스럽습니다." } }, options: [["그리고", "그래서", "그런데", "그러면"]], explanation: "과거의 상황(배경)을 제시하면서 뒤의 내용을 소개할 때 '그런데'를 자주 씁니다." },
+            { id: 5, type: 'basic', sentences: [{ kr: "시간이 없습니다.", vn: "Tôi không có thời gian." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }], answers: ["그래서"], triangle: { 0: { "그러니까": "'그러니까'는 보통 상대방에게 제안하거나 자신의 의지를 말할 때 더 많이 씁니다." } }, options: [["하지만", "그러니까", "그래서", "그런데"]], explanation: "시간이 없는 것이 직접적인 원인이 되어 택시를 탔으므로 '그래서'가 적절합니다." },
+            { id: 6, type: 'basic', sentences: [{ kr: "한국어를 공부합니다.", vn: "Tôi học tiếng Hàn." }, { kr: "어렵습니다.", vn: "Nó khó." }], answers: ["하지만"], triangle: { 0: { "그런데": "배경 설명으로는 가능하지만, '어렵다'는 대조적 의미가 강해 '하지만'이 좋습니다." } }, options: [["그리고", "하지만", "그래서", "그런데"]], explanation: "공부한다는 사실과 어렵다는 사실은 서로 상반되는 느낌이 있으므로 '하지만'을 씁니다." },
+            { id: 7, type: 'basic', sentences: [{ kr: "형은 키가 큽니다.", vn: "Anh trai tôi cao." }, { kr: "동생은 키가 작습니다.", vn: "Em trai tôi thấp." }], answers: ["그런데"], triangle: { 0: { "하지만": "대조의 의미로 쓸 수 있습니다. 다만 두 대상을 비교/나열할 땐 '그런데'가 매우 자연스럽습니다." } }, options: [["그래서", "그러니까", "그리고", "그런데"]], explanation: "두 대상을 대조하여 비교 설명할 때는 '그런데'나 '반면에'를 주로 사용합니다." },
+            { id: 8, type: 'basic', sentences: [{ kr: "노래를 부릅니다.", vn: "Tôi hát." }, { kr: "춤을 춥니다.", vn: "Tôi nhảy." }], answers: ["그리고"], triangle: {}, options: [["하지만", "그리고", "그래서", "왜냐하면"]], explanation: "노래와 춤, 두 가지 행동을 동시에 하거나 나열하는 상황이므로 '그리고'입니다." },
+            { id: 9, type: 'basic', sentences: [{ kr: "약속이 있습니다.", vn: "Tôi có hẹn." }, { kr: "먼저 가겠습니다.", vn: "Tôi sẽ đi trước." }], answers: ["그러니까"], triangle: { 0: { "그래서": "말하기에서는 '그래서'도 많이 쓰지만, 뒤에 의지/행동이 올 땐 '그러니까'가 논리적입니다." } }, options: [["하지만", "그런데", "그러니까", "그리고"]], explanation: "앞의 사실이 뒤의 행동(가겠다)의 판단 근거가 될 때는 '그러니까'가 가장 정확합니다." },
+            { id: 10, type: 'basic', sentences: [{ kr: "이 옷은 비쌉니다.", vn: "Cái áo này đắt." }, { kr: "예쁘지 않습니다.", vn: "Nó không đẹp." }], answers: ["게다가"], triangle: { 0: { "그리고": "단순 나열도 맞지만, 부정적인 점을 '더하는' 느낌을 살리려면 '게다가'가 좋습니다." } }, options: [["게다가", "하지만", "그래서", "왜냐하면"]], explanation: "안 좋은 점(비쌈)에 또 다른 안 좋은 점(안 예쁨)을 덧붙일 때는 '게다가'를 씁니다." }
+        ];
+
+        const advancedQuestions = [
+            { id: 11, type: 'advanced', sentences: [{ kr: "늦잠을 잤습니다.", vn: "Tôi đã ngủ dậy muộn." }, { kr: "버스를 놓쳤습니다.", vn: "Tôi đã lỡ xe buýt." }, { kr: "택시를 탔습니다.", vn: "Tôi đã đi taxi." }, { kr: "지각하지 않았습니다.", vn: "Tôi đã không đi trễ." }], answers: ["그래서", "그래서", "하지만"], triangle: { 0: { "그리고": "원인과 결과 관계이므로 '그래서'가 더 좋습니다." }, 2: { "그런데": "상황 전환도 되지만, 기대와 반대되는 결과이므로 '하지만'이 명확합니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "왜냐하면", "하지만"], ["그리고", "그래서", "하지만", "그러니까"]], explanation: "늦잠→놓침(원인/결과 '그래서'), 놓침→택시(원인/결과 '그래서'), 택시 탔음↔지각 안 함(반대 '하지만')." },
+            { id: 12, type: 'advanced', sentences: [{ kr: "불고기를 만들고 싶었습니다.", vn: "Tôi muốn làm món Bulgogi." }, { kr: "고기를 샀습니다.", vn: "Tôi đã mua thịt." }, { kr: "간장이 없었습니다.", vn: "Không có nước tương." }, { kr: "마트에 다시 갔습니다.", vn: "Tôi đã đi lại siêu thị." }], answers: ["그래서", "그런데", "그래서"], triangle: { 1: { "하지만": "대조보다는 상황의 발견/전환이므로 '그런데'가 조금 더 자연스럽습니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "하고 싶어서 샀고(그래서), 샀는데 없는 상황을 발견했고(그런데), 없어서 다시 갔습니다(그래서)." },
+            { id: 13, type: 'advanced', sentences: [{ kr: "소풍을 가려고 했습니다.", vn: "Tôi định đi dã ngoại." }, { kr: "비가 많이 왔습니다.", vn: "Trời mưa to." }, { kr: "소풍을 취소했습니다.", vn: "Tôi đã hủy chuyến dã ngoại." }, { kr: "집에서 영화를 봤습니다.", vn: "Tôi đã xem phim ở nhà." }], answers: ["그런데", "그래서", "대신에"], triangle: { 0: { "하지만": "의도와 다른 상황 발생이므로 '하지만'도 가능합니다." }, 2: { "그리고": "단순 순서로 볼 수도 있지만, 소풍 '대신' 영화를 본 것이므로 '대신에'가 가장 적절합니다." } }, options: [["그리고", "그런데", "그래서", "그러면"], ["그리고", "그런데", "그래서", "하지만"], ["그리고", "하지만", "대신에", "왜냐하면"]], explanation: "가려 했는데 비가 왔고(그런데), 그래서 취소했고(그래서), 소풍 대신 영화를 봤습니다(대신에)." },
+            { id: 14, type: 'advanced', sentences: [{ kr: "열심히 공부했습니다.", vn: "Tôi đã học chăm chỉ." }, { kr: "시험이 쉬웠습니다.", vn: "Kỳ thi dễ." }, { kr: "100점을 받았습니다.", vn: "Tôi đã được 100 điểm." }, { kr: "기분이 정말 좋습니다.", vn: "Tâm trạng tôi rất tốt." }], answers: ["그런데", "그래서", "그래서"], triangle: { 0: { "그리고": "나열도 가능하지만, '공부했는데(예상 외로) 쉬웠다'는 뉘앙스인 '그런데'가 맛깔납니다." }, 0: { "하지만": "공부한 것과 쉬운 것이 꼭 반대는 아니지만 대조될 수 있어 허용됩니다." } }, options: [["그리고", "그런데", "하지만", "그러면"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "공부했는데 의외로 시험도 쉬웠습니다(그런데/배경). 그래서 점수를 잘 받았고(그래서), 결과적으로 기쁩니다(그래서)." },
+            { id: 15, type: 'advanced', sentences: [{ kr: "친구를 만났습니다.", vn: "Tôi đã gặp bạn." }, { kr: "점심을 먹었습니다.", vn: "Tôi đã ăn trưa." }, { kr: "카페에 갔습니다.", vn: "Tôi đã đi cà phê." }, { kr: "자리가 없었습니다.", vn: "Không có chỗ ngồi." }], answers: ["그리고", "그리고", "그런데"], triangle: { 0: { "그래서": "만나서(원인) 먹었다? 보통은 만나서(순서) 먹습니다. '그리고'가 좋습니다." }, 2: { "하지만": "자리가 없는 부정적 상황이므로 '하지만'도 가능합니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "만나고 밥 먹고(그리고), 그 다음 카페에 갔는데(그리고), 자리가 없는 상황(그런데)입니다." },
+            { id: 16, type: 'advanced', sentences: [{ kr: "머리가 아팠습니다.", vn: "Tôi bị đau đầu." }, { kr: "약을 먹었습니다.", vn: "Tôi đã uống thuốc." }, { kr: "계속 아팠습니다.", vn: "Nó vẫn đau." }, { kr: "병원에 갔습니다.", vn: "Tôi đã đến bệnh viện." }], answers: ["그래서", "하지만", "그래서"], triangle: { 1: { "그런데": "약 먹었는데 계속 아픈 상황 제시로 '그런데'도 훌륭한 답입니다." }, 1: { "그렇지만": "'하지만'과 같습니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그렇지만", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "아파서 약을 먹었고(그래서), 먹었지만 효과가 없었고(하지만), 결국 병원에 갔습니다(그래서)." },
+            { id: 17, type: 'advanced', sentences: [{ kr: "제주도에 갔습니다.", vn: "Tôi đã đi đảo Jeju." }, { kr: "날씨가 좋았습니다.", vn: "Thời tiết đẹp." }, { kr: "사진을 많이 찍었습니다.", vn: "Tôi đã chụp nhiều ảnh." }, { kr: "카메라를 잃어버렸습니다.", vn: "Tôi đã làm mất máy ảnh." }], answers: ["그런데", "그래서", "그런데"], triangle: { 0: { "그리고": "단순 나열 가능." }, 2: { "하지만": "좋은 일 뒤에 나쁜 일이 생겼으므로 '하지만'도 정답입니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "갔는데(배경) 날씨가 좋았고(그런데), 좋아서 찍었고(그래서), 그런데 잃어버리는 사건 발생(그런데)." },
+            { id: 18, type: 'advanced', sentences: [{ kr: "생일이었습니다.", vn: "Đó là sinh nhật của tôi." }, { kr: "선물을 받았습니다.", vn: "Tôi đã nhận được quà." }, { kr: "상자를 열었습니다.", vn: "Tôi đã mở hộp." }, { kr: "아무것도 없었습니다.", vn: "Không có gì cả." }], answers: ["그래서", "그리고", "그런데"], triangle: { 2: { "하지만": "반전이 강하므로 '하지만'도 가능합니다." } }, options: [["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"]], explanation: "생일이라 받았고(그래서), 받고 열었고(그리고), 열었는데 비어 있었습니다(그런데)." },
+            { id: 19, type: 'advanced', sentences: [{ kr: "버스를 탔습니다.", vn: "Tôi đã lên xe buýt." }, { kr: "잠이 들었습니다.", vn: "Tôi đã ngủ thiếp đi." }, { kr: "종점까지 갔습니다.", vn: "Tôi đã đi đến trạm cuối." }, { kr: "집에 늦게 왔습니다.", vn: "Tôi đã về nhà muộn." }], answers: ["그리고", "그래서", "그래서"], triangle: { 0: { "그런데": "탔는데 잠들었다는 상황 묘사로 '그런데'도 가능합니다." } }, options: [["그리고", "그런데", "하지만", "왜냐하면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "그러면"]], explanation: "타고 나서 잠들었고(그리고/그런데), 잠들어서 종점까지 갔고(그래서), 그 결과 늦었습니다(그래서)." },
+            { id: 20, type: 'advanced', sentences: [{ kr: "쇼핑을 했습니다.", vn: "Tôi đã đi mua sắm." }, { kr: "돈을 다 썼습니다.", vn: "Tôi đã tiêu hết tiền." }, { kr: "배가 고팠습니다.", vn: "Tôi đói bụng." }, { kr: "밥을 먹지 못했습니다.", vn: "Tôi đã không thể ăn cơm." }], answers: ["그래서", "그런데", "그래서"], triangle: { 0: { "그리고": "쇼핑하고 돈을 썼다(순서)도 가능하지만, 쇼핑해서 썼다(인과)가 더 강합니다." }, 1: { "하지만": "돈 없는데 배고픈 역설적 상황." } }, options: [["그리고", "그래서", "하지만", "그러면"], ["그리고", "그래서", "하지만", "그런데"], ["그리고", "그래서", "하지만", "왜냐하면"]], explanation: "쇼핑을 해서 다 썼고(그래서), 다 썼는데 배가 고픈 상황이고(그런데), 돈이 없어서 못 먹었습니다(그래서)." }
+        ];
+
+        const allQuestions = [...basicQuestions, ...advancedQuestions];
+
+        // --- State ---
+        let state = {
+            viewMode: 'mobile', // 'mobile' or 'desktop'
+            currentStep: 0,
+            score: 0,
+            showFeedback: false,
+            resultStatus: 'correct',
+            selectedOptions: {}, 
+            answerHistory: []
+        };
+
+        const app = document.getElementById('app');
+
+        // --- Logic ---
+        function toggleViewMode() {
+            state.viewMode = state.viewMode === 'mobile' ? 'desktop' : 'mobile';
+            render();
+        }
+
+        function handleSelect(option, index) {
+            if (state.showFeedback) return;
+            state.selectedOptions[index] = option;
+            render();
+        }
+
+        function checkAnswer() {
+            const currentQ = allQuestions[state.currentStep];
+            const slotsNeeded = currentQ.type === 'basic' ? 1 : 3;
+            
+            if (Object.keys(state.selectedOptions).length < slotsNeeded) return;
+
+            let allCorrect = true;
+            let anyWrong = false;
+            let triangleMessages = [];
+            let userSelectionArray = [];
+
+            for (let i = 0; i < slotsNeeded; i++) {
+                const userChoice = state.selectedOptions[i];
+                const bestAnswer = currentQ.answers[i];
+                userSelectionArray.push(userChoice);
+
+                if (userChoice === bestAnswer) {
+                    // Correct slot
+                } else if (currentQ.triangle && currentQ.triangle[i] && currentQ.triangle[i][userChoice]) {
+                    allCorrect = false;
+                    triangleMessages.push(currentQ.triangle[i][userChoice]);
+                } else {
+                    allCorrect = false;
+                    anyWrong = true;
+                }
+            }
+
+            let finalStatus = 'wrong';
+            let scoreAdd = 0;
+
+            if (allCorrect) {
+                finalStatus = 'correct';
+                scoreAdd = 1;
+            } else if (!anyWrong) {
+                finalStatus = 'triangle';
+                scoreAdd = 0.5;
+            } else {
+                finalStatus = 'wrong';
+                scoreAdd = 0;
+            }
+
+            state.answerHistory.push({
+                id: currentQ.id,
+                type: currentQ.type,
+                status: finalStatus,
+                userSelection: userSelectionArray,
+                correctSelection: currentQ.answers,
+                explanation: currentQ.explanation,
+                triangleInfos: triangleMessages,
+                title: currentQ.sentences[0].kr
+            });
+
+            state.resultStatus = finalStatus;
+            state.score += scoreAdd;
+            state.showFeedback = true;
+            render();
+            
+            setTimeout(() => {
+                const feedbackEl = document.getElementById('feedback-section');
+                if(feedbackEl) feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            state.showFeedback = false;
+            state.selectedOptions = {};
+            state.currentStep += 1;
+            window.scrollTo(0, 0);
+            render();
+        }
+
+        function restartQuiz() {
+            state.currentStep = 0;
+            state.score = 0;
+            state.showFeedback = false;
+            state.selectedOptions = {};
+            state.answerHistory = [];
+            window.scrollTo(0, 0);
+            render();
+        }
+
+        // --- Render Views ---
+        
+        function renderHeader() {
+            const progress = ((state.currentStep + 1) / allQuestions.length) * 100;
+            const isMobile = state.viewMode === 'mobile';
+            
+            // Adjust max-width based on mode
+            const containerClass = isMobile ? "max-w-md" : "max-w-6xl";
+
+            return `
+                <div class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-50 border-b border-slate-200 shadow-sm transition-all duration-300">
+                    <div class="${containerClass} mx-auto px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="font-bold text-slate-800 text-lg">
+                                문제 ${state.currentStep + 1}
+                                <span class="text-slate-400 text-sm font-normal ml-1">/ ${allQuestions.length}</span>
+                            </span>
+                            <div class="h-2 w-24 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
+                                <div class="h-full bg-blue-600 transition-all duration-300" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="toggleViewMode()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors">
+                            ${isMobile ? '<i data-lucide="smartphone" class="w-4 h-4"></i> 모바일' : '<i data-lucide="monitor" class="w-4 h-4"></i> PC/가로'}
+                        </button>
+                    </div>
+                    <!-- Mobile progress bar separate -->
+                    <div class="h-1 w-full bg-slate-100 sm:hidden">
+                         <div class="h-full bg-blue-600 transition-all duration-300" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderConnector(index, currentQ, isMobile) {
+            const userAns = state.selectedOptions[index];
+            const correctAns = currentQ.answers[index];
+            
+            // Styles
+            const mobileBtnClass = "grid grid-cols-2 gap-2 bg-slate-100 p-2 rounded-xl w-full";
+            const desktopBtnClass = "flex flex-col gap-2 bg-slate-100 p-2 rounded-xl min-w-[120px]";
+
+            if (state.showFeedback) {
+                let slotStatus = 'wrong';
+                if (userAns === correctAns) slotStatus = 'correct';
+                else if (currentQ.triangle && currentQ.triangle[index] && currentQ.triangle[index][userAns]) slotStatus = 'triangle';
+
+                let borderColor = 'border-red-500 bg-red-50 text-red-700';
+                if (slotStatus === 'correct') borderColor = 'border-green-500 bg-green-50 text-green-700';
+                if (slotStatus === 'triangle') borderColor = 'border-yellow-500 bg-yellow-50 text-yellow-800';
+
+                return `
+                    <div class="relative z-20 my-2 flex flex-col items-center">
+                        <div class="px-3 py-2 rounded-lg border-2 font-bold text-base shadow-sm ${borderColor} whitespace-nowrap">
+                            ${userAns}
+                            ${slotStatus === 'correct' ? '<i data-lucide="check" class="inline w-3 h-3 ml-1"></i>' : ''}
+                            ${slotStatus === 'triangle' ? '<span class="ml-1 text-xs">△</span>' : ''}
+                        </div>
+                        ${slotStatus !== 'correct' ? `
+                            <div class="mt-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded whitespace-nowrap">
+                                정답: ${correctAns}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                const wrapperClass = isMobile ? mobileBtnClass : desktopBtnClass;
+                
+                const optionsHtml = currentQ.options[index].map(opt => {
+                    const isSelected = state.selectedOptions[index] === opt;
+                    return `
+                        <button onclick="handleSelect('${opt}', ${index})" 
+                            class="py-2 px-2 rounded-lg text-sm font-bold transition-all ${isSelected ? 'bg-blue-600 text-white shadow-md transform scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                            ${opt}
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="relative z-20 my-2">
+                        <div class="${wrapperClass}">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderQuestionCard(currentQ) {
+            const isMobile = state.viewMode === 'mobile';
+            
+            // Icons based on orientation
+            const arrowIcon = isMobile 
+                ? `<div class="flex justify-center items-center py-2 text-slate-300"><i data-lucide="arrow-down" class="w-5 h-5"></i></div>`
+                : `<div class="flex justify-center items-center px-2 text-slate-300"><i data-lucide="arrow-right" class="w-6 h-6"></i></div>`;
+
+            // Sentence Card Style
+            const sentenceClassBase = "relative z-10 p-4 rounded-xl border mb-2 text-center shadow-sm transition-all";
+            const mobileSentenceStyle = "w-full";
+            const desktopSentenceStyle = "w-48 shrink-0 min-h-[120px] flex flex-col justify-center items-center"; // Fixed width for horizontal flow
+            
+            const sentenceClass = `${sentenceClassBase} ${isMobile ? mobileSentenceStyle : desktopSentenceStyle}`;
+
+            // Logic to build the flow
+            let parts = [];
+            const slots = currentQ.type === 'basic' ? 1 : 3;
+            
+            // Sentence 1
+            parts.push(`
+                <div class="${sentenceClass} bg-blue-50/50 border-blue-100">
+                    <p class="text-lg font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[0].kr}</p>
+                    <p class="text-sm text-slate-500">${currentQ.sentences[0].vn}</p>
+                </div>
+            `);
+
+            for (let i = 0; i < slots; i++) {
+                // Connector
+                parts.push(`
+                    <div class="relative z-10 flex ${isMobile ? 'flex-col justify-center w-full' : 'flex-row items-center h-full'}">
+                        ${arrowIcon}
+                        ${renderConnector(i, currentQ, isMobile)}
+                        ${arrowIcon}
+                    </div>
+                `);
+                
+                // Next Sentence
+                const sentenceIndex = i + 1;
+                const colorClass = i >= 1 ? 'bg-purple-50/50 border-purple-100' : 'bg-blue-50/50 border-blue-100';
+                
+                parts.push(`
+                    <div class="${sentenceClass} ${colorClass}">
+                        <p class="text-lg font-bold text-slate-800 mb-1 break-keep">${currentQ.sentences[sentenceIndex].kr}</p>
+                        <p class="text-sm text-slate-500">${currentQ.sentences[sentenceIndex].vn}</p>
+                    </div>
+                `);
+            }
+
+            // Wrapper Logic
+            if (isMobile) {
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-20 mb-4 mx-4">
+                        <div class="p-5 flex flex-col relative max-w-md mx-auto">
+                            <!-- Vertical Line -->
+                            <div class="absolute left-1/2 top-10 bottom-10 w-0.5 bg-slate-100 -translate-x-1/2 z-0"></div>
+                            ${parts.join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Desktop Horizontal Layout
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 mt-20 mb-8 mx-auto w-full max-w-6xl overflow-hidden">
+                        <div class="p-8 overflow-x-auto horizontal-scroll">
+                            <div class="flex flex-row items-center justify-start min-w-max relative gap-0 py-4">
+                                <!-- Horizontal Line -->
+                                <div class="absolute top-1/2 left-10 right-10 h-0.5 bg-slate-100 -translate-y-1/2 z-0"></div>
+                                ${parts.join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderFeedback(currentQ) {
+            if (!state.showFeedback) return '';
+            
+            const isMobile = state.viewMode === 'mobile';
+            const containerClass = isMobile ? "max-w-md mx-4" : "max-w-6xl mx-auto px-4";
+
+            const status = state.resultStatus;
+            let bgClass, borderClass, textClass, icon, title;
+            
+            if (status === 'correct') {
+                bgClass = 'bg-green-50'; borderClass = 'border-green-200'; textClass = 'text-green-700'; icon = 'circle-check'; title = "정답입니다! (O)";
+            } else if (status === 'triangle') {
+                bgClass = 'bg-yellow-50'; borderClass = 'border-yellow-200'; textClass = 'text-yellow-700'; icon = 'triangle-alert'; title = "아쉬워요! (△)";
+            } else {
+                bgClass = 'bg-red-50'; borderClass = 'border-red-200'; textClass = 'text-red-700'; icon = 'circle-x'; title = "오답입니다. (X)";
+            }
+
+            let triangleFeedbackHtml = '';
+            const lastHistory = state.answerHistory[state.answerHistory.length - 1];
+            if (lastHistory && lastHistory.triangleInfos && lastHistory.triangleInfos.length > 0) {
+                 triangleFeedbackHtml = `
+                    <div class="mt-3 bg-white/60 p-3 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                        <p class="font-bold mb-1">💡 왜 세모(△)인가요?</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${lastHistory.triangleInfos.map(msg => `<li>${msg}</li>`).join('')}
+                        </ul>
+                    </div>
+                 `;
+            }
+
+            return `
+                <div class="${containerClass} mb-32">
+                    <div id="feedback-section" class="rounded-xl p-6 border-2 animate-fade-in shadow-sm ${bgClass} ${borderClass}">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="${icon}" class="${textClass} w-7 h-7"></i>
+                            <span class="font-bold text-xl ${textClass}">${title}</span>
+                        </div>
+                        
+                        ${triangleFeedbackHtml}
+
+                        <div class="mt-4 bg-white p-4 rounded-xl border border-black/5 shadow-sm">
+                            <p class="font-bold text-slate-800 mb-2 text-lg">📝 해설</p>
+                            <p class="text-slate-700 leading-relaxed">${currentQ.explanation}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBottomBar(currentQ) {
+            const isMobile = state.viewMode === 'mobile';
+            const containerWidth = isMobile ? "max-w-md" : "max-w-6xl";
+            
+            const slotsNeeded = currentQ.type === 'basic' ? 1 : 3;
+            const isReady = Object.keys(state.selectedOptions).length >= slotsNeeded;
+            
+            let buttonHtml = '';
+
+            if (!state.showFeedback) {
+                buttonHtml = `
+                    <button onclick="checkAnswer()" ${!isReady ? 'disabled' : ''}
+                        class="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl text-lg shadow-lg active:scale-95 transition-all">
+                        정답 확인
+                    </button>
+                `;
+            } else {
+                const status = state.resultStatus;
+                let btnColor = status === 'correct' ? 'bg-green-600' : (status === 'triangle' ? 'bg-yellow-600' : 'bg-red-500');
+                
+                buttonHtml = `
+                    <button onclick="nextQuestion()"
+                        class="w-full py-4 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all ${btnColor}">
+                        다음 문제 <i data-lucide="chevron-right"></i>
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur border-t border-slate-200 z-50">
+                    <div class="${containerWidth} mx-auto">
+                        ${buttonHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCompletion() {
+            const finalScore = state.score;
+            const maxScore = allQuestions.length;
+            const percentage = (finalScore / maxScore) * 100;
+            
+            let gradeIcon, gradeColor;
+            if (percentage >= 90) { gradeIcon = '🏆'; gradeColor = 'bg-yellow-100'; }
+            else if (percentage >= 70) { gradeIcon = '👏'; gradeColor = 'bg-blue-100'; }
+            else { gradeIcon = '💪'; gradeColor = 'bg-slate-100'; }
+
+            const historyHtml = state.answerHistory.map((item, idx) => {
+                let statusIcon, statusClass, borderColor, bgClass;
+                if (item.status === 'correct') { statusIcon = 'check'; statusClass = 'text-blue-500'; borderColor = 'border-blue-100'; bgClass = 'bg-blue-50'; }
+                else if (item.status === 'triangle') { statusIcon = 'triangle-alert'; statusClass = 'text-yellow-500'; borderColor = 'border-yellow-200'; bgClass = 'bg-yellow-50'; }
+                else { statusIcon = 'x'; statusClass = 'text-red-500'; borderColor = 'border-red-200'; bgClass = 'bg-red-50'; }
+
+                let detailHtml = '';
+                if (item.status !== 'correct') {
+                    detailHtml = `
+                        <div class="mt-2 bg-white/60 p-2 rounded text-sm space-y-1">
+                            <div class="flex gap-2"><span class="font-bold text-red-500 w-12">선택:</span> <span>${item.userSelection.join(', ')}</span></div>
+                            <div class="flex gap-2"><span class="font-bold text-green-600 w-12">정답:</span> <span>${item.correctSelection.join(', ')}</span></div>
+                        </div>
+                    `;
+                    if (item.status === 'triangle' && item.triangleInfos.length > 0) {
+                        detailHtml += `<div class="mt-2 text-xs text-yellow-800 font-medium">👉 ${item.triangleInfos[0]}</div>`;
+                    }
+                }
+
+                return `
+                    <div class="border ${borderColor} ${bgClass} rounded-xl p-4 break-inside-avoid">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-500 font-bold text-sm">#${idx + 1}</span>
+                                <i data-lucide="${statusIcon}" class="${statusClass} w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <p class="font-medium text-slate-800 text-sm truncate">${item.title}...</p>
+                        ${detailHtml}
+                    </div>
+                `;
+            }).join('');
+
+            // Grid for desktop view in history
+            const gridClass = state.viewMode === 'mobile' ? "flex flex-col gap-3" : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+            const containerWidth = state.viewMode === 'mobile' ? "max-w-md" : "max-w-6xl";
+
+            return `
+                <div class="min-h-screen bg-white flex flex-col p-6 font-sans">
+                    <div class="w-full ${containerWidth} mx-auto text-center pt-8 pb-24">
+                        <div class="w-24 h-24 ${gradeColor} rounded-full flex items-center justify-center text-5xl mx-auto mb-4 animate-bounce">
+                            ${gradeIcon}
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-1">학습 완료!</h2>
+                        
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 mt-4 max-w-sm mx-auto">
+                            <p class="text-slate-600 mb-1 text-sm">총 점수</p>
+                            <p class="text-4xl font-bold text-blue-600">${finalScore} <span class="text-lg text-slate-400 font-normal">/ ${maxScore}</span></p>
+                        </div>
+
+                        <div class="text-left">
+                            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                                상세 리뷰
+                            </h3>
+                            <div class="${gridClass}">
+                                ${historyHtml}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50">
+                        <div class="max-w-md mx-auto">
+                            <button onclick="restartQuiz()"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 text-lg shadow-lg active:scale-95 transition-transform">
+                                <i data-lucide="refresh-cw"></i>
+                                다시 시작하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Main Render ---
+        function render() {
+            if (state.currentStep >= allQuestions.length) {
+                app.innerHTML = renderCompletion();
+            } else {
+                const currentQ = allQuestions[state.currentStep];
+                app.innerHTML = `
+                    ${renderHeader()}
+                    ${renderQuestionCard(currentQ)}
+                    ${renderFeedback(currentQ)}
+                    ${renderBottomBar(currentQ)}
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        render();
+    </script>
+</body>
+</html>
+
