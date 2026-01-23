@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>한국어 추측 표현 뉘앙스 퀴즈</title>
+  <title>한국어 추측 표현 뉘앙스 퀴즈 (15문항)</title>
   <style>
     :root {
       --bg: #111827;
@@ -43,7 +43,7 @@
     /* 반응형 레이아웃 */
     @media (max-width: 850px) {
       .container { grid-template-columns: 1fr; }
-      .sidebar { order: -1; } /* 모바일에서는 점수판을 위로 */
+      .sidebar { order: -1; }
     }
 
     /* 카드 공통 스타일 */
@@ -229,7 +229,7 @@
   <main class="card" id="quizCard">
     <div class="quiz-header">
       <h2 style="margin:0; font-size:20px;">추측 정확성 퀴즈</h2>
-      <span class="badge" id="qNum">문제 1/10</span>
+      <span class="badge" id="qNum">문제 1/15</span>
     </div>
 
     <div class="context-box">
@@ -252,7 +252,7 @@
           <div style="font-size:12px; color:var(--text-sub); margin-bottom:4px;">현재 점수</div>
           <div class="big-score" id="scoreText">0</div>
         </div>
-        <div class="total-score">/ 10 문제</div>
+        <div class="total-score" id="totalCount">/ 15 문제</div>
       </div>
       <div class="progress-track">
         <div class="progress-fill" id="progressBar"></div>
@@ -278,7 +278,7 @@
         </li>
         <li>
           <strong>-(으)ㄹ걸요</strong> (확신 30%)<br>
-          근거가 없거나 막연한 느낌
+          근거가 없거나 막연한 느낌, 무확인
         </li>
       </ul>
     </div>
@@ -287,7 +287,9 @@
 
 <script>
 (() => {
+  // 문항 데이터 (총 15개)
   const items = [
+    // 기존 문항 (1~10)
     { id: 1, context: "하늘이 아주 어둡고 바람이 셉니다. 천둥 소리도 들려요.<br>→ <b>조금 있으면 비가 _____ .</b>", answer: "T", why: "천둥과 어두운 하늘은 비가 온다는 매우 강력한 객관적 근거입니다. (강한 확신)" },
     { id: 2, context: "친구가 민수의 위치를 묻는데, 나는 오늘 민수와 연락한 적이 없어요.<br>→ <b>잘 모르겠는데, 아마 집에 _____ .</b>", answer: "K", why: "연락이나 정보가 전혀 없는 상태에서의 막연한 추측입니다. (가장 약한 확신)" },
     { id: 3, context: "수업 시작 9시, 현재 8시 55분. 학교까지는 걸어서 20분 걸려요.<br>→ <b>지금 출발하면 늦을 _____ .</b>", answer: "T", why: "시간과 거리 계산(수치)에 따른 결과는 사실에 가깝습니다. (강한 근거)" },
@@ -297,7 +299,39 @@
     { id: 7, context: "지하철이 멈췄습니다. 안내 방송은 아직 안 나왔어요.<br>→ <b>고장 난 것 _____ .</b>", answer: "G", why: "상황으로 보아 짐작(일반 추정)할 수 있지만, 확실한 증거는 아직 없습니다." },
     { id: 8, context: "친구가 약속 장소에 없어요. 내가 보낸 문자를 확인해보니 내가 장소를 잘못 적었어요.<br>→ <b>네가 장소를 잘못 알았을 _____ .</b> (X) <br>→ <b>내가 장소를 잘못 말했을 _____ .</b>", answer: "T", why: "문자 기록이라는 명백한 증거(Fact)가 있습니다." },
     { id: 9, context: "팀장님은 꼼꼼한 성격입니다. 하지만 보고서를 직접 확인하진 못했어요.<br>→ <b>팀장님이 이 보고서를 싫어할 _____ .</b>", answer: "G", why: "성격을 근거로 한 일반적인 예상이지만, 결과는 달라질 수 있습니다." },
-    { id: 10, context: "가게 불이 꺼져 있고 '영업 종료' 팻말이 걸려 있습니다.<br>→ <b>이미 문을 닫았을 _____ .</b>", answer: "T", why: "눈앞의 시각적 증거(꺼진 불, 팻말)가 매우 확실합니다." }
+    { id: 10, context: "가게 불이 꺼져 있고 '영업 종료' 팻말이 걸려 있습니다.<br>→ <b>이미 문을 닫았을 _____ .</b>", answer: "T", why: "눈앞의 시각적 증거(꺼진 불, 팻말)가 매우 확실합니다." },
+
+    // 추가 문항 (11~15)
+    { 
+      id: 11, 
+      context: "친구가 새로 산 커피를 가리키며 '이거 민수 씨가 좋아할까?'라고 묻습니다. 나는 민수 씨 식성을 전혀 몰라요.<br>→ <b>글쎄요, 아마 _____ .</b>", 
+      answer: "K", 
+      why: "상대방의 취향(정보)을 전혀 모르는 상태에서 대답하고 있습니다. 근거가 없으므로 가장 약한 추측인 '-을걸요'가 적절합니다." 
+    },
+    { 
+      id: 12, 
+      context: "금요일 저녁 7시 강남역입니다. 도로 상황을 보진 않았지만, 평소에 늘 차가 많은 시간이죠.<br>→ <b>지금 차를 가져가면 길이 많이 _____ .</b>", 
+      answer: "G", 
+      why: "직접 보진 않았지만(확신 부족), '금요일 저녁'이라는 일반적 패턴(상식)으로 미루어 짐작하므로 '-을 것 같아요'가 적절합니다." 
+    },
+    { 
+      id: 13, 
+      context: "지금 몇 시인지 시계를 안 봐서 정확히 모릅니다. 하지만 해가 진 것을 보니 대충 저녁인 것 같아요.<br>→ <b>아마 7시는 _____ .</b>", 
+      answer: "K", 
+      why: "시계(객관적 수치)를 확인하지 않았고, 단순히 감각에 의존한 막연한 추측이므로 '-을걸요(넘었을걸요)'가 적절합니다." 
+    },
+    { 
+      id: 14, 
+      context: "저기 정장을 입고 서류 가방을 든 사람이 지나갑니다. 직업을 모르지만 외관상 추측해 봅니다.<br>→ <b>저 사람은 회사원 _____ .</b>", 
+      answer: "G", 
+      why: "옷차림이라는 시각적 단서를 통해 보편적인 판단(일반적 추정)을 하고 있으므로 '-일 것 같아요'가 적절합니다." 
+    },
+    { 
+      id: 15, 
+      context: "친구가 '이번 시험 어려울까?'라고 걱정합니다. 선생님이 힌트를 안 주셔서 아무 정보가 없지만, 친구를 안심시키고 싶어요.<br>→ <b>아마 별로 어렵지 _____ .</b>", 
+      answer: "K", 
+      why: "시험 난이도에 대한 정보가 전혀 없는 상태입니다. 근거 없이 막연하게 추측하거나 희망 섞인 예상을 할 때는 '-을걸요(않을걸요)'를 씁니다." 
+    }
   ];
 
   const choicesData = [
@@ -320,6 +354,7 @@
     resTitle: document.getElementById('resTitle'),
     explain: document.getElementById('explain'),
     score: document.getElementById('scoreText'),
+    total: document.getElementById('totalCount'),
     bar: document.getElementById('progressBar'),
     prev: document.getElementById('prevBtn'),
     next: document.getElementById('nextBtn'),
@@ -333,6 +368,7 @@
     // Header Info
     els.num.textContent = `문제 ${idx + 1} / ${items.length}`;
     els.score.textContent = score;
+    els.total.textContent = `/ ${items.length} 문제`;
     els.bar.style.width = `${((answered.filter(x=>x).length) / items.length) * 100}%`;
 
     // Context formatting
@@ -341,7 +377,7 @@
     // Reset UI state
     els.choices.innerHTML = "";
     els.feedback.style.display = "none";
-    els.card.style.borderColor = "var(--border)"; // Reset border
+    els.card.style.borderColor = "var(--border)";
 
     // Controls
     els.prev.disabled = idx === 0;
@@ -355,12 +391,10 @@
       
       if (userAns) {
         btn.disabled = true;
-        // 정답 표시
         if (c.key === item.answer) {
           btn.classList.add("correct");
           btn.innerHTML += `<span>✅ 정답</span>`;
         }
-        // 내가 고른 오답 표시
         else if (c.key === userAns) {
           btn.classList.add("wrong");
           btn.innerHTML += `<span>❌ 선택</span>`;
