@@ -2,541 +2,422 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>한국어 추측 표현 퀴즈: 뉘앙스 마스터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>한국어 추측 표현 뉘앙스 퀴즈</title>
   <style>
     :root {
-      --bg-body: #0f172a;
-      --bg-card: #1e293b;
-      --bg-btn: #334155;
-      --bg-btn-hover: #475569;
-      --text-main: #f1f5f9;
-      --text-sub: #94a3b8;
+      --bg: #111827;
+      --card-bg: #1f2937;
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
       --accent: #60a5fa;
-      --success: #10b981;
-      --error: #ef4444;
-      --border: #334155;
-      --radius: 12px;
+      --success: #34d399;
+      --error: #f87171;
+      --border: #374151;
+      --radius: 16px;
       --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-
+    
     * { box-sizing: border-box; }
     
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
       color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* 반응형 레이아웃 */
+    @media (max-width: 850px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { order: -1; } /* 모바일에서는 점수판을 위로 */
+    }
+
+    /* 카드 공통 스타일 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.3s ease;
+    }
+
+    /* 메인 퀴즈 영역 */
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: #374151;
+      color: var(--accent);
+    }
+
+    .context-box {
+      background: #111827;
+      border-left: 4px solid var(--accent);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
       line-height: 1.6;
     }
-
-    .wrap {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    /* Header Area */
-    header {
-      margin-bottom: 24px;
-      text-align: center;
-    }
-    .main-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-      color: #fff;
-    }
-    .sub-title {
-      font-size: 0.9rem;
+    
+    .context-label {
+      display: block;
+      font-size: 12px;
       color: var(--text-sub);
+      margin-bottom: 4px;
+      font-weight: 600;
     }
 
-    /* Grid Layout */
-    .dashboard {
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 20px;
+    .blank {
+      display: inline-block;
+      min-width: 60px;
+      text-align: center;
+      border-bottom: 2px dashed var(--text-sub);
+      color: var(--accent);
+      font-weight: bold;
     }
 
-    @media (max-width: 768px) {
-      .dashboard {
-        grid-template-columns: 1fr; /* Stack specifically on mobile */
-      }
-      .card.right {
-        order: -1; /* Show progress bar on top in mobile */
-      }
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* Card Component */
-    .card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
+    .btn-choice {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-choice:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: #1e2532;
+    }
+
+    .btn-choice:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    /* 정오답 상태 스타일 */
+    .btn-choice.correct {
+      border-color: var(--success);
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--success);
+    }
+    
+    .btn-choice.wrong {
+      border-color: var(--error);
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--error);
+    }
+
+    /* 피드백 영역 */
+    .feedback {
+      margin-top: 24px;
+      padding: 16px;
+      background: #18202f;
+      border-radius: 12px;
+      animation: fadeIn 0.3s ease;
       border: 1px solid var(--border);
     }
 
-    /* Progress Bar */
-    .score-row {
+    .feedback-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .txt-success { color: var(--success); }
+    .txt-error { color: var(--error); }
+
+    /* 사이드바 (점수 및 가이드) */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    
+    .score-board {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
-    .score-label { font-size: 0.85rem; color: var(--text-sub); }
-    .score-val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
     
+    .big-score { font-size: 32px; font-weight: 800; line-height: 1; }
+    .total-score { font-size: 14px; color: var(--text-sub); }
+
     .progress-track {
       height: 8px;
-      background: var(--bg-btn);
-      border-radius: 99px;
+      background: #374151;
+      border-radius: 4px;
       overflow: hidden;
     }
+    
     .progress-fill {
       height: 100%;
       background: var(--accent);
       width: 0%;
-      transition: width 0.3s ease;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Quiz Area */
-    .q-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
+    .guide-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 14px;
       color: var(--text-sub);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-    }
-    .q-badge {
-      background: var(--bg-btn);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .context-box {
-      background: #0f172a; /* Darker inner bg */
-      padding: 16px;
-      border-radius: 8px;
-      border-left: 4px solid var(--accent);
-      margin-bottom: 20px;
-      font-size: 1.05rem;
-    }
-    .context-label {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--text-sub);
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-    .blank {
-      display: inline-block;
-      min-width: 60px;
-      border-bottom: 2px dashed var(--accent);
-      color: var(--accent);
-      text-align: center;
-      font-weight: bold;
-    }
-
-    /* Choices */
-    .choice-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .btn-choice {
-      width: 100%;
-      text-align: left;
-      padding: 16px;
-      background: var(--bg-btn);
-      border: 1px solid transparent;
-      border-radius: 10px;
-      color: var(--text-main);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .btn-choice:hover:not(:disabled) {
-      background: var(--bg-btn-hover);
-      transform: translateY(-2px);
-    }
-    .btn-choice:disabled {
-      opacity: 0.7;
-      cursor: default;
     }
     
-    /* Answer States */
-    .btn-choice.correct {
-      border-color: var(--success);
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-      font-weight: 700;
-    }
-    .btn-choice.wrong {
-      border-color: var(--error);
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--error);
-    }
+    .guide-list li { margin-bottom: 12px; line-height: 1.5; }
+    .guide-list strong { color: var(--text-main); }
     
-    /* Result Icon */
-    .res-icon {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.2rem;
-    }
-
-    /* Explanation Box */
-    .explanation {
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(96, 165, 250, 0.1);
-      border: 1px solid rgba(96, 165, 250, 0.2);
-      border-radius: 8px;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-    
-    .exp-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; display: block; }
-    .exp-text { font-size: 0.95rem; color: var(--text-main); }
-
-    /* Controls */
     .controls {
       display: flex;
       gap: 10px;
-      margin-top: 24px;
+      margin-top: 20px;
     }
-    .btn-nav {
+    
+    .btn-ctl {
       flex: 1;
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      background: var(--bg-card);
+      background: var(--card-bg);
       color: var(--text-main);
-      font-weight: 600;
       cursor: pointer;
+      font-weight: 600;
     }
-    .btn-nav:hover:not(:disabled) { background: var(--bg-btn); }
-    .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
-    .btn-nav.primary { border-color: var(--accent); color: var(--accent); }
+    .btn-ctl:hover { background: #374151; }
 
-    /* Cheat Sheet (Right Side) */
-    .cheat-item { margin-bottom: 16px; font-size: 0.9rem; }
-    .cheat-title { font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-    .cheat-desc { color: var(--text-sub); line-height: 1.4; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot.yellow { background: #fbbf24; } /* -을 것 같다 */
-    .dot.purple { background: #a78bfa; } /* -을걸요 */
-    .dot.green { background: #34d399; } /* -을 텐데요 */
-
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-<div class="wrap">
-  <header>
-    <h1 class="main-title">한국어 추측 표현 퀴즈</h1>
-    <div class="sub-title">상황에 가장 자연스러운 표현을 골라보세요.</div>
-  </header>
-
-  <div class="dashboard">
-    <div class="card" id="quizCard">
-      <div class="q-header">
-        <span id="qIndex">문제 1 / 10</span>
-        <span class="q-badge">뉘앙스 추론</span>
-      </div>
-
-      <div class="context-box">
-        <span class="context-label">상황(Context)</span>
-        <div id="qContextText"></div>
-        <div style="margin-top:12px; font-size:1.1em;">
-          "<span id="qSentenceText"></span>"
-        </div>
-      </div>
-
-      <div class="choice-list" id="choiceList">
-        </div>
-
-      <div id="feedbackArea" style="display:none;">
-        <div class="explanation">
-          <span class="exp-title" id="resTitle">정답입니다!</span>
-          <span class="exp-text" id="expText">해설 내용이 여기에 나옵니다.</span>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="btn-nav" id="prevBtn">이전</button>
-        <button class="btn-nav primary" id="nextBtn">다음 문제</button>
-      </div>
+<div class="container">
+  <main class="card" id="quizCard">
+    <div class="quiz-header">
+      <h2 style="margin:0; font-size:20px;">추측 정확성 퀴즈</h2>
+      <span class="badge" id="qNum">문제 1/10</span>
     </div>
 
-    <div class="card right">
-      <div class="score-row">
-        <span class="score-label">현재 점수</span>
-        <span class="score-val"><span id="scoreVal">0</span>점</span>
+    <div class="context-box">
+      <span class="context-label">상황 (근거)</span>
+      <div id="qContext" style="font-size: 16px;"></div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="feedback" id="feedback" style="display:none;">
+      <div class="feedback-title" id="resTitle"></div>
+      <div style="font-size:14px; color:var(--text-sub); line-height:1.6;" id="explain"></div>
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <div class="card">
+      <div class="score-board">
+        <div>
+          <div style="font-size:12px; color:var(--text-sub); margin-bottom:4px;">현재 점수</div>
+          <div class="big-score" id="scoreText">0</div>
+        </div>
+        <div class="total-score">/ 10 문제</div>
       </div>
       <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div style="margin-top:8px; text-align:right; font-size:0.8rem; color:var(--text-sub);">
-        진행률 <span id="progressPct">0</span>%
-      </div>
-
-      <hr style="border:0; border-top:1px solid var(--border); margin: 24px 0;">
-
-      <h3 style="margin:0 0 16px 0; font-size:1rem;">💡 핵심 포인트</h3>
-      
-      <div class="cheat-item">
-        <div class="cheat-title"><span class="dot yellow"></span> -(으)ㄹ 것 같아요</div>
-        <div class="cheat-desc">가장 일반적이고 조심스러운 추측. 근거가 약해도 OK. (확신: 낮음~중간)</div>
-      </div>
-
-      <div class="cheat-item">
-        <div class="cheat-title"><span class="dot purple"></span> -(으)ㄹ걸요</div>
-        <div class="cheat-desc">경험이나 직감을 바탕으로 한 강한 확신. 상대의 생각에 반박하거나 새로운 정보를 줄 때 자주 씀. (확신: 높음)</div>
-      </div>
-
-      <div class="cheat-item">
-        <div class="cheat-title"><span class="dot green"></span> -(으)ㄹ 텐데요</div>
-        <div class="cheat-desc">"그럴 것 같은데..."라며 말끝을 흐리는 느낌. 상대에게 제안, 걱정, 아쉬움을 표현하기 위한 배경 설명.</div>
+        <div class="progress-fill" id="progressBar"></div>
       </div>
       
-      <button class="btn-nav" id="restartBtn" style="width:100%; margin-top:10px;">처음부터 다시</button>
+      <div class="controls">
+        <button class="btn-ctl" id="prevBtn">이전</button>
+        <button class="btn-ctl" id="nextBtn">다음</button>
+      </div>
+      <button class="btn-ctl" id="resetBtn" style="width:100%; margin-top:10px; border-color:var(--error); color:var(--error);">다시 시작</button>
     </div>
-  </div>
+
+    <div class="card" style="font-size:14px;">
+      <h3 style="margin:0 0 16px 0; font-size:16px;">💡 핵심 가이드</h3>
+      <ul class="guide-list">
+        <li>
+          <strong>-(으)ㄹ 텐데요</strong> (확신 90%)<br>
+          근거가 확실할 때 (관찰, 규칙, 데이터)
+        </li>
+        <li>
+          <strong>-(으)ㄹ 것 같아요</strong> (확신 50~70%)<br>
+          일반적인 생각이나 흐름상 추측
+        </li>
+        <li>
+          <strong>-(으)ㄹ걸요</strong> (확신 30%)<br>
+          근거가 없거나 막연한 느낌
+        </li>
+      </ul>
+    </div>
+  </aside>
 </div>
 
 <script>
-  // Quiz Data
-  const quizData = [
-    {
-      id: 1,
-      context: "창밖을 보니 먹구름이 가득하고 바람이 아주 세게 불어요. 천둥 소리도 들려요.",
-      sentence: "조금 있으면 비가 _____.",
-      answer: "K",
-      explain: "눈에 보이는 확실한 증거(먹구름, 천둥)가 있어 화자가 강하게 확신하고 있습니다. 이때는 단순 추측보다 확신이 강한 '-을걸요'가 가장 자연스럽습니다."
-    },
-    {
-      id: 2,
-      context: "친구가 '민수 지금 어디야?'라고 묻습니다. 나는 민수에게 연락을 못 받아서 잘 몰라요.",
-      sentence: "글쎄, 잘 모르겠는데 집에 _____.",
-      answer: "G",
-      explain: "근거가 거의 없고 정보가 부족한 상황입니다. 이때는 가장 조심스럽고 막연한 추측인 '-을 것 같아요'를 씁니다."
-    },
-    {
-      id: 3,
-      context: "지금 8시 55분이고, 수업은 9시예요. 학교까지 20분이 걸려요. 친구에게 빨리 가라고 말하고 싶어요.",
-      sentence: "지금 출발하면 _____.",
-      answer: "T",
-      explain: "'늦을 것'이라는 예상이 중요한 게 아니라, '그러니까 서둘러라/택시를 타라'는 제안의 의도가 숨어 있습니다. 상황을 전제로 걱정/제안을 할 때는 '-을 텐데요'가 적절합니다."
-    },
-    {
-      id: 4,
-      context: "나는 이 카페 단골이라 메뉴 맛을 다 알아요. 친구가 단 커피를 싫어하는데 '캬라멜 라떼'를 시키려고 해요.",
-      sentence: "그건 너무 단맛이 강할 _____.",
-      answer: "K",
-      explain: "자신의 경험(단골)을 바탕으로 친구의 선택에 대해 확신을 가지고 말해주고 있습니다(반박/정보 제공). '-을걸요'가 적합합니다."
-    },
-    {
-      id: 5,
-      context: "회사 규정에 '지각 3번이면 경고'라고 적혀 있어요. 김 대리님은 이미 2번 지각했고, 오늘도 늦었어요.",
-      sentence: "오늘도 늦었으니까 경고를 받을 _____.",
-      answer: "K",
-      explain: "규칙이라는 명확한 근거가 있어 결과가 거의 확실합니다. 단순 추측을 넘어선 논리적 단정에는 '-을걸요'가 어울립니다."
-    },
-    {
-      id: 6,
-      context: "친구가 내일 놀이공원에 가자고 해요. 그런데 일기예보에서 내일 하루 종일 비가 온다고 했어요.",
-      sentence: "내일 비가 _____ . 다른 날로 잡는 게 어때?",
-      answer: "T",
-      explain: "'비가 올 것이다'라는 사실을 근거로 '다른 날로 잡자'고 제안하고 있습니다. 상대방의 제안에 대해 우려를 나타내며 배경을 설명하는 '-을 텐데요'가 가장 자연스럽습니다."
-    },
-    {
-      id: 7,
-      context: "지하철이 갑자기 멈췄어요. 방송도 안 나오고 아무런 정보가 없어요.",
-      sentence: "무슨 일이지? 고장 난 _____.",
-      answer: "G",
-      explain: "상황 파악이 전혀 안 된 상태에서의 막연한 추측입니다. 확신을 가질 근거가 없으므로 '-을 것 같아요'가 안전합니다."
-    },
-    {
-      id: 8,
-      context: "친구가 약속 장소가 강남역이라고 우기는데, 내가 가진 초대장에는 홍대입구라고 적혀 있어요.",
-      sentence: "초대장에는 홍대라고 써 있는데... 네가 잘못 본 _____.",
-      answer: "T",
-      explain: "증거(초대장)를 제시하며 상대방의 생각이 틀렸을 가능성을 지적하고 있습니다. 완곡하게 상대의 착오를 지적할 때 '-을 텐데요'를 자주 씁니다."
-    },
-    {
-      id: 9,
-      context: "우리 팀장님은 꼼꼼한 성격이에요. 이번 보고서는 급하게 써서 오타가 좀 많아요.",
-      sentence: "팀장님이 이 보고서를 싫어하실 _____.",
-      answer: "G",
-      explain: "성격을 알지만 결과는 아직 모릅니다. 일반적인 가능성을 이야기하므로 '-을 것 같아요'가 무난합니다. (확신이 아주 강하다면 -을걸요도 가능하지만, 문맥상 걱정스러운 추측에 가깝습니다)"
-    },
-    {
-      id: 10,
-      context: "지금 밤 11시예요. 저 식당은 항상 10시에 문을 닫아요. 가게 불도 꺼져 있어요.",
-      sentence: "가보나 마나 이미 문 닫았 _____.",
-      answer: "K",
-      explain: "시간과 상황 증거가 완벽하여 사실상 100% 확신하는 상황입니다. '분명히 ~했을 것이다'라는 뉘앙스는 '-을걸요'입니다."
-    }
+(() => {
+  const items = [
+    { id: 1, context: "하늘이 아주 어둡고 바람이 셉니다. 천둥 소리도 들려요.<br>→ <b>조금 있으면 비가 _____ .</b>", answer: "T", why: "천둥과 어두운 하늘은 비가 온다는 매우 강력한 객관적 근거입니다. (강한 확신)" },
+    { id: 2, context: "친구가 민수의 위치를 묻는데, 나는 오늘 민수와 연락한 적이 없어요.<br>→ <b>잘 모르겠는데, 아마 집에 _____ .</b>", answer: "K", why: "연락이나 정보가 전혀 없는 상태에서의 막연한 추측입니다. (가장 약한 확신)" },
+    { id: 3, context: "수업 시작 9시, 현재 8시 55분. 학교까지는 걸어서 20분 걸려요.<br>→ <b>지금 출발하면 늦을 _____ .</b>", answer: "T", why: "시간과 거리 계산(수치)에 따른 결과는 사실에 가깝습니다. (강한 근거)" },
+    { id: 4, context: "일기예보에서 내일 비 올 확률이 50%라고 했습니다.<br>→ <b>내일 비가 올 _____ .</b>", answer: "G", why: "확률 50%는 확정적이지 않은 일반적인 가능성입니다. (중간 확신)" },
+    { id: 5, context: "규정상 지각 3번은 경고입니다. 동료가 오늘로 3번째 지각을 했어요.<br>→ <b>오늘 경고를 받을 _____ .</b>", answer: "T", why: "규칙(규정)에 따른 결과는 예외 없이 적용되므로 확신이 매우 강합니다." },
+    { id: 6, context: "내일 친구들과 놀러 가는데, 그냥 느낌이 쎄해요.<br>→ <b>내일 비가 올 _____ .</b>", answer: "K", why: "단순한 '느낌'은 객관적 근거가 될 수 없습니다. (약한 확신)" },
+    { id: 7, context: "지하철이 멈췄습니다. 안내 방송은 아직 안 나왔어요.<br>→ <b>고장 난 것 _____ .</b>", answer: "G", why: "상황으로 보아 짐작(일반 추정)할 수 있지만, 확실한 증거는 아직 없습니다." },
+    { id: 8, context: "친구가 약속 장소에 없어요. 내가 보낸 문자를 확인해보니 내가 장소를 잘못 적었어요.<br>→ <b>네가 장소를 잘못 알았을 _____ .</b> (X) <br>→ <b>내가 장소를 잘못 말했을 _____ .</b>", answer: "T", why: "문자 기록이라는 명백한 증거(Fact)가 있습니다." },
+    { id: 9, context: "팀장님은 꼼꼼한 성격입니다. 하지만 보고서를 직접 확인하진 못했어요.<br>→ <b>팀장님이 이 보고서를 싫어할 _____ .</b>", answer: "G", why: "성격을 근거로 한 일반적인 예상이지만, 결과는 달라질 수 있습니다." },
+    { id: 10, context: "가게 불이 꺼져 있고 '영업 종료' 팻말이 걸려 있습니다.<br>→ <b>이미 문을 닫았을 _____ .</b>", answer: "T", why: "눈앞의 시각적 증거(꺼진 불, 팻말)가 매우 확실합니다." }
   ];
 
-  const choices = [
-    { key: "G", label: "-(으)ㄹ 것 같아요" }, // Guess (Low-Mid)
-    { key: "T", label: "-(으)ㄹ 텐데요" },    // Tone/Context (Suggestion/Worry)
-    { key: "K", label: "-(으)ㄹ걸요" }        // Knowledge/Strong Guess
+  const choicesData = [
+    { key: "T", label: "텐데요 (강한 근거)" },
+    { key: "G", label: "것 같아요 (일반 추측)" },
+    { key: "K", label: "걸요 (약한 추측)" }
   ];
 
-  // State Management
-  let currentIdx = 0;
+  let idx = 0;
   let score = 0;
-  let userAnswers = new Array(quizData.length).fill(null); // Stores 'G', 'T', 'K' or null
+  let answered = new Array(items.length).fill(null);
 
   // DOM Elements
   const els = {
-    qIndex: document.getElementById('qIndex'),
-    qContext: document.getElementById('qContextText'),
-    qSentence: document.getElementById('qSentenceText'),
-    choiceList: document.getElementById('choiceList'),
-    feedbackArea: document.getElementById('feedbackArea'),
+    card: document.getElementById('quizCard'),
+    num: document.getElementById('qNum'),
+    ctx: document.getElementById('qContext'),
+    choices: document.getElementById('choices'),
+    feedback: document.getElementById('feedback'),
     resTitle: document.getElementById('resTitle'),
-    expText: document.getElementById('expText'),
-    scoreVal: document.getElementById('scoreVal'),
-    progressFill: document.getElementById('progressFill'),
-    progressPct: document.getElementById('progressPct'),
-    prevBtn: document.getElementById('prevBtn'),
-    nextBtn: document.getElementById('nextBtn'),
-    restartBtn: document.getElementById('restartBtn')
+    explain: document.getElementById('explain'),
+    score: document.getElementById('scoreText'),
+    bar: document.getElementById('progressBar'),
+    prev: document.getElementById('prevBtn'),
+    next: document.getElementById('nextBtn'),
+    reset: document.getElementById('resetBtn')
   };
 
-  // Initialize
-  function init() {
-    renderQuiz();
-    updateStats();
-  }
+  function render() {
+    const item = items[idx];
+    const userAns = answered[idx];
+    
+    // Header Info
+    els.num.textContent = `문제 ${idx + 1} / ${items.length}`;
+    els.score.textContent = score;
+    els.bar.style.width = `${((answered.filter(x=>x).length) / items.length) * 100}%`;
 
-  function renderQuiz() {
-    const item = quizData[currentIdx];
-    const answeredKey = userAnswers[currentIdx];
-    const isAnswered = answeredKey !== null;
+    // Context formatting
+    els.ctx.innerHTML = item.context.replace("_____", `<span class="blank">_____</span>`);
 
-    // 1. Text Content
-    els.qIndex.textContent = `문제 ${item.id} / ${quizData.length}`;
-    els.qContext.innerHTML = item.context.replace(/\n/g, '<br>');
-    els.qSentence.innerHTML = item.sentence.replace("_____", `<span class="blank">_____</span>`);
+    // Reset UI state
+    els.choices.innerHTML = "";
+    els.feedback.style.display = "none";
+    els.card.style.borderColor = "var(--border)"; // Reset border
 
-    // 2. Choices
-    els.choiceList.innerHTML = '';
-    choices.forEach(choice => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-choice';
-      btn.innerHTML = `${choice.label}`;
+    // Controls
+    els.prev.disabled = idx === 0;
+    els.next.disabled = idx === items.length - 1;
+
+    // Generate Choices
+    choicesData.forEach(c => {
+      const btn = document.createElement("button");
+      btn.className = "btn-choice";
+      btn.innerHTML = `<span>-${c.label}</span>`;
       
-      if (isAnswered) {
+      if (userAns) {
         btn.disabled = true;
-        // Styling logic
-        if (choice.key === item.answer) {
-          btn.classList.add('correct');
-          btn.innerHTML += ` <span class="res-icon">⭕</span>`;
-        } else if (choice.key === answeredKey && answeredKey !== item.answer) {
-          btn.classList.add('wrong');
-          btn.innerHTML += ` <span class="res-icon">❌</span>`;
+        // 정답 표시
+        if (c.key === item.answer) {
+          btn.classList.add("correct");
+          btn.innerHTML += `<span>✅ 정답</span>`;
+        }
+        // 내가 고른 오답 표시
+        else if (c.key === userAns) {
+          btn.classList.add("wrong");
+          btn.innerHTML += `<span>❌ 선택</span>`;
         }
       } else {
-        btn.onclick = () => handleAnswer(choice.key);
+        btn.onclick = () => checkAnswer(c.key);
       }
-      els.choiceList.appendChild(btn);
+      els.choices.appendChild(btn);
     });
 
-    // 3. Feedback Section
-    if (isAnswered) {
-      els.feedbackArea.style.display = 'block';
-      const isCorrect = answeredKey === item.answer;
-      els.resTitle.textContent = isCorrect ? "정답입니다! 🎉" : "아쉽네요! 다시 확인해 볼까요?";
-      els.resTitle.style.color = isCorrect ? "var(--success)" : "var(--error)";
-      els.expText.innerHTML = item.explain;
-    } else {
-      els.feedbackArea.style.display = 'none';
-    }
-
-    // 4. Navigation Buttons
-    els.prevBtn.disabled = currentIdx === 0;
-    
-    if (currentIdx === quizData.length - 1) {
-        els.nextBtn.textContent = "결과 확인 완료";
-        els.nextBtn.disabled = true; 
-    } else {
-        els.nextBtn.textContent = "다음 문제";
-        els.nextBtn.disabled = false;
+    // Show Feedback if answered
+    if (userAns) {
+      els.feedback.style.display = "block";
+      const isCorrect = userAns === item.answer;
+      
+      if (isCorrect) {
+        els.resTitle.innerHTML = `<span class="txt-success">✨ 정답입니다!</span>`;
+        els.card.style.borderColor = "var(--success)";
+      } else {
+        els.resTitle.innerHTML = `<span class="txt-error">오답입니다.</span>`;
+        els.card.style.borderColor = "var(--error)";
+      }
+      els.explain.textContent = item.why;
     }
   }
 
-  function handleAnswer(key) {
-    if (userAnswers[currentIdx] !== null) return; // Prevent double answer
-
-    userAnswers[currentIdx] = key;
-    if (key === quizData[currentIdx].answer) {
-      score++;
-    }
-    
-    updateStats();
-    renderQuiz();
+  function checkAnswer(key) {
+    answered[idx] = key;
+    if (key === items[idx].answer) score++;
+    render();
   }
 
-  function updateStats() {
-    els.scoreVal.textContent = score;
-    
-    const answeredCount = userAnswers.filter(a => a !== null).length;
-    const pct = Math.round((answeredCount / quizData.length) * 100);
-    
-    els.progressFill.style.width = `${pct}%`;
-    els.progressPct.textContent = pct;
-  }
-
-  function goNext() {
-    if (currentIdx < quizData.length - 1) {
-      currentIdx++;
-      renderQuiz();
+  function move(step) {
+    if (idx + step >= 0 && idx + step < items.length) {
+      idx += step;
+      render();
     }
   }
 
-  function goPrev() {
-    if (currentIdx > 0) {
-      currentIdx--;
-      renderQuiz();
-    }
+  function reset() {
+    idx = 0; score = 0;
+    answered.fill(null);
+    render();
   }
 
-  function restart() {
-    if(!confirm("퀴즈를 처음부터 다시 시작하시겠습니까?")) return;
-    currentIdx = 0;
-    score = 0;
-    userAnswers.fill(null);
-    renderQuiz();
-    updateStats();
-  }
-
-  // Event Listeners
-  els.nextBtn.addEventListener('click', goNext);
-  els.prevBtn.addEventListener('click', goPrev);
-  els.restartBtn.addEventListener('click', restart);
+  els.prev.onclick = () => move(-1);
+  els.next.onclick = () => move(1);
+  els.reset.onclick = reset;
 
   // Keyboard support
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' && !els.nextBtn.disabled) goNext();
-    if (e.key === 'ArrowLeft' && !els.prevBtn.disabled) goPrev();
+    if (e.key === "ArrowLeft") move(-1);
+    if (e.key === "ArrowRight") move(1);
   });
 
-  // Start
-  init();
-
+  render();
+})();
 </script>
 </body>
 </html>
