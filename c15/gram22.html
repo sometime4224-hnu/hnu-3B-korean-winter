@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>추측 표현 퀴즈: -을 텐데요 / -을 것 같아요 / -을걸요</title>
+  <style>
+    :root { --bg:#0b0c10; --card:#12141b; --text:#e9eef7; --muted:#a9b2c3; --line:#263042; --accent:#7aa2ff; --good:#38c172; --bad:#ff5c7a; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; background:linear-gradient(180deg,#0b0c10,#0b0c10 30%,#0f1220); color:var(--text); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .top { display:flex; gap:14px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; }
+    .title { font-size: 20px; font-weight: 800; letter-spacing:-0.2px; }
+    .sub { color:var(--muted); font-size: 13px; line-height:1.4; margin-top:6px; }
+    .card { background:rgba(18,20,27,.9); border:1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .grid { display:grid; grid-template-columns: 1.05fr .95fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+    .pillrow { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .pill { border:1px solid var(--line); background:#0f1220; padding:8px 10px; border-radius:999px; font-size:12px; color:var(--muted); }
+    .pill b { color: var(--text); }
+    .qhead { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .qno { font-weight:800; }
+    .progress { color:var(--muted); font-size:12px; }
+    .context { margin-top: 10px; padding: 12px; border-radius: 12px; background:#0f1220; border:1px solid var(--line); line-height: 1.55; }
+    .blank { display:inline-block; padding: 2px 8px; border-radius: 10px; border:1px dashed #40506a; color:#cfe0ff; font-weight:700; }
+    .choices { display:grid; gap:10px; margin-top: 12px; }
+    .btn {
+      width:100%; text-align:left; cursor:pointer;
+      border:1px solid var(--line); background:#111626; color:var(--text);
+      border-radius: 14px; padding: 12px 12px; font-size: 14px; line-height: 1.35;
+      transition: transform .05s ease, border-color .15s ease, background .15s ease;
+    }
+    .btn:hover { border-color:#3a4a66; background:#121a30; }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { cursor:not-allowed; opacity:.8; }
+    .tag { display:inline-block; margin-left:8px; font-size:11px; padding: 3px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:#0f1220; }
+    .tag.good { border-color: rgba(56,193,114,.4); color: var(--good); }
+    .tag.bad { border-color: rgba(255,92,122,.45); color: var(--bad); }
+    .feedback { margin-top: 12px; padding: 12px; border-radius: 14px; border:1px solid var(--line); background:#0f1220; }
+    .feedback .res { font-weight:900; }
+    .feedback .res.good { color: var(--good); }
+    .feedback .res.bad { color: var(--bad); }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 8px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+    .ctl {
+      cursor:pointer; border:1px solid var(--line); background:#0f1220; color:var(--text);
+      border-radius: 12px; padding: 10px 12px; font-weight:700; font-size:13px;
+    }
+    .ctl:hover { border-color:#3a4a66; }
+    .right h3 { margin:0; font-size: 15px; }
+    .right ul { margin:10px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .bar { height:10px; border-radius:999px; background:#0f1220; border:1px solid var(--line); overflow:hidden; }
+    .bar > i { display:block; height:100%; width:0%; background: linear-gradient(90deg, rgba(122,162,255,.75), rgba(122,162,255,.2)); }
+    .scorebox { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top: 12px; }
+    .score { font-weight:900; }
+    .small { font-size:12px; color:var(--muted); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; padding: 2px 6px; border:1px solid var(--line); border-radius: 8px; background:#0f1220; color: var(--muted); }
+    .hr { height:1px; background:var(--line); margin:14px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="card" style="flex:1 1 560px;">
+        <div class="title">추측 정확성 퀴즈 (10문항)</div>
+        <div class="sub">
+          목표: <b>-을 텐데요 / -을 것 같아요 / -을걸요</b>의 <b>근거 유무</b>와 <b>강도(확신)</b> 차이를 상황으로 변별하기
+        </div>
+        <div class="pillrow">
+          <div class="pill"><b>-을 것 같아요</b>: 근거가 약하거나 일반 추정. 강도 <b>중-약</b>.</div>
+          <div class="pill"><b>-을걸요</b>: 화자 확신이 비교적 큼(경험/직감). 강도 <b>중-강</b>.</div>
+          <div class="pill"><b>-을 텐데요</b>: (상대도 알 법한 근거/상황) + “그럴 것”을 전제로 한 <b>대화 유도</b>(제안/지적/아쉬움). 강도 <b>중-강</b>, 맥락 의존.</div>
+        </div>
+        <div class="sub" style="margin-top:10px;">
+          조작: 보기 클릭 → 즉시 채점/해설. <span class="kbd">N</span> 다음, <span class="kbd">P</span> 이전, <span class="kbd">R</span> 다시 시작
+        </div>
+      </div>
+
+      <div class="card right" style="flex:1 1 320px;">
+        <h3>판단 기준(수업용)</h3>
+        <ul>
+          <li><b>근거(증거)</b>: 직접 봄/들음/규칙/습관/상황 단서</li>
+          <li><b>확신 강도</b>: 낮음(가능성) ↔ 높음(거의 확실)</li>
+          <li><b>화용</b>: 상대 반응 유도(제안/지적/아쉬움)면 <b>-을 텐데요</b>가 잘 붙음</li>
+        </ul>
+        <div class="hr"></div>
+        <div class="scorebox">
+          <div>
+            <div class="small">진행</div>
+            <div class="progress" id="progressText">0 / 10</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="small">점수</div>
+            <div class="score" id="scoreText">0</div>
+          </div>
+        </div>
+        <div class="bar" aria-label="progress">
+          <i id="barFill"></i>
+        </div>
+        <div class="controls">
+          <button class="ctl" id="prevBtn" type="button">이전</button>
+          <button class="ctl" id="nextBtn" type="button">다음</button>
+          <button class="ctl" id="restartBtn" type="button">다시 시작</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="quizCard">
+        <div class="qhead">
+          <div class="qno" id="qTitle">문항</div>
+          <div class="progress" id="qMeta">-</div>
+        </div>
+
+        <div class="context" id="qContext"></div>
+
+        <div class="choices" id="choices"></div>
+
+        <div class="feedback" id="feedback" style="display:none;">
+          <div class="res" id="resLine">-</div>
+          <div class="muted" id="explain">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0;font-size:15px;">표현 빠른 정리</h3>
+        <div class="muted" style="margin-top:10px;">
+          <b>1) -을 것 같아요</b><br>
+          · “그럴 가능성이 있어요.” (조심스러운 추정)<br>
+          · 근거가 약해도 가능. 일상적/중립적.
+        </div>
+        <div class="muted" style="margin-top:10px;">
+          <b>2) -을걸요</b><br>
+          · “아마(거의) 그럴 거예요.” (확신 더 큼)<br>
+          · 경험/직감/상황판단으로 단정에 가까움(하지만 예언은 아님).
+        </div>
+        <div class="muted" style="margin-top:10px;">
+          <b>3) -을 텐데요</b><br>
+          · “그럴 텐데(그래서…)” 전제 + 다음 행동/평가 유도<br>
+          · 제안/지적/아쉬움/대조(‘그랬을 텐데요…’)로 자주 씀.
+        </div>
+        <div class="hr"></div>
+        <div class="muted">
+          수업 팁: 학생에게 “<b>근거가 약하면</b> -을 것 같아요, <b>확신이 크면</b> -을걸요,
+          <b>상대 반응을 끌어내면</b> -을 텐데요”로 1차 분류시키고, 예외(문맥)를 토론하세요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const choicesFixed = [
+    { key: "T", label: "-(으)ㄹ 텐데요" },
+    { key: "G", label: "-(으)ㄹ 것 같아요" },
+    { key: "K", label: "-(으)ㄹ걸요" },
+  ];
+
+  // 10 items: each requires choosing the most appropriate ending for nuance.
+  const items = [
+    {
+      id: 1,
+      context: "상황: (하늘이 아주 어둡고) 바람이 세게 불어요. 멀리서 천둥 소리도 들려요.\n문장: 조금 있으면 비가 _____.",
+      answer: "K",
+      why: "여러 단서(하늘/바람/천둥)가 있고, 화자가 비교적 확신 있게 말합니다. 일상에서 ‘거의 그럴 것’에 가깝게 말할 때 -을걸요가 자연스럽습니다."
+    },
+    {
+      id: 2,
+      context: "상황: 친구가 ‘민수 지금 어디야?’라고 묻습니다. 나는 민수에게서 아무 연락도 못 받았어요.\n문장: 잘 모르겠는데, 집에 _____ .",
+      answer: "G",
+      why: "근거가 거의 없고 조심스럽게 추측만 합니다. 이때는 낮은 강도의 -을 것 같아요가 적합합니다."
+    },
+    {
+      id: 3,
+      context: "상황: 수업이 9시에 시작인데, 지금 8시 55분이에요. 학교까지는 걸어서 20분 걸려요.\n문장(상대에게): 지금 출발하면 늦을 _____ .",
+      answer: "T",
+      why: "늦을 가능성을 전제로 상대 행동(빨리 출발/택시 등)을 유도하는 말입니다. ‘그럴 텐데요(그래서…)’의 대화 유도 기능이 핵심입니다."
+    },
+    {
+      id: 4,
+      context: "상황: 카페 단골인 내가 신메뉴를 많이 봐 왔어요. 친구가 ‘이 카페 커피 달아?’라고 물어요.\n문장: 여기 라떼는 단맛이 꽤 강할 _____ .",
+      answer: "K",
+      why: "경험 기반(자주 옴)으로 확신이 비교적 큽니다. 단정에 가까운 추정은 -을걸요가 자연스럽습니다."
+    },
+    {
+      id: 5,
+      context: "상황: 회사 규정에 ‘지각 3번이면 경고’라고 써 있어요. 동료가 이미 지각 2번 했고, 오늘도 늦었어요.\n문장: 오늘도 늦었으니까 경고를 받을 _____ .",
+      answer: "K",
+      why: "규정(근거)이 명확하고 결과가 거의 확실합니다. 이때는 강도가 큰 -을걸요가 자연스럽습니다. (-을 것 같아요도 가능하지만 강도/확실성에서 덜 맞음)"
+    },
+    {
+      id: 6,
+      context: "상황: 친구가 ‘내일 영화 보러 갈까?’라고 해요. 근데 내일 비 예보가 있는지 나는 확인 안 했어요.\n문장: 내일 비가 올 _____, 다른 날로 잡을까?",
+      answer: "T",
+      why: "‘비가 올 것’이라는 전제를 깔고 제안을 이어갑니다(다른 날로). 이런 연결 구조가 -을 텐데요와 잘 맞습니다."
+    },
+    {
+      id: 7,
+      context: "상황: 지하철이 갑자기 멈췄고 안내 방송도 없어요. 정확한 정보는 없어요.\n문장: 고장 난 것 _____ .",
+      answer: "G",
+      why: "정보가 부족해 가능성만 말합니다. 과도한 확신(-을걸요)은 부자연스럽고, -을 텐데요는 뒤에 제안/유도 맥락이 필요합니다."
+    },
+    {
+      id: 8,
+      context: "상황: 친구가 약속 장소를 잘못 말한 것 같아요. 나는 이전 대화를 다시 확인해 보니, 장소가 다르게 적혀 있어요.\n문장(상대에게): 네가 장소를 잘못 본 _____ .",
+      answer: "T",
+      why: "근거(이전 대화 기록)가 있고, 상대가 확인/수정을 하도록 유도하는 뉘앙스가 강합니다. ‘그럴 텐데요(확인해 봐)’ 흐름에 적합합니다."
+    },
+    {
+      id: 9,
+      context: "상황: 팀장 성격상 결과를 엄격히 보는 편이에요. 하지만 이번 보고서는 내가 아직 자세히 못 봤어요.\n문장: 팀장이 이 보고서를 싫어할 _____ .",
+      answer: "G",
+      why: "성향 정보는 있지만 ‘이번 보고서’를 충분히 확인하지 않았습니다. 가능성 중심의 -을 것 같아요가 적합합니다."
+    },
+    {
+      id: 10,
+      context: "상황: 상대가 ‘지금 문 닫았나?’라고 묻습니다. 당신은 가게 앞에 와 있고, 불이 꺼져 있고, ‘마감 10시’ 표지도 봤어요. 지금 10시 30분이에요.\n문장: 이미 문 닫았 _____ .",
+      answer: "K",
+      why: "직접 관찰+시간 정보로 근거가 매우 강합니다. 거의 확실한 판단이라 -을걸요가 자연스럽습니다."
+    }
+  ];
+
+  // State
+  let idx = 0;
+  let score = 0;
+  const answered = new Array(items.length).fill(null); // stores chosen key
+
+  // Elements
+  const qTitle = document.getElementById("qTitle");
+  const qMeta = document.getElementById("qMeta");
+  const qContext = document.getElementById("qContext");
+  const choicesEl = document.getElementById("choices");
+  const feedbackEl = document.getElementById("feedback");
+  const resLine = document.getElementById("resLine");
+  const explain = document.getElementById("explain");
+
+  const progressText = document.getElementById("progressText");
+  const scoreText = document.getElementById("scoreText");
+  const barFill = document.getElementById("barFill");
+
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const restartBtn = document.getElementById("restartBtn");
+
+  function pct(n, d){ return Math.round((n/d)*100); }
+
+  function render() {
+    const it = items[idx];
+    qTitle.textContent = `문항 ${it.id}`;
+    qMeta.textContent = `선택: 빈칸에 가장 알맞은 표현`;
+    qContext.innerHTML = it.context
+      .replaceAll("_____", `<span class="blank">_____</span>`)
+      .replaceAll("\n", "<br>");
+
+    // top progress
+    const doneCount = answered.filter(v => v !== null).length;
+    progressText.textContent = `${doneCount} / ${items.length}`;
+    scoreText.textContent = `${score}`;
+    barFill.style.width = `${pct(doneCount, items.length)}%`;
+
+    // buttons availability
+    prevBtn.disabled = (idx === 0);
+    nextBtn.disabled = (idx === items.length - 1);
+
+    // build choices
+    choicesEl.innerHTML = "";
+    feedbackEl.style.display = "none";
+
+    const chosen = answered[idx];
+
+    choicesFixed.forEach(c => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn";
+      btn.dataset.key = c.key;
+      btn.textContent = c.label;
+
+      // If already answered, lock and show correctness tags
+      if (chosen !== null) {
+        btn.disabled = true;
+        if (c.key === it.answer) {
+          const t = document.createElement("span");
+          t.className = "tag good";
+          t.textContent = "정답";
+          btn.appendChild(t);
+        } else if (c.key === chosen) {
+          const t = document.createElement("span");
+          t.className = "tag bad";
+          t.textContent = "내 선택";
+          btn.appendChild(t);
+        }
+      } else {
+        btn.addEventListener("click", () => choose(c.key));
+      }
+
+      choicesEl.appendChild(btn);
+    });
+
+    // If answered, show feedback
+    if (chosen !== null) showFeedback(chosen);
+  }
+
+  function choose(key) {
+    const it = items[idx];
+    answered[idx] = key;
+
+    const isCorrect = (key === it.answer);
+    if (isCorrect) score += 1;
+
+    showFeedback(key);
+    render(); // re-render to lock choices and show tags
+  }
+
+  function showFeedback(chosenKey) {
+    const it = items[idx];
+    const isCorrect = (chosenKey === it.answer);
+
+    feedbackEl.style.display = "block";
+    resLine.className = "res " + (isCorrect ? "good" : "bad");
+
+    const chosenLabel = choicesFixed.find(x => x.key === chosenKey).label;
+    const answerLabel = choicesFixed.find(x => x.key === it.answer).label;
+
+    resLine.textContent = isCorrect
+      ? `정답: ${answerLabel}`
+      : `오답: 내 선택 ${chosenLabel} / 정답 ${answerLabel}`;
+
+    explain.textContent = it.why;
+  }
+
+  function go(delta) {
+    const ni = idx + delta;
+    if (ni < 0 || ni >= items.length) return;
+    idx = ni;
+    render();
+  }
+
+  function restart() {
+    idx = 0;
+    score = 0;
+    for (let i=0;i<answered.length;i++) answered[i] = null;
+    render();
+  }
+
+  // Controls
+  prevBtn.addEventListener("click", () => go(-1));
+  nextBtn.addEventListener("click", () => go(1));
+  restartBtn.addEventListener("click", restart);
+
+  // Keyboard shortcuts
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "n" || e.key === "N") go(1);
+    if (e.key === "p" || e.key === "P") go(-1);
+    if (e.key === "r" || e.key === "R") restart();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
