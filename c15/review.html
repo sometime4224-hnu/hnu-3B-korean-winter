@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>한국어 3B 15과 워크북(복습) - 퀴즈 앱</title>
+  <style>
+    :root{
+      --bg1:#fff7fb;
+      --bg2:#f3fbff;
+      --card:#ffffffcc;
+      --line:#e8e8f2;
+      --text:#20202a;
+      --muted:#5a5a73;
+      --accent:#6a7cff;
+      --accent2:#ff7aa2;
+      --good:#16a34a;
+      --bad:#dc2626;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
+      --tap:54px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, #ffeaf4 0%, transparent 55%),
+        radial-gradient(1200px 700px at 80% 20%, #e6f6ff 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+    }
+    .app{
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 16px 14px 110px;
+    }
+
+    /* Header */
+    .topbar{
+      position: sticky;
+      top:0;
+      z-index:10;
+      padding: 12px 0;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .brand h1{
+      font-size: 16px;
+      margin:0;
+      letter-spacing:-.2px;
+    }
+    .brand .sub{
+      font-size: 12px;
+      color:var(--muted);
+    }
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:8px 10px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+    .pill label{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    select, button{
+      font: inherit;
+    }
+    select{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:7px 10px;
+      background:#fff;
+      font-size:13px;
+      outline:none;
+    }
+
+    /* Cards / layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    @media (min-width:720px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .card h2{
+      font-size: 15px;
+      margin:0 0 6px;
+      letter-spacing:-.2px;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      font-size: 13px;
+      line-height:1.35;
+    }
+    .card .meta{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      font-size:12px;
+      color:#374151;
+      border:1px dashed #d8d8ea;
+      background:#ffffff80;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .btn{
+      border:0;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color:#fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 650;
+      cursor:pointer;
+      min-height: 40px;
+      box-shadow: 0 10px 25px rgba(106,124,255,.22);
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{
+      background:#fff;
+      color:#1f2a44;
+      border:1px solid var(--line);
+      box-shadow:none;
+      font-weight:600;
+    }
+    .btn.ghost{
+      background:transparent;
+      border:1px solid var(--line);
+      color:#1f2a44;
+      box-shadow:none;
+    }
+
+    /* Section page */
+    .section-head{
+      margin-top: 16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .section-title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:-.3px;
+    }
+    .section-title .desc{
+      color:var(--muted);
+      font-size: 13px;
+      line-height:1.35;
+    }
+    .progress{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .bar{
+      width: 180px;
+      height: 10px;
+      border-radius: 999px;
+      background: #ffffffaa;
+      border:1px solid var(--line);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Exercise list */
+    .exercise{
+      margin-top:12px;
+      border-top:1px solid var(--line);
+      padding-top: 12px;
+    }
+    .exercise h3{
+      margin:0 0 6px;
+      font-size: 14px;
+    }
+    .exercise .inst{
+      margin:0 0 10px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+
+    /* Question UI */
+    .qbox{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+    }
+    .qtop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .qno{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .qprompt{
+      font-size: 15px;
+      line-height: 1.45;
+      margin: 0;
+      letter-spacing:-.2px;
+    }
+    .context{
+      margin-top:8px;
+      font-size:13px;
+      color:#374151;
+      background:#f8fafc;
+      border:1px solid #eef2ff;
+      border-radius: 12px;
+      padding: 10px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+    .options{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media (min-width:720px){
+      .options.two{ grid-template-columns: 1fr 1fr; }
+    }
+    .opt{
+      width:100%;
+      min-height: var(--tap);
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      text-align:left;
+      cursor:pointer;
+      font-size: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,.04);
+    }
+    .opt:active{ transform: translateY(1px); }
+    .opt.correct{
+      border-color: rgba(22,163,74,.35);
+      box-shadow: 0 10px 20px rgba(22,163,74,.14);
+      background: #f0fdf4;
+    }
+    .opt.wrong{
+      border-color: rgba(220,38,38,.28);
+      box-shadow: 0 10px 20px rgba(220,38,38,.12);
+      background: #fff1f2;
+    }
+    .feedback{
+      margin-top:10px;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #ffffffcc;
+      line-height:1.45;
+    }
+    .feedback .flag{
+      font-weight: 750;
+      margin-right: 8px;
+    }
+    .feedback.good{ border-color: rgba(22,163,74,.25); }
+    .feedback.bad{ border-color: rgba(220,38,38,.22); }
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    /* Bottom nav */
+    .bottom{
+      position: fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.92));
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--line);
+      z-index: 20;
+    }
+    .bottom-inner{
+      max-width: 920px;
+      margin: 0 auto;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .left-actions, .right-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .bottom .btn{
+      min-height: 44px;
+      padding: 10px 14px;
+    }
+    .bottom .btn.secondary{ min-width: 92px; }
+    .bottom .status{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Utility */
+    .hide{ display:none !important; }
+    .divider{ height:1px; background:var(--line); margin:10px 0; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="app topbar-inner">
+      <div class="brand">
+        <h1>15과 워크북 복습 · 퀴즈 앱</h1>
+        <div class="sub">객관식/OX/선택형 · 모바일 최적화</div>
+      </div>
+      <div class="controls">
+        <div class="pill">
+          <label for="fbLang">피드백</label>
+          <select id="fbLang" aria-label="피드백 언어 선택">
+            <option value="ko">한국어</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+        <button class="btn secondary" id="resetAllBtn" title="전체 진행 초기화">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="root"></div>
+
+  <div class="bottom">
+    <div class="bottom-inner">
+      <div class="left-actions">
+        <button class="btn ghost" id="homeBtn">목차</button>
+        <div class="status" id="statusText"></div>
+      </div>
+      <div class="right-actions">
+        <button class="btn secondary" id="prevBtn">이전</button>
+        <button class="btn" id="nextBtn">다음</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const LS_KEY = "wb15_quiz_v1_progress";
+  const LS_LANG = "wb15_quiz_v1_lang";
+
+  const i18n = {
+    ko: {
+      homeTitle: "단락 선택",
+      homeDesc: "각 단락은 1페이지(섹션)입니다. 문제는 버튼으로만 풀 수 있습니다.",
+      start: "시작",
+      continue: "이어하기",
+      done: "완료",
+      score: "점수",
+      correct: "정답",
+      incorrect: "오답",
+      explanation: "해설",
+      saved: "저장됨",
+      notAnswered: "아직 선택하지 않았습니다.",
+      sectionDone: "이 단락의 모든 문제를 풀었습니다.",
+      resetConfirm: "진행을 모두 초기화할까요?"
+    },
+    vi: {
+      homeTitle: "Chọn phần",
+      homeDesc: "Mỗi phần là 1 trang. Làm bài bằng nút chọn (trắc nghiệm/OX).",
+      start: "Bắt đầu",
+      continue: "Tiếp tục",
+      done: "Hoàn thành",
+      score: "Điểm",
+      correct: "Đúng",
+      incorrect: "Sai",
+      explanation: "Giải thích",
+      saved: "Đã lưu",
+      notAnswered: "Bạn chưa chọn đáp án.",
+      sectionDone: "Bạn đã làm xong tất cả câu hỏi trong phần này.",
+      resetConfirm: "Bạn có muốn xóa toàn bộ tiến trình không?"
+    }
+  };
+
+  function t(key){
+    return i18n[state.fbLang][key] || i18n.ko[key] || key;
+  }
+
+  /* -----------------------------
+     Data (문제) : PDF 기반(주관식 -> 객관식/선택형)
+     ----------------------------- */
+  const SECTIONS = [
+    {
+      id: "vocab",
+      title: "어휘 (Vocabulary)",
+      desc: "원인-결과 연결 / 부동산 대화 빈칸 / 가계부·절약 표현",
+      tag: "p.108-109",
+      exercises: [
+        {
+          title: "연습 1. 원인-결과 연결",
+          inst: "각 문장(원인)에 알맞은 결과를 고르세요. 선택하면 예문이 완성됩니다.",
+          questions: [
+            {
+              prompt: "보일러가 고장 났어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물(물이) 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 4,
+              explain_ko: "보일러가 고장 나면 난방이 안 됩니다.",
+              explain_vi: "Khi nồi hơi bị hỏng thì không sưởi được."
+            },
+            {
+              prompt: "아파트 물탱크 청소를 해요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물(물이) 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 7,
+              explain_ko: "물탱크를 청소하면 잠시 수돗물이 안 나올 수 있어요.",
+              explain_vi: "Khi vệ sinh bồn nước, có thể bị cắt nước tạm thời."
+            },
+            {
+              prompt: "욕조 하수구가 막혔어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 3,
+              explain_ko: "하수구가 막히면 물이 잘 안 내려갑니다.",
+              explain_vi: "Khi ống thoát nước bị tắc thì nước không thoát được."
+            },
+            {
+              prompt: "위층에서 아이들이 뛰어 놀아요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 2,
+              explain_ko: "위층에서 뛰면 아래층에 소음이 크게 들려요.",
+              explain_vi: "Trẻ chạy nhảy ở tầng trên thì gây ồn."
+            },
+            {
+              prompt: "변기에 비누가 빠졌어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 6,
+              explain_ko: "변기에 물건이 들어가면 변기가 막힐 수 있어요.",
+              explain_vi: "Nếu rơi đồ vào bồn cầu thì dễ bị tắc."
+            },
+            {
+              prompt: "태풍 때문에 전봇대가 쓰러졌어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 0,
+              explain_ko: "전봇대가 쓰러지면 정전이 날 수 있어요.",
+              explain_vi: "Cột điện đổ có thể gây mất điện."
+            },
+            {
+              prompt: "음식물 쓰레기를 안 버렸어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 5,
+              explain_ko: "음식물 쓰레기를 오래 두면 냄새가 납니다.",
+              explain_vi: "Để rác thực phẩm lâu sẽ có mùi hôi."
+            },
+            {
+              prompt: "지붕이 샜어요.",
+              options: ["전기가 나갔어요.", "천장에서 물이 새요.", "소음이 심해요.", "물이 안 내려가요.", "난방이 안 돼요.", "이상한 냄새가 나요.", "변기가 막혔어요.", "수돗물이 안 나와요."],
+              answer: 1,
+              explain_ko: "지붕이 새면 천장에서 물이 새요.",
+              explain_vi: "Mái dột thì nước có thể rò từ trần nhà."
+            }
+          ]
+        },
+        {
+          title: "연습 2. 부동산 대화 빈칸(객관식)",
+          inst: "빈칸에 들어갈 알맞은 단어를 고르세요. (단어: 계약서/계약 기간/보증금/공과금/연체료/포함되다/납부하다/밀리다)",
+          questions: [
+            {
+              context:
+`A: 어제 본 원룸을 계약하고 싶은데 (1) ____ 를 쓰기 전에 좀 여쭤 볼 게 있는데요.
+A: (2) ____ 1,000만 원에 월세가 40만 원이라고 하셨지요?
+B: 네, 하지만 관리비와 공과금은 따로 (3) ____ 야 해요.`,
+              prompt: "(1) 빈칸",
+              options: ["계약서", "보증금", "공과금", "연체료"],
+              answer: 0,
+              explain_ko: "‘계약서’를 쓰기 전에 = 계약서를 작성하기 전에.",
+              explain_vi: "‘계약서’ = hợp đồng. Trước khi viết hợp đồng."
+            },
+            {
+              context:
+`A: ... (2) ____ 1,000만 원에 월세가 40만 원이라고 하셨지요?`,
+              prompt: "(2) 빈칸",
+              options: ["보증금", "계약 기간", "연체료", "포함되다"],
+              answer: 0,
+              explain_ko: "보증금 1,000만 원 / 월세 40만 원.",
+              explain_vi: "‘보증금’ = tiền đặt cọc."
+            },
+            {
+              context:
+`B: ... 관리비와 공과금은 따로 (3) ____ 야 해요.`,
+              prompt: "(3) 빈칸",
+              options: ["포함돼", "납부해야", "밀려야", "계약해야"],
+              answer: 1,
+              explain_ko: "따로 ‘납부해야 해요’(=따로 내야 해요).",
+              explain_vi: "‘납부하다’ = nộp/đóng (tiền)."
+            },
+            {
+              context:
+`A: 관리비에는 무엇이 (4) ____ 나요?
+B: 청소비와 인터넷 요금이 포함돼요.`,
+              prompt: "(4) 빈칸",
+              options: ["포함되", "밀리", "계약 기간", "연체료"],
+              answer: 0,
+              explain_ko: "무엇이 포함되나요? = 무엇이 들어가나요?",
+              explain_vi: "‘포함되다’ = bao gồm."
+            },
+            {
+              context:
+`A: 그럼 (5) ____ 은 뭐예요?
+B: 전기 요금과 수도 요금, 그리고 난방비예요.`,
+              prompt: "(5) 빈칸",
+              options: ["공과금", "계약서", "보증금", "계약 기간"],
+              answer: 0,
+              explain_ko: "전기/수도/난방비 = 공과금.",
+              explain_vi: "‘공과금’ = tiền điện/nước/gas..."
+            },
+            {
+              context:
+`B: 참, 공과금이 (6) ____ 면 (7) ____ 를 내야 하니까 조심하세요.`,
+              prompt: "(6) 빈칸",
+              options: ["포함되", "밀리", "계약하", "납부하"],
+              answer: 1,
+              explain_ko: "공과금이 ‘밀리면’(=연체되면).",
+              explain_vi: "‘밀리다’ = bị trễ hạn/chậm (tiền)."
+            },
+            {
+              context:
+`B: 공과금이 밀리면 (7) ____ 를 내야 하니까...`,
+              prompt: "(7) 빈칸",
+              options: ["연체료", "보증금", "계약서", "계약 기간"],
+              answer: 0,
+              explain_ko: "연체료 = 늦게 낼 때 추가로 내는 돈.",
+              explain_vi: "‘연체료’ = phí phạt trễ hạn."
+            },
+            {
+              context:
+`A: ... 제가 2년 동안 한국에 살 예정인데 (8) ____ 을 2년으로 할 수 있을까요?`,
+              prompt: "(8) 빈칸",
+              options: ["계약 기간", "계약서", "공과금", "포함되다"],
+              answer: 0,
+              explain_ko: "2년으로 하고 싶은 것은 ‘계약 기간’.",
+              explain_vi: "‘계약 기간’ = thời hạn hợp đồng."
+            }
+          ]
+        },
+        {
+          title: "연습 3. 가계부·절약 표현(선택형)",
+          inst: "표(7월 지출)를 보고 알맞은 선택지를 고르세요. (말하기 과제 → 객관식으로 변환)",
+          questions: [
+            {
+              prompt: "7월 지출 중 가장 큰 항목은 무엇이에요?",
+              options: ["월세(450,000원)", "식비(150,000원)", "옷값(120,000원)", "여행비(100,000원)"],
+              answer: 0,
+              explain_ko: "월세 450,000원이 가장 큽니다.",
+              explain_vi: "Khoản lớn nhất là tiền nhà (월세)."
+            },
+            {
+              prompt: "7월 합계는 얼마예요?",
+              options: ["900,000원", "1,000,000원", "1,050,000원", "950,000원"],
+              answer: 1,
+              explain_ko: "표의 합계는 1,000,000원입니다.",
+              explain_vi: "Tổng là 1,000,000 won."
+            },
+            {
+              prompt: "‘절약하다’와 의미가 가장 가까운 것은?",
+              options: ["낭비하다", "아끼다", "늘다", "밀리다"],
+              answer: 1,
+              explain_ko: "절약하다 = 아끼다(돈/시간을 덜 쓰다).",
+              explain_vi: "‘절약하다’ gần nghĩa với ‘아끼다’ (tiết kiệm)."
+            },
+            {
+              prompt: "저축을 늘리려면 보통 무엇을 해야 해요?",
+              options: ["지출을 줄이다", "지출을 늘리다", "연체료를 내다", "공과금을 포함하다"],
+              answer: 0,
+              explain_ko: "저축을 늘리려면 지출을 줄이는 게 일반적입니다.",
+              explain_vi: "Muốn tăng tiết kiệm thì thường phải giảm chi tiêu."
+            },
+            {
+              prompt: "예문: ‘식비를 절약해서 50,000원 정도 아낄 수 있을 것 같아요.’ 여기서 ‘아끼다’의 의미는?",
+              options: ["맛있게 먹다", "돈을 덜 쓰다", "늦게 내다", "약속을 취소하다"],
+              answer: 1,
+              explain_ko: "아끼다 = 돈을 덜 쓰다.",
+              explain_vi: "‘아끼다’ = tiêu ít hơn (tiết kiệm tiền)."
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "g1",
+      title: "문법 1. V-게 하다",
+      desc: "요청·지시(시키다/하게 하다) 표현을 상황에 맞게 고르기",
+      tag: "p.110-111",
+      exercises: [
+        {
+          title: "연습 1. 빈칸(객관식)",
+          inst: "알맞은 동사를 고르세요. (형태: V-게 해 주세요 / V-지 못하게 해 주세요)",
+          questions: [
+            {
+              prompt: "친구들과 사이좋게 ____게 해 주세요.",
+              options: ["지내", "오", "살", "있"],
+              answer: 0,
+              explain_ko: "사이좋게 지내다.",
+              explain_vi: "Cụm tự nhiên: ‘사이좋게 지내다’ (sống hòa thuận)."
+            },
+            {
+              prompt: "낮잠을 자기 전에 우유를 ____게 해 주세요.",
+              options: ["마시", "쓰", "빌리", "밀리"],
+              answer: 0,
+              explain_ko: "우유를 마시게 하다.",
+              explain_vi: "‘마시다’ = uống."
+            },
+            {
+              prompt: "점심을 먹은 후에 꼭 약을 ____게 해 주세요.",
+              options: ["먹", "입", "보", "가"],
+              answer: 0,
+              explain_ko: "약을 먹게 하다.",
+              explain_vi: "‘먹다’ = uống/ăn (thuốc)."
+            },
+            {
+              prompt: "사탕 같은 단 음식을 ____지 못하게 해 주세요.",
+              options: ["먹", "타", "나오", "들어오"],
+              answer: 0,
+              explain_ko: "단 음식을 먹지 못하게 하다.",
+              explain_vi: "Không cho ăn đồ ngọt."
+            },
+            {
+              prompt: "감기에 걸렸으니까 외출할 때 따뜻한 옷을 ____게 해 주세요.",
+              options: ["입", "읽", "놓", "빌"],
+              answer: 0,
+              explain_ko: "옷을 입게 하다.",
+              explain_vi: "‘입다’ = mặc."
+            }
+          ]
+        },
+        {
+          title: "연습 2. 상황에 맞는 대답 선택",
+          inst: "A의 고민에 가장 자연스러운 B를 고르세요. (V-게 하다 사용)",
+          questions: [
+            {
+              prompt: "A: 친구가 수업 시간에 자꾸 조는데 어떡하죠?",
+              options: [
+                "B: 밤에 일찍 자게 하면 어떨까요?",
+                "B: 공과금을 밀리면 연체료를 내야 해요.",
+                "B: 방이 여러 개니까 불편하지 않을걸요.",
+                "B: 신발을 벗지 않으면 안 됩니다."
+              ],
+              answer: 0,
+              explain_ko: "원인(피곤함) 해결: 일찍 자게 하다.",
+              explain_vi: "Giải pháp hợp lý: cho ngủ sớm."
+            },
+            {
+              prompt: "A: 동생이 집에 오자마자 게임만 하는데 어떡하죠?",
+              options: [
+                "B: 숙제를 먼저 하게 하고 게임은 나중에 하게 해 보세요.",
+                "B: 전기가 나갔어요.",
+                "B: 계약 기간을 2년으로 할 수 있을까요?",
+                "B: 내일 아침 학교에 가는 길에 사도 되겠지요?"
+              ],
+              answer: 0,
+              explain_ko: "순서 조절: 숙제를 먼저 하게 하다.",
+              explain_vi: "Cho làm bài trước rồi mới chơi."
+            },
+            {
+              prompt: "A: 요즘 우리 아이가 갑자기 눈이 나빠졌는데 어떡하죠?",
+              options: [
+                "B: 병원에 가게 하고 휴대폰을 덜 보게 하세요.",
+                "B: 월세는 보통 1년 계약을 해요.",
+                "B: 지금이 이사철이라서 쉽게 구할 수 없을걸요.",
+                "B: 쓰레기는 반드시 쓰레기봉투에 넣어서 버려야 합니다."
+              ],
+              answer: 0,
+              explain_ko: "조치: 병원에 가게 하다 / 습관: 덜 보게 하다.",
+              explain_vi: "Cho đi khám và hạn chế xem điện thoại."
+            },
+            {
+              prompt: "A: 룸메이트가 아무 때나 남자 친구를 데리고 오는데 어떡하죠?",
+              options: [
+                "B: 규칙을 정해서 미리 연락하게 하세요.",
+                "B: 전봇대가 쓰러져서 전기가 나갔어요.",
+                "B: 옷값과 교통비가 아까워요.",
+                "B: 귀뚜라미의 귀는 어디에 있을까요?"
+              ],
+              answer: 0,
+              explain_ko: "규칙 설정: 연락하게 하다.",
+              explain_vi: "Đặt quy tắc: phải báo trước."
+            }
+          ]
+        },
+        {
+          title: "연습 3. 의사-상담 대화(선택형)",
+          inst: "빈칸에 들어갈 가장 자연스러운 표현을 고르세요.",
+          questions: [
+            {
+              context:
+`의사: 어두운 방에 혼자 있는 것은 안 좋아요. 방에서 (1) ____ 나오게 하세요.`,
+              prompt: "(1) 빈칸",
+              options: ["밖으로", "전기로", "공과금으로", "연체료로"],
+              answer: 0,
+              explain_ko: "‘밖으로 나오게 하다’가 자연스럽습니다.",
+              explain_vi: "Tự nhiên nhất: ‘ra ngoài’ (밖으로)."
+            },
+            {
+              context:
+`의사: 슬픈 음악을 듣는 건 좋지 않아요. (2) _____.`,
+              prompt: "(2) 가장 자연스러운 문장",
+              options: [
+                "즐거운 음악을 듣게 하세요.",
+                "계약서를 쓰게 하세요.",
+                "수돗물이 안 나오게 하세요.",
+                "전봇대를 쓰러지게 하세요."
+              ],
+              answer: 0,
+              explain_ko: "대조: 슬픈 음악 X → 즐거운 음악 O.",
+              explain_vi: "Đối lập hợp lý: không nghe nhạc buồn → nghe nhạc vui."
+            },
+            {
+              context:
+`의사: 마음이 아플 때는 초콜릿 같은 단 음식을 (3) _____.`,
+              prompt: "(3) 빈칸",
+              options: ["먹게 하세요", "밀리게 하세요", "포함되게 하세요", "계약하게 하세요"],
+              answer: 0,
+              explain_ko: "‘먹게 하세요’가 맞습니다.",
+              explain_vi: "Đúng: ‘cho ăn’ (먹게 하세요)."
+            },
+            {
+              context:
+`의사: 네, 좋은 사람이 있으면 (4) _____.`,
+              prompt: "(4) 가장 자연스러운 문장",
+              options: [
+                "만나게 해 보세요.",
+                "전기가 나가게 해 보세요.",
+                "연체료를 내게 해 보세요.",
+                "하수구가 막히게 해 보세요."
+              ],
+              answer: 0,
+              explain_ko: "좋은 사람이 있으면 만나게 하다.",
+              explain_vi: "Nếu có người tốt thì cho gặp thử."
+            }
+          ]
+        },
+        {
+          title: "연습 4. ‘-게 하려면’(선택형)",
+          inst: "A의 바람을 이루려면 무엇을 해야 하는지 B의 대답을 고르세요.",
+          questions: [
+            {
+              prompt: "A: 아이가 밤에 잠을 잘 자면 좋겠어요.\nB:",
+              options: [
+                "아이를 낮에 너무 오래 자게 하지 마세요.",
+                "공과금을 따로 납부해야 해요.",
+                "지붕이 새서 천장에서 물이 새요.",
+                "한국이 언제 통일될까요?"
+              ],
+              answer: 0,
+              explain_ko: "잠을 잘 자게 하려면 낮잠/수면습관을 조절.",
+              explain_vi: "Muốn ngủ tốt thì cần điều chỉnh thói quen ngủ."
+            },
+            {
+              prompt: "A: 손님들이 물건을 더 많이 사면 좋겠어요.\nB:",
+              options: [
+                "손님들이 더 많이 사게 하려면 할인 행사를 하세요.",
+                "우유를 마시게 해 주세요.",
+                "수돗물이 안 나와요.",
+                "연체료를 내야 해요."
+              ],
+              answer: 0,
+              explain_ko: "구매를 유도: 할인/프로모션.",
+              explain_vi: "Tăng mua: giảm giá/khuyến mãi."
+            },
+            {
+              prompt: "A: 짝사랑하는 사람이 나를 좋아하면 좋겠어요.\nB:",
+              options: [
+                "나를 좋아하게 하려면 자주 만나고 대화를 많이 하세요.",
+                "쓰레기를 봉투에 버리지 않으면 안 돼요.",
+                "방에서 밖으로 나오게 하세요.",
+                "전봇대가 쓰러졌어요."
+              ],
+              answer: 0,
+              explain_ko: "자연스러운 조언 형태로 ‘-게 하려면’ 사용.",
+              explain_vi: "Dùng ‘-게 하려면’ để đưa ra lời khuyên."
+            },
+            {
+              prompt: "A: 남자 친구가 담배를 피우지 않으면 좋겠어요.\nB:",
+              options: [
+                "담배를 안 피우게 하려면 이유를 말하고 약속을 정하세요.",
+                "보일러가 고장 났어요.",
+                "계약 기간을 2년으로 해요.",
+                "귀뚜라미 귀는 어디에 있어요?"
+              ],
+              answer: 0,
+              explain_ko: "금연을 ‘하게’ 만들기 위한 조건 제시.",
+              explain_vi: "Đưa điều kiện để giúp bỏ thuốc."
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "g2",
+      title: "문법 2. A/V-(으)ㄹ걸(요)",
+      desc: "추측·예상 표현(아마 ~일/할걸요)을 상황에 맞게 선택",
+      tag: "p.112-113",
+      exercises: [
+        {
+          title: "연습 1. 대화 완성(선택형)",
+          inst: "이유에 맞는 ‘-(으)ㄹ걸요’ 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "A: 전기 요금을 인터넷으로 내도 될까요?\nB: 네, ____",
+              options: [
+                "인터넷으로 낼 수 있을걸요.",
+                "전기가 나갔을걸요.",
+                "연체료를 낼걸요.",
+                "계약서를 쓸걸요."
+              ],
+              answer: 0,
+              explain_ko: "가능 추측: ‘낼 수 있을걸요’.",
+              explain_vi: "Dự đoán khả năng: ‘có thể nộp được’."
+            },
+            {
+              prompt: "A: 한국어 4급 과정이 어려울까요?\nB: 3급을 배웠으니까 ____",
+              options: [
+                "할 수 있을걸요.",
+                "못할걸요.",
+                "막혔을걸요.",
+                "새는 걸요."
+              ],
+              answer: 0,
+              explain_ko: "근거: 3급을 배움 → 가능 추측.",
+              explain_vi: "Có cơ sở: đã học cấp 3 → làm được."
+            },
+            {
+              prompt: "A: 외국 사람인데 한국 영화를 이해할 수 있을까요?\nB: 자막이 있으니까 ____",
+              options: [
+                "이해할 수 있을걸요.",
+                "이해 못할걸요.",
+                "전기가 나갔을걸요.",
+                "계약 기간일걸요."
+              ],
+              answer: 0,
+              explain_ko: "자막이 있으니 이해 가능.",
+              explain_vi: "Có phụ đề nên hiểu được."
+            },
+            {
+              prompt: "A: 여러 명이 한 집에서 살면 불편하지 않을까요?\nB: 방이 여러 개니까 ____",
+              options: [
+                "괜찮을걸요.",
+                "안 괜찮을걸요.",
+                "막혔을걸요.",
+                "밀릴걸요."
+              ],
+              answer: 0,
+              explain_ko: "방이 여러 개면 덜 불편하다고 추측.",
+              explain_vi: "Nhiều phòng thì có lẽ ổn."
+            }
+          ]
+        },
+        {
+          title: "연습 2. ‘아마 안 ~’(선택형)",
+          inst: "확신이 낮을 때 자연스러운 추측을 고르세요.",
+          questions: [
+            {
+              prompt: "A: 보일러가 고장 나면 집 주인이 고쳐 줄까요?\nB:",
+              options: [
+                "글쎄요, 아마 고쳐 줄걸요.",
+                "네, 수돗물이 안 나올걸요.",
+                "아니요, 소음이 심할걸요.",
+                "네, 계약서를 쓸걸요."
+              ],
+              answer: 0,
+              explain_ko: "상식적 추측: 집주인이 수리할 가능성.",
+              explain_vi: "Dự đoán hợp lý: chủ nhà có thể sửa."
+            },
+            {
+              prompt: "A: 인터넷에서 큰 집을 믿고 계약해도 될까요?\nB:",
+              options: [
+                "글쎄요, 아마 안 될걸요.",
+                "네, 꼭 불을 꺼야 할걸요.",
+                "네, 신발을 벗을걸요.",
+                "아마 귀가 다리에 있을걸요."
+              ],
+              answer: 0,
+              explain_ko: "조심 조언: ‘아마 안 될걸요’가 자연스럽습니다.",
+              explain_vi: "Khuyên thận trọng: ‘có lẽ không nên’."
+            },
+            {
+              prompt: "A: 한국이 언제 통일될까요?\nB:",
+              options: [
+                "글쎄요, 아마 아직 멀었을걸요.",
+                "네, 오늘 저녁에 케이크를 살걸요.",
+                "네, 공과금을 납부해야 할걸요.",
+                "아니요, 천장에서 물이 샐걸요."
+              ],
+              answer: 0,
+              explain_ko: "시점이 불확실 → ‘아마 …일걸요’.",
+              explain_vi: "Không chắc thời điểm → dùng ‘아마 …일걸요’."
+            },
+            {
+              prompt: "A: 여자 친구에게 신발을 선물하면 여자 친구가 진짜 떠날까요?\nB:",
+              options: [
+                "글쎄요, 아마 안 떠날걸요.",
+                "네, 변기가 막힐걸요.",
+                "네, 지붕이 샐걸요.",
+                "네, 계약 기간일걸요."
+              ],
+              answer: 0,
+              explain_ko: "부정 추측 형태가 자연스럽습니다.",
+              explain_vi: "Cách dự đoán phủ định tự nhiên."
+            }
+          ]
+        },
+        {
+          title: "연습 3. 근거 있는 추측(선택형)",
+          inst: "보기처럼 근거에 맞는 추측을 고르세요.",
+          questions: [
+            {
+              prompt: "A: 어제 남자 친구가 바쁘다고 약속을 취소했는데 정말 바빴을까?\nB:",
+              options: [
+                "정말 바빴을걸.",
+                "연체료를 낼걸.",
+                "수돗물이 안 나올걸.",
+                "방이 여러 개일걸."
+              ],
+              answer: 0,
+              explain_ko: "상황 추측: 바빴을걸.",
+              explain_vi: "Dự đoán theo tình huống: chắc bận."
+            },
+            {
+              prompt: "A: 스티븐이 역사책을 빌려 갔는데 다 읽었을까?\nB:",
+              options: [
+                "다 읽었을걸.",
+                "전기가 나갔을걸.",
+                "계약서를 쓸걸.",
+                "지붕이 샜을걸."
+              ],
+              answer: 0,
+              explain_ko: "추측: 다 읽었을걸.",
+              explain_vi: "Dự đoán: chắc đọc xong."
+            },
+            {
+              prompt: "A: 남자 친구에게 도시락을 처음 싸 줬는데 맛있게 먹었을까?\nB:",
+              options: [
+                "맛있게 먹었을걸.",
+                "공과금이 밀렸을걸.",
+                "하수구가 막혔을걸.",
+                "연체료가 포함됐을걸."
+              ],
+              answer: 0,
+              explain_ko: "추측: 맛있게 먹었을걸.",
+              explain_vi: "Dự đoán: chắc ăn ngon."
+            },
+            {
+              prompt: "A: 부모님이 고향에 잘 도착하셨을까?\nB:",
+              options: [
+                "잘 도착하셨을걸.",
+                "변기가 막혔을걸.",
+                "수돗물이 안 나올걸.",
+                "소음이 심했을걸."
+              ],
+              answer: 0,
+              explain_ko: "추측: 잘 도착하셨을걸.",
+              explain_vi: "Dự đoán: chắc đã đến nơi an toàn."
+            }
+          ]
+        },
+        {
+          title: "연습 4. 형태 고르기(선택형)",
+          inst: "의미가 아니라 ‘형태(을/ㄹ걸요)’가 맞는 것을 고르세요.",
+          questions: [
+            {
+              prompt: "귀뚜라미의 귀는 다리에 ____.",
+              options: ["있을걸요", "있을거예요", "있게 하세요", "있지 않으면 안 돼요"],
+              answer: 0,
+              explain_ko: "추측 표현: ‘있을걸요’.",
+              explain_vi: "Dạng dự đoán: ‘있을걸요’."
+            },
+            {
+              prompt: "호랑이와 사자가 싸우면 호랑이가 이길 ____.",
+              options: ["걸요", "게요", "고요", "지요"],
+              answer: 0,
+              explain_ko: "‘이길걸요’가 형태상 맞습니다.",
+              explain_vi: "Đúng dạng: ‘이길걸요’."
+            },
+            {
+              prompt: "미래의 사람들은 인공 고기를 먹게 될 ____.",
+              options: ["걸요", "게요", "던요", "지만요"],
+              answer: 0,
+              explain_ko: "추측 어미: ‘-(으)ㄹ걸요’.",
+              explain_vi: "Đuôi dự đoán: ‘-(으)ㄹ걸요’."
+            },
+            {
+              prompt: "내년에 경제 상황이 더 나빠질 ____.",
+              options: ["걸요", "게 하다", "지 않으면 안 되다", "는 길에"],
+              answer: 0,
+              explain_ko: "문법2의 핵심 형태: ‘나빠질걸요’.",
+              explain_vi: "Dạng đúng: ‘나빠질걸요’."
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "g3",
+      title: "문법 3. A/V-지 않으면 안 되다",
+      desc: "의무·필수(반드시 ~해야 한다) 표현을 선택형으로 연습",
+      tag: "p.114-115",
+      exercises: [
+        {
+          title: "연습 1. 대화 완성(선택형)",
+          inst: "괄호의 말을 사용해 ‘-지 않으면 안 되다’ 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "A: 어떤 사람을 소개해 줄까요?\nB: 우선 ____ (성격이 잘 맞다)",
+              options: [
+                "성격이 잘 맞지 않으면 안 돼요.",
+                "성격이 잘 맞을걸요.",
+                "성격이 잘 맞는 길에요.",
+                "성격이 포함돼요."
+              ],
+              answer: 0,
+              explain_ko: "필수 조건: ‘-지 않으면 안 돼요’.",
+              explain_vi: "Điều kiện bắt buộc: ‘-지 않으면 안 돼요’."
+            },
+            {
+              prompt: "A: 날씨가 이렇게 추운데 운동하러 가요?\nB: 저는 살이 쉽게 찌는 편이라 매일 ____ (운동하다)",
+              options: [
+                "운동하지 않으면 안 돼요.",
+                "운동할걸요.",
+                "운동하는 길이에요.",
+                "운동을 포함돼요."
+              ],
+              answer: 0,
+              explain_ko: "의무/필수 습관 표현.",
+              explain_vi: "Diễn tả ‘phải’ tập mỗi ngày."
+            },
+            {
+              prompt: "A: 이번 연휴 때 뭐 할 거예요?\nB: 보고서를 써야 해서 연휴에도 ____ (일하다)",
+              options: [
+                "일하지 않으면 안 돼요.",
+                "일할걸요.",
+                "일하는 길이에요.",
+                "일이 밀려요."
+              ],
+              answer: 0,
+              explain_ko: "해야 하는 일: ‘일하지 않으면 안 돼요’.",
+              explain_vi: "Phải làm việc: ‘không làm không được’."
+            },
+            {
+              prompt: "A: 왜 그렇게 서둘러요?\nB: 결혼식이 11시라서 지금 ____ (출발하다)",
+              options: [
+                "출발하지 않으면 안 돼요.",
+                "출발할걸요.",
+                "출발하는 길이에요.",
+                "출발이 포함돼요."
+              ],
+              answer: 0,
+              explain_ko: "지금 반드시 해야 함.",
+              explain_vi: "Bây giờ bắt buộc phải xuất phát."
+            }
+          ]
+        },
+        {
+          title: "연습 2. 규칙 문장 바꾸기(선택형)",
+          inst: "‘-아/어야 하다’ 규칙을 ‘-지 않으면 안 되다’로 바꾼 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "새벽 1시 이후에는 꼭 불을 꺼야 합니다.",
+              options: [
+                "새벽 1시 이후에는 불을 끄지 않으면 안 됩니다.",
+                "새벽 1시 이후에는 불을 끌걸요.",
+                "새벽 1시 이후에는 불을 끄는 길에요.",
+                "새벽 1시 이후에는 불이 포함됩니다."
+              ],
+              answer: 0,
+              explain_ko: "‘꺼야 합니다’ → ‘끄지 않으면 안 됩니다’.",
+              explain_vi: "‘Phải tắt’ → ‘không tắt không được’."
+            },
+            {
+              prompt: "쓰레기는 반드시 쓰레기봉투에 넣어서 버려야 합니다.",
+              options: [
+                "쓰레기는 쓰레기봉투에 넣어서 버리지 않으면 안 됩니다.",
+                "쓰레기는 쓰레기봉투에 넣어서 버릴걸요.",
+                "쓰레기는 쓰레기봉투에 넣어서 버리는 길에요.",
+                "쓰레기는 연체료를 내야 해요."
+              ],
+              answer: 0,
+              explain_ko: "규칙/의무 전환.",
+              explain_vi: "Chuyển sang mẫu bắt buộc."
+            },
+            {
+              prompt: "기숙사 식당을 이용할 때는 꼭 학생증을 보여 줘야 합니다.",
+              options: [
+                "기숙사 식당을 이용할 때는 학생증을 보여 주지 않으면 안 됩니다.",
+                "기숙사 식당을 이용할 때는 학생증을 보여 줄걸요.",
+                "기숙사 식당을 이용할 때는 학생증을 보여 주는 길에요.",
+                "기숙사 식당을 이용할 때는 학생증이 포함돼요."
+              ],
+              answer: 0,
+              explain_ko: "‘보여 줘야’ → ‘보여 주지 않으면 안 됩니다’.",
+              explain_vi: "‘Phải xuất trình’ → ‘không xuất trình không được’."
+            },
+            {
+              prompt: "방에서 요리하면 안 됩니다. (요리할 때는 1층 부엌 이용)",
+              options: [
+                "방에서 요리하지 않으면 안 됩니다.",
+                "방에서 요리하면 안 됩니다.",
+                "방에서 요리할걸요.",
+                "방에서 요리하는 길에요."
+              ],
+              answer: 1,
+              explain_ko: "이 문장은 ‘금지’라서 그대로가 자연스럽습니다. (선택형 변환)",
+              explain_vi: "Câu này là ‘cấm’, nên giữ nguyên tự nhiên nhất."
+            }
+          ]
+        },
+        {
+          title: "연습 3. ‘못 가요’ 이유(선택형)",
+          inst: "보기처럼 약속을 거절할 때 가장 자연스러운 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "상황: 회사 동료가 집들이를 해서 거기에 가야 해요.",
+              options: [
+                "미안해요. 회사 동료 집들이라서 거기에 안 가면 안 돼요.",
+                "미안해요. 전봇대가 쓰러졌어요.",
+                "미안해요. 계약서를 쓰기 전에요.",
+                "미안해요. 귀뚜라미의 귀는 다리에 있어요."
+              ],
+              answer: 0,
+              explain_ko: "의무 때문에 못 감: ‘안 가면 안 돼요’.",
+              explain_vi: "Không đi không được → dùng ‘안 가면 안 돼요’."
+            },
+            {
+              prompt: "상황: 너무 무리해서 몸살이 나서 쉬어야 해요.",
+              options: [
+                "미안해요. 쉬지 않으면 안 돼요.",
+                "미안해요. 쉬울걸요.",
+                "미안해요. 쉬는 길에요.",
+                "미안해요. 쉬워요."
+              ],
+              answer: 0,
+              explain_ko: "필수 행동: 쉬지 않으면 안 돼요.",
+              explain_vi: "Bắt buộc phải nghỉ."
+            }
+          ]
+        },
+        {
+          title: "연습 4. 문화 규칙 이해(OX/선택형)",
+          inst: "한국 규칙 문장의 뜻으로 맞는 베트남어 설명을 고르세요. (쓰기 과제 → 객관식)",
+          questions: [
+            {
+              prompt: "‘신발을 벗지 않으면 안 됩니다.’의 의미는?",
+              options: [
+                "Bạn phải cởi giày (không cởi không được).",
+                "Bạn có thể đi giày tùy ý.",
+                "Bạn không được ăn cơm.",
+                "Bạn phải trả tiền điện."
+              ],
+              answer: 0,
+              explain_ko: "‘반드시 신발을 벗어야 한다’는 뜻.",
+              explain_vi: "Nghĩa: bắt buộc phải cởi giày."
+            },
+            {
+              prompt: "‘숟가락과 젓가락을 사용하지 않으면 안 됩니다.’의 의미는?",
+              options: [
+                "Bạn phải dùng thìa và đũa.",
+                "Bạn phải ăn bằng tay.",
+                "Bạn không được dùng đũa.",
+                "Bạn phải về trước 12 giờ."
+              ],
+              answer: 0,
+              explain_ko: "반드시 숟가락/젓가락을 사용해야 함.",
+              explain_vi: "Bắt buộc dùng thìa/đũa."
+            },
+            {
+              prompt: "‘고개를 숙여서 인사하지 않으면 안 됩니다.’의 의미는?",
+              options: [
+                "Bạn phải cúi đầu chào hỏi.",
+                "Bạn không cần chào.",
+                "Bạn phải mua hoa.",
+                "Bạn phải ký hợp đồng."
+              ],
+              answer: 0,
+              explain_ko: "정중하게 인사해야 한다는 뜻.",
+              explain_vi: "Phải cúi đầu chào (lễ phép)."
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "g4",
+      title: "문법 4. V-는 길에",
+      desc: "어딘가 가는/오는 중에(…하는 길에) 부탁·해결하기",
+      tag: "p.116-117",
+      exercises: [
+        {
+          title: "연습 1. 대화 완성(선택형)",
+          inst: "괄호의 동사를 이용해 ‘V-는 길에’를 고르세요.",
+          questions: [
+            {
+              prompt: "A: 오늘 집에 일찍 들어올 거지?\nB: 친구가 입원을 해서 ____ 잠깐 들러야 해요. (퇴근하다)",
+              options: ["퇴근하는 길에", "퇴근할걸요", "퇴근하지 않으면 안 돼요", "퇴근하게 해 주세요"],
+              answer: 0,
+              explain_ko: "퇴근하다 → 퇴근하는 길에.",
+              explain_vi: "퇴근하다 → ‘퇴근하는 길에’."
+            },
+            {
+              prompt: "A: 관리비가 밀려서 오늘까지 내야 하는데 은행 갈 시간이 없네.\nB: ____ 내가 내고 갈게. (학교 가다)",
+              options: ["학교 가는 길에", "학교 갈걸요", "학교 안 가면 안 돼요", "학교에 포함돼요"],
+              answer: 0,
+              explain_ko: "학교에 가는 중에 처리.",
+              explain_vi: "Trên đường đi học sẽ nộp giúp."
+            },
+            {
+              prompt: "A: 사고 싶은 책이 있는데 나가기가 너무 귀찮아요.\nB: 그럼 내가 ____ 사 올게요. (나갔다 오다)",
+              options: ["나갔다 오는 길에", "나갈걸요", "나가지 않으면 안 돼요", "나가게 해 주세요"],
+              answer: 0,
+              explain_ko: "‘나갔다 오다’ 흐름을 살린 표현.",
+              explain_vi: "Dùng cụm ‘trên đường đi/ về sau khi ra ngoài’."
+            },
+            {
+              prompt: "A: 왜 이렇게 늦었어요? 고속도로가 많이 막혔어요?\nB: 아니요, 너무 졸려서 ____ 휴게소에서 쉬다 왔어요. (올라오다)",
+              options: ["올라오는 길에", "올라올걸요", "올라오지 않으면 안 돼요", "올라오게 하세요"],
+              answer: 0,
+              explain_ko: "올라오다 → 올라오는 길에.",
+              explain_vi: "올라오다 → ‘올라오는 길에’."
+            }
+          ]
+        },
+        {
+          title: "연습 2. 친구 문제 해결(선택형)",
+          inst: "상황에 맞는 ‘…하는 길에’ 해결 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "친구: “냉장고가 텅 비었는데 장을 볼 시간이 없어.”\n→ 당신의 대답:",
+              options: [
+                "걱정하지 마. 내가 집에 가는 길에 먹을 걸 좀 사 올게.",
+                "걱정하지 마. 공과금을 밀리면 연체료를 내야 해.",
+                "걱정하지 마. 아마 안 될걸.",
+                "걱정하지 마. 신발을 벗지 않으면 안 돼."
+              ],
+              answer: 0,
+              explain_ko: "가는 길에 장을 봐서 해결.",
+              explain_vi: "Trên đường về sẽ mua đồ ăn giúp."
+            },
+            {
+              prompt: "친구: “오늘은 몸이 좀 안 좋아서 아침부터 굶었어.”\n→ 당신의 대답:",
+              options: [
+                "아픈데 굶어서 어떡해. 내가 이따가 나갔다 오는 길에 잠깐 들러서 죽이라도 끓여 줄게.",
+                "아픈데 굶어서 어떡해. 보일러가 고장 났어.",
+                "아픈데 굶어서 어떡해. 계약 기간은 2년이야.",
+                "아픈데 굶어서 어떡해. 귀뚜라미 귀는 다리에 있어."
+              ],
+              answer: 0,
+              explain_ko: "방문 동선(나갔다 오는 길에)으로 해결.",
+              explain_vi: "Sẽ ghé qua trên đường về để nấu cháo."
+            },
+            {
+              prompt: "친구: “내일 예식장에 가야 하는데 입을 옷이 없어.”\n→ 당신의 대답:",
+              options: [
+                "얼마 전에 새 옷 장점이 있는데 빌려줄까? 내가 퇴근하는 길에 가져다줄게.",
+                "내일 예식장? 전봇대가 쓰러졌어.",
+                "내일 예식장? 아마 안 떨어질걸.",
+                "내일 예식장? 불을 끄지 않으면 안 돼."
+              ],
+              answer: 0,
+              explain_ko: "퇴근 동선으로 전달.",
+              explain_vi: "Trên đường tan làm sẽ mang tới."
+            },
+            {
+              prompt: "친구: “요즘 욕조에 물이 잘 안 내려가서 불편해.”\n→ 당신의 대답:",
+              options: [
+                "우리 집 앞에 수리 센터가 있으니까 내가 지나가는 길에 수리 기사한테 한번 물어볼게.",
+                "물 안 내려가? 그럼 소음이 심해.",
+                "물 안 내려가? 계약서를 써.",
+                "물 안 내려가? 통일이 언제야?"
+              ],
+              answer: 0,
+              explain_ko: "‘지나가는 길에’ 문의.",
+              explain_vi: "Sẽ hỏi thợ sửa trên đường đi qua."
+            }
+          ]
+        },
+        {
+          title: "연습 3. 메신저 빈칸(선택형)",
+          inst: "선택지(학교에 가다 / 운동 갔다 오다 / 수업하러 가다)를 ‘…는 길에’로 바꿔 알맞게 고르세요.",
+          questions: [
+            {
+              prompt: "“그래서 오늘 저녁에 (1) ____ 에 케이크를 사려고요.”",
+              options: ["수업하러 가는 길에", "학교에 가는 길에", "운동 갔다 오는 길에", "올라오는 길에"],
+              answer: 0,
+              explain_ko: "‘오늘 저녁’ 흐름상 ‘수업하러 가는 길에’로 설정.",
+              explain_vi: "Theo ngữ cảnh buổi tối: ‘trên đường đi học (lớp)’."
+            },
+            {
+              prompt: "“오늘은 시간이 없는데 내일 아침 (2) ____ 에 사도 되겠지요?”",
+              options: ["학교에 가는 길에", "수업하러 가는 길에", "운동 갔다 오는 길에", "나갔다 오는 길에"],
+              answer: 0,
+              explain_ko: "‘내일 아침’ → 학교 가는 길에.",
+              explain_vi: "Buổi sáng → trên đường đi học."
+            },
+            {
+              prompt: "“정우 씨에게 혹시 바쁘면 (3) ____ 에 잠깐 들러도 좋으니까…”",
+              options: ["운동 갔다 오는 길에", "학교에 가는 길에", "수업하러 가는 길에", "계약서 쓰는 길에"],
+              answer: 0,
+              explain_ko: "‘바쁘면 … 오는 길에’가 자연스럽게 연결됨.",
+              explain_vi: "Tự nhiên: nếu bận thì ghé qua trên đường về sau khi tập."
+            }
+          ]
+        },
+        {
+          title: "연습 4. 부탁하기(선택형)",
+          inst: "‘고향에 가는 길에 / 일본에 가는 길에’ 맥락을 살려 가장 자연스러운 문장을 고르세요.",
+          questions: [
+            {
+              prompt: "“그런데 고향에 (1) ____ 에 일본에 잠깐 들를까 해서요.”",
+              options: ["가는 길에", "갈걸요", "가지 않으면 안 돼요", "가게 해 주세요"],
+              answer: 0,
+              explain_ko: "고향에 ‘가는 길에’ 일본에 들르다.",
+              explain_vi: "‘Trên đường về quê’ ghé Nhật."
+            },
+            {
+              prompt: "“제가 일본에 (2) ____ 에 사 갈게요.”",
+              options: ["가는 길에", "가게 하세요", "갔을걸요", "가지 않으면 안 돼요"],
+              answer: 0,
+              explain_ko: "부탁/배려: ‘일본에 가는 길에 사 가다’.",
+              explain_vi: "Mua giúp ‘trên đường đi Nhật’."
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  /* -----------------------------
+     State + progress
+     ----------------------------- */
+  const defaultProgress = {
+    sectionId: null,
+    exIndex: 0,
+    qIndex: 0,
+    answers: {} // key: `${sectionId}|${exIndex}|${qIndex}` => { picked, correct }
+  };
+
+  let state = {
+    fbLang: loadLang(),
+    view: "home", // home | section
+    sectionId: null,
+    exIndex: 0,
+    qIndex: 0,
+    progress: loadProgress()
+  };
+
+  // if progress has a sectionId, continue
+  if (state.progress.sectionId) {
+    state.view = "section";
+    state.sectionId = state.progress.sectionId;
+    state.exIndex = state.progress.exIndex;
+    state.qIndex = state.progress.qIndex;
+  }
+
+  // elements
+  const root = document.getElementById("root");
+  const statusText = document.getElementById("statusText");
+  const homeBtn = document.getElementById("homeBtn");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const fbLangSel = document.getElementById("fbLang");
+  const resetAllBtn = document.getElementById("resetAllBtn");
+
+  fbLangSel.value = state.fbLang;
+
+  fbLangSel.addEventListener("change", () => {
+    state.fbLang = fbLangSel.value;
+    saveLang(state.fbLang);
+    render();
+  });
+
+  resetAllBtn.addEventListener("click", () => {
+    const ok = confirm(t("resetConfirm"));
+    if (!ok) return;
+    state.progress = structuredClone(defaultProgress);
+    saveProgress(state.progress);
+    state.view = "home";
+    state.sectionId = null;
+    state.exIndex = 0;
+    state.qIndex = 0;
+    render();
+  });
+
+  homeBtn.addEventListener("click", () => {
+    state.view = "home";
+    state.sectionId = null;
+    render();
+  });
+
+  prevBtn.addEventListener("click", () => {
+    if (state.view !== "section") return;
+    goPrev();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (state.view !== "section") return;
+    goNext();
+  });
+
+  function loadLang(){
+    return localStorage.getItem(LS_LANG) || "ko";
+  }
+  function saveLang(v){
+    localStorage.setItem(LS_LANG, v);
+  }
+  function loadProgress(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return structuredClone(defaultProgress);
+      const p = JSON.parse(raw);
+      return {...structuredClone(defaultProgress), ...p, answers: p.answers || {}};
+    }catch(e){
+      return structuredClone(defaultProgress);
+    }
+  }
+  function saveProgress(p){
+    localStorage.setItem(LS_KEY, JSON.stringify(p));
+  }
+
+  function sectionById(id){
+    return SECTIONS.find(s => s.id === id);
+  }
+
+  function makeKey(sectionId, exIndex, qIndex){
+    return `${sectionId}|${exIndex}|${qIndex}`;
+  }
+
+  function countTotals(section){
+    let total = 0;
+    section.exercises.forEach(ex => total += ex.questions.length);
+    return total;
+  }
+
+  function countAnswered(sectionId){
+    const section = sectionById(sectionId);
+    let total = 0;
+    let correct = 0;
+    section.exercises.forEach((ex, ei) => {
+      ex.questions.forEach((q, qi) => {
+        total++;
+        const k = makeKey(sectionId, ei, qi);
+        if (state.progress.answers[k]) {
+          if (state.progress.answers[k].correct) correct++;
+        }
+      });
+    });
+    return { total, correct };
+  }
+
+  function getCurrent(){
+    const section = sectionById(state.sectionId);
+    const ex = section.exercises[state.exIndex];
+    const q = ex.questions[state.qIndex];
+    const key = makeKey(state.sectionId, state.exIndex, state.qIndex);
+    const saved = state.progress.answers[key] || null;
+    return { section, ex, q, key, saved };
+  }
+
+  function goPrev(){
+    const section = sectionById(state.sectionId);
+    if (state.qIndex > 0){
+      state.qIndex--;
+    } else if (state.exIndex > 0){
+      state.exIndex--;
+      state.qIndex = section.exercises[state.exIndex].questions.length - 1;
+    } else {
+      // start
+      return;
+    }
+    syncProgressCursor();
+    render();
+  }
+
+  function goNext(){
+    const section = sectionById(state.sectionId);
+    const ex = section.exercises[state.exIndex];
+    if (state.qIndex < ex.questions.length - 1){
+      state.qIndex++;
+    } else if (state.exIndex < section.exercises.length - 1){
+      state.exIndex++;
+      state.qIndex = 0;
+    } else {
+      // end
+      // keep at end
+      return;
+    }
+    syncProgressCursor();
+    render();
+  }
+
+  function syncProgressCursor(){
+    state.progress.sectionId = state.sectionId;
+    state.progress.exIndex = state.exIndex;
+    state.progress.qIndex = state.qIndex;
+    saveProgress(state.progress);
+  }
+
+  function startSection(sectionId, resume=false){
+    state.view = "section";
+    state.sectionId = sectionId;
+
+    if (resume && state.progress.sectionId === sectionId){
+      state.exIndex = state.progress.exIndex || 0;
+      state.qIndex = state.progress.qIndex || 0;
+    } else {
+      state.exIndex = 0;
+      state.qIndex = 0;
+      state.progress.sectionId = sectionId;
+      state.progress.exIndex = 0;
+      state.progress.qIndex = 0;
+      saveProgress(state.progress);
+    }
+    render();
+  }
+
+  function renderHome(){
+    const lang = state.fbLang;
+    const wrap = document.createElement("div");
+
+    const head = document.createElement("div");
+    head.className = "card";
+    head.innerHTML = `
+      <h2>${i18n[lang].homeTitle}</h2>
+      <p>${i18n[lang].homeDesc}</p>
+      <div class="divider"></div>
+      <p class="mono" style="font-size:12px;color:var(--muted);margin:0;">
+        Tip: 같은 기기에서 다시 열면 진행이 저장됩니다.
+      </p>
+    `;
+    wrap.appendChild(head);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    SECTIONS.forEach(sec => {
+      const {total, correct} = countAnswered(sec.id);
+      const all = countTotals(sec);
+      const hasAny = total > 0;
+      const pct = hasAny ? Math.round((Object.keys(state.progress.answers).filter(k => k.startsWith(sec.id+"|")).length / all) * 100) : 0;
+
+      const card = document.createElement("div");
+      card.className = "card";
+      const btnLabel = (state.progress.sectionId === sec.id) ? i18n[lang].continue : i18n[lang].start;
+
+      card.innerHTML = `
+        <h2>${sec.title}</h2>
+        <p>${sec.desc}</p>
+        <div class="meta">
+          <span class="tag">${sec.tag} · ${i18n[lang].score}: ${correct}/${all} · ${pct}%</span>
+          <button class="btn" data-sec="${sec.id}">${btnLabel}</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    wrap.appendChild(grid);
+
+    // bind
+    wrap.querySelectorAll("button[data-sec]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const secId = e.currentTarget.getAttribute("data-sec");
+        const resume = (state.progress.sectionId === secId);
+        startSection(secId, resume);
+      });
+    });
+
+    root.replaceChildren(wrap);
+
+    // bottom status + nav buttons
+    statusText.textContent = "";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+  }
+
+  function renderSection(){
+    const { section, ex, q, key, saved } = getCurrent();
+
+    // compute progress
+    const totalInSection = countTotals(section);
+    const answeredKeys = Object.keys(state.progress.answers).filter(k => k.startsWith(section.id+"|"));
+    const answeredCount = answeredKeys.length;
+
+    // position within section
+    let idx = 0;
+    for (let ei=0; ei<section.exercises.length; ei++){
+      for (let qi=0; qi<section.exercises[ei].questions.length; qi++){
+        if (ei===state.exIndex && qi===state.qIndex){ break; }
+        idx++;
+      }
+      if (ei===state.exIndex) break;
+    }
+    const pos = idx + 1;
+
+    const wrap = document.createElement("div");
+
+    const head = document.createElement("div");
+    head.className = "card";
+    head.innerHTML = `
+      <div class="section-head">
+        <div class="section-title">
+          <h2>${section.title}</h2>
+          <div class="desc">${section.desc} <span class="tag" style="margin-left:6px;">${section.tag}</span></div>
+        </div>
+        <div class="progress">
+          <div class="bar" aria-label="progress bar"><div id="barFill"></div></div>
+          <div class="mini">${pos}/${totalInSection} · ${t("score")}: ${countAnswered(section.id).correct}/${totalInSection}</div>
+        </div>
+      </div>
+    `;
+    wrap.appendChild(head);
+
+    // exercise header
+    const exCard = document.createElement("div");
+    exCard.className = "card exercise";
+    exCard.innerHTML = `
+      <h3>${ex.title}</h3>
+      <p class="inst">${ex.inst}</p>
+    `;
+
+    // question box
+    const qbox = document.createElement("div");
+    qbox.className = "qbox";
+
+    const qtop = document.createElement("div");
+    qtop.className = "qtop";
+    qtop.innerHTML = `
+      <div class="qno">${t("saved")}: ${answeredCount}/${totalInSection}</div>
+      <div class="qno">${t("score")}: ${countAnswered(section.id).correct}/${totalInSection}</div>
+    `;
+
+    const prompt = document.createElement("p");
+    prompt.className = "qprompt";
+    prompt.textContent = q.prompt;
+
+    qbox.appendChild(qtop);
+    qbox.appendChild(prompt);
+
+    if (q.context){
+      const ctx = document.createElement("div");
+      ctx.className = "context";
+      ctx.textContent = q.context;
+      qbox.appendChild(ctx);
+    }
+
+    const opts = document.createElement("div");
+    opts.className = "options " + (q.options.length <= 6 ? "two" : "");
+    const picked = saved ? saved.picked : null;
+
+    const feedback = document.createElement("div");
+    feedback.className = "feedback hide";
+
+    function showFeedback(isCorrect){
+      const flag = isCorrect ? t("correct") : t("incorrect");
+      const exp = state.fbLang === "vi" ? (q.explain_vi || q.explain_ko || "") : (q.explain_ko || q.explain_vi || "");
+      feedback.classList.remove("hide");
+      feedback.classList.toggle("good", isCorrect);
+      feedback.classList.toggle("bad", !isCorrect);
+      feedback.innerHTML = `<span class="flag">${flag}</span> <span>${exp}</span>`;
+    }
+
+    q.options.forEach((text, idx) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.type = "button";
+      b.textContent = text;
+
+      if (picked !== null){
+        if (idx === q.answer) b.classList.add("correct");
+        if (idx === picked && picked !== q.answer) b.classList.add("wrong");
+      }
+
+      b.addEventListener("click", () => {
+        // save answer
+        const isCorrect = idx === q.answer;
+        state.progress.answers[key] = { picked: idx, correct: isCorrect };
+        saveProgress(state.progress);
+
+        // re-render to lock styles
+        render();
+
+        // after re-render, keep feedback visible
+        // (render() will rebuild; we store lastAnsweredKey for one-frame display)
+      });
+
+      opts.appendChild(b);
+    });
+
+    qbox.appendChild(opts);
+
+    // feedback after answering
+    if (picked !== null){
+      showFeedback(saved.correct);
+      qbox.appendChild(feedback);
+    } else {
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = t("notAnswered");
+      qbox.appendChild(hint);
+    }
+
+    exCard.appendChild(qbox);
+    wrap.appendChild(exCard);
+
+    // progress bar fill
+    root.replaceChildren(wrap);
+    const barFill = document.getElementById("barFill");
+    if (barFill){
+      const pct = Math.round((pos/totalInSection)*100);
+      barFill.style.width = pct + "%";
+    }
+
+    // bottom status + nav buttons
+    statusText.textContent = `${section.title} · ${pos}/${totalInSection}`;
+    prevBtn.disabled = (state.exIndex === 0 && state.qIndex === 0);
+
+    // determine if last question
+    const isLastEx = state.exIndex === section.exercises.length - 1;
+    const isLastQ = state.qIndex === section.exercises[state.exIndex].questions.length - 1;
+    nextBtn.disabled = (isLastEx && isLastQ);
+
+    // when end reached (all solved), show a subtle message in status
+    const answered = countAnswered(section.id);
+    if (answered.correct + (answered.total - answered.correct) === answered.total && answeredKeys.length === answered.total){
+      // all answered
+      // (no popup; just status text)
+    }
+  }
+
+  function render(){
+    if (state.view === "home") renderHome();
+    else renderSection();
+  }
+
+  // Initial sync cursor when in section
+  if (state.view === "section"){
+    syncProgressCursor();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
