@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>논항구조 드래그&드롭 훈련</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 드래그 중 시각 효과 */
+    .dragging { opacity: 0.6; transform: scale(0.98); }
+    .drop-ok { outline: 3px solid rgba(34,197,94,0.7); outline-offset: 3px; }
+    .drop-bad { outline: 3px solid rgba(239,68,68,0.7); outline-offset: 3px; }
+    .shake { animation: shake 240ms ease-in-out; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    /* 모바일에서 드래그가 끊기는 것 완화 */
+    .touch-pan { touch-action: pan-y; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 touch-pan">
+  <div class="max-w-6xl mx-auto p-4 md:p-6">
+    <header class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">국어 논항구조: 동적 칸 생성 드래그&드롭</h1>
+      <p class="text-sm md:text-base text-slate-600 mt-1">
+        1) 왼쪽에서 서술어를 끌어오세요 → 2) 필요한 논항 칸이 자동 생성 → 3) 아래 후보 어휘를 칸에 올려 정답(O)/오답(X)
+      </p>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-12 gap-4">
+      <!-- Left: predicates -->
+      <section class="md:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-semibold">서술어 목록</h2>
+          <button id="btnReset" class="text-sm px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+            초기화
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-500 mb-3">서술어를 오른쪽 문장 영역으로 드래그하세요.</div>
+
+        <div id="predicateList" class="space-y-2"></div>
+
+        <details class="mt-4">
+          <summary class="cursor-pointer text-sm text-slate-700">설정(서술어/정답) 보기</summary>
+          <pre id="debug" class="mt-2 text-xs bg-slate-100 rounded-xl p-3 overflow-auto"></pre>
+        </details>
+      </section>
+
+      <!-- Right: sentence builder -->
+      <section class="md:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <h2 class="font-semibold">문장 만들기</h2>
+          <div class="flex items-center gap-2">
+            <span id="statusPill" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+              서술어를 드래그하세요
+            </span>
+            <button id="btnNewRound" class="text-sm px-3 py-1.5 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
+              새 문제
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3">
+          <!-- fixed subject -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm text-slate-500">주어</span>
+            <span id="subjectFixed" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 font-medium">
+              철수가
+            </span>
+            <span class="text-sm text-slate-400">* 주어 칸은 고정</span>
+          </div>
+
+          <!-- predicate drop zone -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm text-slate-500">서술어</span>
+            <div id="predicateDrop"
+                 class="min-h-[44px] flex-1 px-3 py-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50">
+              <span class="text-slate-400 text-sm">여기에 서술어를 놓으세요</span>
+            </div>
+          </div>
+
+          <!-- dynamic argument slots -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-slate-500">논항 칸</span>
+              <span id="progress" class="text-xs text-slate-500"></span>
+            </div>
+            <div id="argSlots" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+
+          <!-- candidate bank -->
+          <div class="mt-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-slate-500">후보 어휘</span>
+              <button id="btnShuffle" class="text-sm px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200">
+                섞기
+              </button>
+            </div>
+            <div id="bank" class="flex flex-wrap gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200 min-h-[60px]"></div>
+            <div class="text-xs text-slate-500 mt-2">
+              오답이면 X 표시 후 튕겨 나가며(원위치) 정답이면 O 표시 후 칸에 고정됩니다.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /***********************
+     * 1) 데이터(서술어-논항구조-정답)
+     ***********************/
+    const PREDICATES = [
+      {
+        id: "eat",
+        label: "먹다",
+        type: "동사",
+        args: [
+          { id: "obj", label: "목적어(을/를)", hint: "무엇을?", answers: ["사과를", "김밥을", "밥을"] }
+        ],
+        bank: ["사과를","김밥을","밥을","의자에","친구에게","학교에서","빨리","즐겁게"]
+      },
+      {
+        id: "give",
+        label: "주다",
+        type: "동사",
+        args: [
+          { id: "obj", label: "목적어(을/를)", hint: "무엇을?", answers: ["선물을", "책을", "돈을"] },
+          { id: "goal", label: "수혜자(에게)", hint: "누구에게?", answers: ["친구에게", "동생에게", "선생님께"] }
+        ],
+        bank: ["선물을","책을","돈을","친구에게","동생에게","선생님께","학교에서","어제","조용히"]
+      },
+      {
+        id: "put",
+        label: "놓다",
+        type: "동사",
+        args: [
+          { id: "obj", label: "대상(을/를)", hint: "무엇을?", answers: ["책을","가방을","컵을"] },
+          { id: "loc", label: "장소(에)", hint: "어디에?", answers: ["책상에","의자에","바닥에"] }
+        ],
+        bank: ["책을","가방을","컵을","책상에","의자에","바닥에","친구에게","맛있게","천천히"]
+      },
+      {
+        id: "meet",
+        label: "만나다",
+        type: "동사",
+        args: [
+          { id: "obj", label: "대상(을/를)", hint: "누구를?", answers: ["친구를","교수를","동생을"] }
+        ],
+        bank: ["친구를","교수를","동생을","학교에서","카페에서","어제","선물을","기분이"]
+      },
+      {
+        id: "like",
+        label: "좋아하다",
+        type: "동사",
+        args: [
+          { id: "obj", label: "대상(을/를)", hint: "무엇을/누구를?", answers: ["커피를","영화를","친구를"] }
+        ],
+        bank: ["커피를","영화를","친구를","의자에","친구에게","빨리","예쁘게","공부를"]
+      },
+      {
+        id: "be_happy",
+        label: "행복하다",
+        type: "형용사",
+        args: [
+          { id: "cause", label: "원인/계기(때문에)", hint: "무엇 때문에?", answers: ["합격 때문에","선물 때문에","휴가 때문에"] }
+        ],
+        bank: ["합격 때문에","선물 때문에","휴가 때문에","사과를","친구에게","책상에","학교에서","어제"]
+      }
+    ];
+
+    const SUBJECTS = ["철수가", "영희가", "민수가", "지수가", "학생이", "교수가"];
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    /***********************
+     * 2) 상태
+     ***********************/
+    let currentPredicate = null;     // 선택된 서술어 객체
+    let filled = {};                 // {argId: true/false}
+    let roundLocked = false;
+
+    /***********************
+     * 3) DOM
+     ***********************/
+    const predicateListEl = document.getElementById("predicateList");
+    const predicateDropEl = document.getElementById("predicateDrop");
+    const argSlotsEl = document.getElementById("argSlots");
+    const bankEl = document.getElementById("bank");
+    const statusPillEl = document.getElementById("statusPill");
+    const progressEl = document.getElementById("progress");
+    const subjectFixedEl = document.getElementById("subjectFixed");
+    const debugEl = document.getElementById("debug");
+
+    /***********************
+     * 4) 렌더: 왼쪽 서술어 목록
+     ***********************/
+    function renderPredicateList() {
+      predicateListEl.innerHTML = "";
+      PREDICATES.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className =
+          "flex items-center justify-between gap-2 p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-grab active:cursor-grabbing";
+        btn.setAttribute("draggable", "true");
+        btn.dataset.pid = p.id;
+
+        btn.innerHTML = `
+          <div class="min-w-0">
+            <div class="font-semibold">${p.label}</div>
+            <div class="text-xs text-slate-500">${p.type} · 필요 논항 ${p.args.length}개</div>
+          </div>
+          <div class="text-xs px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap">
+            drag
+          </div>
+        `;
+
+        btn.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/predicate", p.id);
+          btn.classList.add("dragging");
+        });
+        btn.addEventListener("dragend", () => btn.classList.remove("dragging"));
+
+        predicateListEl.appendChild(btn);
+      });
+
+      debugEl.textContent = JSON.stringify(PREDICATES, null, 2);
+    }
+
+    /***********************
+     * 5) 드롭: 서술어 영역
+     ***********************/
+    function setupPredicateDrop() {
+      predicateDropEl.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        predicateDropEl.classList.add("drop-ok");
+      });
+      predicateDropEl.addEventListener("dragleave", () => {
+        predicateDropEl.classList.remove("drop-ok");
+      });
+      predicateDropEl.addEventListener("drop", (e) => {
+        e.preventDefault();
+        predicateDropEl.classList.remove("drop-ok");
+        if (roundLocked) return;
+
+        const pid = e.dataTransfer.getData("text/predicate");
+        if (!pid) return;
+
+        const p = PREDICATES.find(x => x.id === pid);
+        if (!p) return;
+
+        setPredicate(p);
+      });
+    }
+
+    function setPredicate(p) {
+      currentPredicate = p;
+      filled = {};
+      roundLocked = false;
+
+      // 서술어 표시
+      predicateDropEl.className =
+        "min-h-[44px] flex-1 px-3 py-2 rounded-2xl border border-slate-200 bg-white flex items-center justify-between gap-2";
+      predicateDropEl.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="font-semibold">${p.label}</span>
+          <span class="text-xs px-2 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600">${p.type}</span>
+        </div>
+        <button id="btnClearPredicate" class="text-sm px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          서술어 빼기
+        </button>
+      `;
+
+      document.getElementById("btnClearPredicate").addEventListener("click", () => {
+        if (roundLocked) return;
+        clearPredicate();
+      });
+
+      statusPillEl.textContent = "논항 칸에 어휘를 채우세요";
+      statusPillEl.className = "text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200";
+
+      // 논항칸 생성 + 후보어휘 생성
+      renderArgSlots();
+      renderBank(p.bank);
+
+      updateProgress();
+    }
+
+    function clearPredicate() {
+      currentPredicate = null;
+      filled = {};
+      roundLocked = false;
+
+      predicateDropEl.className =
+        "min-h-[44px] flex-1 px-3 py-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50";
+      predicateDropEl.innerHTML = `<span class="text-slate-400 text-sm">여기에 서술어를 놓으세요</span>`;
+
+      argSlotsEl.innerHTML = "";
+      bankEl.innerHTML = "";
+
+      statusPillEl.textContent = "서술어를 드래그하세요";
+      statusPillEl.className = "text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200";
+
+      progressEl.textContent = "";
+    }
+
+    /***********************
+     * 6) 논항 칸
+     ***********************/
+    function renderArgSlots() {
+      argSlotsEl.innerHTML = "";
+      currentPredicate.args.forEach(arg => {
+        filled[arg.id] = false;
+
+        const slot = document.createElement("div");
+        slot.className = "p-3 rounded-2xl border border-slate-200 bg-slate-50";
+        slot.dataset.argId = arg.id;
+
+        slot.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="font-semibold">${arg.label}</div>
+              <div class="text-xs text-slate-500">힌트: ${arg.hint}</div>
+            </div>
+            <div class="text-sm font-bold w-6 text-right" data-mark="${arg.id}"></div>
+          </div>
+
+          <div class="mt-2">
+            <div class="min-h-[44px] px-3 py-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white flex items-center"
+                 data-dropzone="${arg.id}">
+              <span class="text-slate-400 text-sm">여기에 단어를 놓으세요</span>
+            </div>
+          </div>
+        `;
+
+        // dropzone events
+        const dz = slot.querySelector(`[data-dropzone="${arg.id}"]`);
+        dz.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          if (filled[arg.id] || roundLocked) return;
+          dz.classList.add("drop-ok");
+        });
+        dz.addEventListener("dragleave", () => dz.classList.remove("drop-ok"));
+        dz.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dz.classList.remove("drop-ok");
+          if (filled[arg.id] || roundLocked) return;
+
+          const wid = e.dataTransfer.getData("text/word");
+          if (!wid) return;
+
+          const wordEl = document.querySelector(`[data-word-id="${CSS.escape(wid)}"]`);
+          if (!wordEl) return;
+
+          const word = wordEl.dataset.word;
+          checkWordDrop(arg, word, wordEl, dz, slot);
+        });
+
+        argSlotsEl.appendChild(slot);
+      });
+    }
+
+    function setMark(argId, ok) {
+      const markEl = document.querySelector(`[data-mark="${CSS.escape(argId)}"]`);
+      if (!markEl) return;
+      if (ok) {
+        markEl.textContent = "O";
+        markEl.className = "text-sm font-bold w-6 text-right text-green-600";
+      } else {
+        markEl.textContent = "X";
+        markEl.className = "text-sm font-bold w-6 text-right text-red-600";
+      }
+      setTimeout(() => { markEl.textContent = ""; }, ok ? 600 : 800);
+    }
+
+    function checkWordDrop(arg, word, wordEl, dropzoneEl, slotEl) {
+      const isCorrect = arg.answers.includes(word);
+
+      if (isCorrect) {
+        // 고정 배치
+        filled[arg.id] = true;
+        setMark(arg.id, true);
+
+        dropzoneEl.className =
+          "min-h-[44px] px-3 py-2 rounded-2xl border border-green-200 bg-green-50 flex items-center justify-between gap-2";
+
+        dropzoneEl.innerHTML = `
+          <span class="font-semibold text-green-700">${word}</span>
+          <button class="text-sm px-3 py-1.5 rounded-xl bg-white border border-green-200 text-green-700 hover:bg-green-100">
+            빼기
+          </button>
+        `;
+
+        // 은행에서 해당 단어 제거(같은 단어가 여러 개 있을 수 있으니 id 기준)
+        wordEl.remove();
+
+        // 빼기 버튼
+        const btn = dropzoneEl.querySelector("button");
+        btn.addEventListener("click", () => {
+          if (roundLocked) return;
+          filled[arg.id] = false;
+          // 다시 dropzone 복구
+          dropzoneEl.className =
+            "min-h-[44px] px-3 py-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white flex items-center";
+          dropzoneEl.innerHTML = `<span class="text-slate-400 text-sm">여기에 단어를 놓으세요</span>`;
+          // 은행에 단어 복원
+          addWordToBank(word);
+          // 드롭 이벤트가 사라졌으므로(내부HTML 교체) 다시 연결
+          rebindDropzones();
+          updateProgress();
+        });
+
+        updateProgress();
+        maybeFinishRound();
+      } else {
+        // 오답: X + 튕김(원위치 느낌)
+        setMark(arg.id, false);
+
+        slotEl.classList.add("shake");
+        setTimeout(() => slotEl.classList.remove("shake"), 260);
+
+        // word 튕김 효과
+        wordEl.classList.add("drop-bad");
+        setTimeout(() => wordEl.classList.remove("drop-bad"), 220);
+      }
+    }
+
+    function rebindDropzones() {
+      // dropzone들이 innerHTML 교체로 이벤트가 끊긴 경우를 대비해 전체 재연결
+      if (!currentPredicate) return;
+      currentPredicate.args.forEach(arg => {
+        const slot = document.querySelector(`[data-arg-id="${CSS.escape(arg.id)}"]`);
+        if (!slot) return;
+        const dz = slot.querySelector(`[data-dropzone="${CSS.escape(arg.id)}"]`);
+        if (!dz) return;
+
+        // 이미 정답 고정된 상태면 스킵
+        if (filled[arg.id]) return;
+
+        dz.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          if (filled[arg.id] || roundLocked) return;
+          dz.classList.add("drop-ok");
+        });
+        dz.addEventListener("dragleave", () => dz.classList.remove("drop-ok"));
+        dz.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dz.classList.remove("drop-ok");
+          if (filled[arg.id] || roundLocked) return;
+
+          const wid = e.dataTransfer.getData("text/word");
+          if (!wid) return;
+
+          const wordEl = document.querySelector(`[data-word-id="${CSS.escape(wid)}"]`);
+          if (!wordEl) return;
+
+          const word = wordEl.dataset.word;
+          checkWordDrop(arg, word, wordEl, dz, slot);
+        });
+      });
+    }
+
+    /***********************
+     * 7) 후보 어휘 은행
+     ***********************/
+    function renderBank(words) {
+      bankEl.innerHTML = "";
+      words.forEach(w => addWordToBank(w));
+    }
+
+    function addWordToBank(word) {
+      const chip = document.createElement("div");
+      const uid = `${word}__${crypto.randomUUID()}`;
+
+      chip.className =
+        "px-3 py-2 rounded-2xl bg-white border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing select-none";
+      chip.setAttribute("draggable", "true");
+      chip.dataset.word = word;
+      chip.dataset.wordId = uid;
+
+      chip.innerHTML = `
+        <span class="font-medium">${word}</span>
+      `;
+
+      chip.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/word", uid);
+        chip.classList.add("dragging");
+      });
+      chip.addEventListener("dragend", () => chip.classList.remove("dragging"));
+
+      bankEl.appendChild(chip);
+    }
+
+    function shuffleBank() {
+      const chips = Array.from(bankEl.children);
+      for (let i = chips.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [chips[i], chips[j]] = [chips[j], chips[i]];
+      }
+      bankEl.innerHTML = "";
+      chips.forEach(c => bankEl.appendChild(c));
+    }
+
+    /***********************
+     * 8) 진행/완료
+     ***********************/
+    function updateProgress() {
+      if (!currentPredicate) {
+        progressEl.textContent = "";
+        return;
+      }
+      const total = currentPredicate.args.length;
+      const done = Object.values(filled).filter(Boolean).length;
+      progressEl.textContent = `${done}/${total} 완료`;
+    }
+
+    function maybeFinishRound() {
+      const allDone = Object.values(filled).every(Boolean);
+      if (!allDone) return;
+
+      roundLocked = true;
+      statusPillEl.textContent = "완료: 올바른 논항구조를 구성했습니다";
+      statusPillEl.className =
+        "text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200";
+    }
+
+    /***********************
+     * 9) 새 문제(랜덤 서술어, 랜덤 주어)
+     ***********************/
+    function newRound() {
+      clearPredicate();
+      subjectFixedEl.textContent = pick(SUBJECTS);
+      // 바로 한 문제 시작(원하면 주석 처리)
+      // setPredicate(pick(PREDICATES));
+    }
+
+    /***********************
+     * 10) 이벤트 바인딩
+     ***********************/
+    document.getElementById("btnReset").addEventListener("click", () => {
+      subjectFixedEl.textContent = "철수가";
+      clearPredicate();
+    });
+
+    document.getElementById("btnNewRound").addEventListener("click", () => {
+      newRound();
+    });
+
+    document.getElementById("btnShuffle").addEventListener("click", () => {
+      shuffleBank();
+    });
+
+    /***********************
+     * 11) 시작
+     ***********************/
+    renderPredicateList();
+    setupPredicateDrop();
+    newRound();
+  </script>
+</body>
+</html>
