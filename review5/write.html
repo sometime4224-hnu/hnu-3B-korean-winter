@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>고향 글쓰기 웹앱 (KO-VI)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, "Noto Sans KR", Arial, sans-serif; }
+    .chip { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px; border:1px solid rgba(0,0,0,.12); }
+    .fade { transition: opacity .2s ease, transform .2s ease; }
+    .hidden-soft { opacity: 0; transform: translateY(6px); pointer-events:none; height:0; overflow:hidden; }
+    .visible-soft { opacity: 1; transform: translateY(0); }
+    textarea::placeholder { color: rgba(0,0,0,.35); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; font-size:.8em; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-lg font-semibold truncate">고향 글쓰기 웹앱 (중급 2.5-3급) · KO-VI</h1>
+        <p class="text-xs text-slate-600 truncate">질문에 답하며 단락별로 글을 완성합니다. 베트남어 도움말 포함.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="toggleVI" class="px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white hover:bg-slate-100 active:scale-[.99]">
+          베트남어 도움말: <span id="viState" class="font-semibold">켜짐</span>
+        </button>
+        <button id="resetAll" class="px-3 py-2 text-sm rounded-xl bg-slate-900 text-white hover:bg-slate-800 active:scale-[.99]">
+          전체 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <!-- 안내 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="chip bg-slate-50"><span class="kbd">1</span> 질문 선택</span>
+        <span class="chip bg-slate-50"><span class="kbd">2</span> 메모/문장 작성</span>
+        <span class="chip bg-slate-50"><span class="kbd">3</span> 단락 생성</span>
+        <span class="chip bg-slate-50"><span class="kbd">4</span> 최종 글 완성</span>
+      </div>
+      <p class="mt-3 text-sm text-slate-700 leading-relaxed">
+        각 단계에서 질문에 답을 적고 <b>단락 만들기</b> 버튼을 눌러 문장을 정리합니다.
+        마지막에 <b>최종 글 생성</b>을 누르면 전체 글이 합쳐집니다.
+      </p>
+    </section>
+
+    <!-- 탭 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2">
+      <div class="flex flex-wrap gap-2">
+        <button class="tabBtn px-3 py-2 rounded-xl text-sm border border-slate-300 bg-white hover:bg-slate-100"
+          data-tab="tab1">1) 도입</button>
+        <button class="tabBtn px-3 py-2 rounded-xl text-sm border border-slate-300 bg-white hover:bg-slate-100"
+          data-tab="tab2">2) 과거</button>
+        <button class="tabBtn px-3 py-2 rounded-xl text-sm border border-slate-300 bg-white hover:bg-slate-100"
+          data-tab="tab3">3) 현재</button>
+        <button class="tabBtn px-3 py-2 rounded-xl text-sm border border-slate-300 bg-white hover:bg-slate-100"
+          data-tab="tab4">4) 미래</button>
+        <button class="tabBtn px-3 py-2 rounded-xl text-sm border border-slate-300 bg-white hover:bg-slate-100"
+          data-tab="tab5">필수 표현·문법</button>
+        <button class="tabBtn ml-auto px-3 py-2 rounded-xl text-sm bg-slate-900 text-white hover:bg-slate-800"
+          data-tab="tab6">최종 글</button>
+      </div>
+    </section>
+
+    <!-- 1) 도입 -->
+    <section id="tab1" class="tabPanel bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">1) 도입: 고향 기본 정보</h2>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q1. 고향은 어디입니까? (도시/마을, 지역)</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Quê bạn ở đâu? (thành phố/làng, vùng/tỉnh)</p>
+          <input id="i1" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 하노이 / 호찌민 / 다낭 / …" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q2. 고향은 어떤 곳으로 유명합니까? (음식, 관광지, 자연, 사람)</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Quê bạn nổi tiếng về điều gì? (món ăn, du lịch, thiên nhiên, con người)</p>
+          <input id="i2" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 바다 / 과일 / 관광지 / 전통 음식 / …" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q3. 이번 글에서 무엇을 말하고 싶습니까? (변화, 좋은 점, 바라는 점)</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Trong bài này bạn muốn nói về điều gì? (sự thay đổi, điểm tốt, điều mong muốn)</p>
+          <input id="i3" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 변화 / 장점 / 바라는 점" />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button id="makeP1" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          단락 만들기
+        </button>
+        <button class="copyBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-copy="p1Out">복사</button>
+        <button class="saveBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-save="p1Out" data-target="final1">최종 글에 저장</button>
+      </div>
+
+      <div class="p-3 rounded-xl border border-slate-200 bg-white">
+        <p class="text-sm text-slate-600 mb-2">생성된 도입 단락</p>
+        <textarea id="p1Out" class="w-full min-h-[120px] px-3 py-2 rounded-xl border border-slate-300 bg-slate-50"
+          placeholder="여기에 단락이 생성됩니다." readonly></textarea>
+      </div>
+
+      <details class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+        <summary class="font-medium cursor-pointer">문장틀(도입) 보기</summary>
+        <div class="mt-2 text-sm leading-relaxed">
+          <p><b>KO</b>: 제 고향은 ___에 있습니다. ___로 유명합니다. 오늘은 고향의 변화에 대해 이야기해 보겠습니다.</p>
+          <p class="viHelp mt-1"><b>VI</b>: Quê tôi ở ___. Nổi tiếng về ___. Hôm nay tôi sẽ nói về sự thay đổi của quê tôi.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 2) 과거 -->
+    <section id="tab2" class="tabPanel hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">2) 과거: 어렸을 때 고향 모습</h2>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q4. 어렸을 때 고향은 어떤 분위기였습니까?</p>
+          <p class="text-sm text-slate-500">예: 조용했다/복잡했다, 깨끗했다/먼지가 많았다</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Khi còn nhỏ, không khí/khung cảnh quê bạn như thế nào?</p>
+          <input id="p2a" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 조용했고 공기가 좋았습니다." />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q5. 그때 집과 동네는 어떤 모습이었습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Lúc đó nhà và khu phố như thế nào?</p>
+          <input id="p2b" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 낮은 집이 많았고 길이 좁았습니다." />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q6. 자연환경은 어땠습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Môi trường tự nhiên như thế nào?</p>
+          <input id="p2c" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 나무가 많아서 그늘이 많았습니다." />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q7. 사람들은 어떻게 살았습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Người dân sống như thế nào?</p>
+          <input id="p2d" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 이웃끼리 자주 도와주었습니다." />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q8. 기억에 남는 장소/사건이 있습니까? 왜 기억에 남습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Có nơi/chuyện nào bạn nhớ nhất không? Vì sao bạn nhớ?</p>
+          <input id="p2e" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 시장이 기억에 남습니다. 사람도 많고 재미있었습니다." />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button id="makeP2" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          단락 만들기
+        </button>
+        <button class="copyBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-copy="p2Out">복사</button>
+        <button class="saveBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-save="p2Out" data-target="final2">최종 글에 저장</button>
+      </div>
+
+      <div class="p-3 rounded-xl border border-slate-200 bg-white">
+        <p class="text-sm text-slate-600 mb-2">생성된 과거 단락</p>
+        <textarea id="p2Out" class="w-full min-h-[140px] px-3 py-2 rounded-xl border border-slate-300 bg-slate-50"
+          placeholder="여기에 단락이 생성됩니다." readonly></textarea>
+      </div>
+
+      <details class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+        <summary class="font-medium cursor-pointer">문장틀(과거) 보기</summary>
+        <div class="mt-2 text-sm leading-relaxed">
+          <p><b>KO</b>: 어렸을 때 제 고향은 ___(이)었습니다. 그때는 ___이/가 많았습니다. 특히 ___이/가 기억에 남습니다.</p>
+          <p class="viHelp mt-1"><b>VI</b>: Khi còn nhỏ, quê tôi ___. Lúc đó có nhiều ___. Đặc biệt tôi nhớ ___.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 3) 현재 -->
+    <section id="tab3" class="tabPanel hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">3) 현재: 변화 + 좋은 점</h2>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q9. 지금 고향에서 가장 크게 변한 것은 무엇입니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Bây giờ điều gì thay đổi nhiều nhất ở quê bạn?</p>
+          <input id="p3a" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 교통 / 건물 / 인구 / 가게" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q10. 변한 이유는 무엇이라고 생각합니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Theo bạn vì sao quê bạn thay đổi?</p>
+          <input id="p3b" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 개발 때문에 / 관광객이 늘어서 / 경제가 좋아져서" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q11. 변화의 장점은 무엇입니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Điểm tốt của sự thay đổi là gì?</p>
+          <input id="p3c" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 편리해졌다 / 시설이 좋아졌다 / 일자리가 늘었다" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q12. 현재 고향의 좋은 점 1가지 + 예시</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Chọn 1 điểm tốt hiện nay và giải thích bằng ví dụ.</p>
+          <input id="p3d" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 공원이 많아서 운동하기 좋습니다. 예를 들면, …" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q13. 변화로 생긴 문제/불편은 있습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Có vấn đề/bất tiện nào do thay đổi không?</p>
+          <input id="p3e" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 교통체증이 심해졌다 / 물가가 비싸졌다 / 오염이 생겼다" />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button id="makeP3" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          단락 만들기
+        </button>
+        <button class="copyBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-copy="p3Out">복사</button>
+        <button class="saveBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-save="p3Out" data-target="final3">최종 글에 저장</button>
+      </div>
+
+      <div class="p-3 rounded-xl border border-slate-200 bg-white">
+        <p class="text-sm text-slate-600 mb-2">생성된 현재 단락</p>
+        <textarea id="p3Out" class="w-full min-h-[150px] px-3 py-2 rounded-xl border border-slate-300 bg-slate-50"
+          placeholder="여기에 단락이 생성됩니다." readonly></textarea>
+      </div>
+
+      <details class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+        <summary class="font-medium cursor-pointer">문장틀(현재) 보기</summary>
+        <div class="mt-2 text-sm leading-relaxed">
+          <p><b>KO</b>: 요즘은 ___게 되었습니다. ___ 때문에 ___이/가 늘었습니다. 덕분에 ___이/가 더 편리합니다. 하지만 ___도 있습니다.</p>
+          <p class="viHelp mt-1"><b>VI</b>: Dạo này quê tôi đã trở nên ___. Vì ___ nên ___ tăng lên. Nhờ đó ___ tiện hơn. Nhưng cũng có ___.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 4) 미래 -->
+    <section id="tab4" class="tabPanel hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">4) 미래: 바라는 변화 + 이유</h2>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q14. 앞으로 고향이 어떤 점에서 더 좋아졌으면 좋겠습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Bạn mong quê bạn cải thiện điều gì trong tương lai?</p>
+          <input id="p4a" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 환경 / 교통 / 교육 / 문화 / 일자리" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q15. 왜 그렇게 되면 좋겠습니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Vì sao điều đó tốt?</p>
+          <input id="p4b" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 주민들이 더 건강해질 수 있어서" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q16. 어떤 방법이 가능하다고 생각합니까?</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Bạn nghĩ có giải pháp nào?</p>
+          <input id="p4c" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 공원을 더 만들 필요가 있다 / 대중교통을 늘리면 좋겠다" />
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-medium">Q17. 마지막으로 고향을 한 문장으로 정리해 보세요.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Cuối cùng, hãy tóm tắt quê bạn bằng 1 câu.</p>
+          <input id="p4d" class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+            placeholder="예: 제 고향은 계속 발전하는 따뜻한 곳입니다." />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button id="makeP4" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          단락 만들기
+        </button>
+        <button class="copyBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-copy="p4Out">복사</button>
+        <button class="saveBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-save="p4Out" data-target="final4">최종 글에 저장</button>
+      </div>
+
+      <div class="p-3 rounded-xl border border-slate-200 bg-white">
+        <p class="text-sm text-slate-600 mb-2">생성된 미래 단락</p>
+        <textarea id="p4Out" class="w-full min-h-[140px] px-3 py-2 rounded-xl border border-slate-300 bg-slate-50"
+          placeholder="여기에 단락이 생성됩니다." readonly></textarea>
+      </div>
+
+      <details class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+        <summary class="font-medium cursor-pointer">문장틀(미래) 보기</summary>
+        <div class="mt-2 text-sm leading-relaxed">
+          <p><b>KO</b>: 앞으로 ___했으면 좋겠습니다. 왜냐하면 ___기 때문입니다. 그래서 ___할 필요가 있다고 생각합니다. 마지막으로, 제 고향은 ___입니다.</p>
+          <p class="viHelp mt-1"><b>VI</b>: Tôi mong ___. Vì ___. Vì vậy tôi nghĩ cần ___. Cuối cùng, quê tôi là ___.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 5) 필수 표현·문법 -->
+    <section id="tab5" class="tabPanel hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">필수 표현·문법 (한국어 예시 포함)</h2>
+      <p class="text-sm text-slate-700">아래 표현을 글에 3개 이상 넣어 보세요.</p>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">1) 어렸을 때는 N(이)었다</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 어렸을 때는 우리 동네가 아주 조용한 마을이었습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Hồi nhỏ thì…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">2) 지금은/요즘은</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 요즘은 새 건물이 많이 생겨서 거리가 더 밝아졌습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Bây giờ/Dạo này…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">3) N이/가 많았다 · 늘었다 · 줄었다</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 예전에는 논이 많았지만, 지금은 아파트가 늘었습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: nhiều… / tăng… / giảm…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">4) V-게 되다 (변화 결과)</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 도로가 넓어져서 이동이 편해지게 되었습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: Trở nên… / đã thành…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">5) N보다 (비교)</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 지금이 예전보다 훨씬 편리합니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: hơn…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">6) A/V-지만 (대조)</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 교통이 편리하지만, 사람도 너무 많습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: nhưng…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">7) 왜냐하면 A/V-기 때문(에) (이유)</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 저는 고향을 좋아합니다. 왜냐하면 사람들 사이가 따뜻하기 때문입니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: bởi vì…</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="font-semibold">8) V-았/었으면 좋겠다 (바람)</p>
+          <p class="text-sm text-slate-700 mt-1"><b>예시</b>: 앞으로 공원이 더 많아졌으면 좋겠습니다.</p>
+          <p class="viHelp text-sm text-slate-600 mt-1">VI: mong rằng…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6) 최종 글 -->
+    <section id="tab6" class="tabPanel hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+      <h2 class="text-base font-semibold">최종 글</h2>
+      <div class="flex flex-wrap gap-2">
+        <button id="makeFinal" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+          최종 글 생성
+        </button>
+        <button class="copyBtn px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100"
+          data-copy="finalOut">복사</button>
+        <button id="downloadTxt" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100">
+          .txt로 저장
+        </button>
+      </div>
+
+      <div class="grid gap-3">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="text-sm text-slate-700 font-medium mb-2">저장된 단락(수정 가능)</p>
+          <label class="text-xs text-slate-600">도입</label>
+          <textarea id="final1" class="w-full min-h-[90px] mt-1 px-3 py-2 rounded-xl border border-slate-300 bg-white"></textarea>
+          <label class="text-xs text-slate-600 mt-2 block">과거</label>
+          <textarea id="final2" class="w-full min-h-[110px] mt-1 px-3 py-2 rounded-xl border border-slate-300 bg-white"></textarea>
+          <label class="text-xs text-slate-600 mt-2 block">현재</label>
+          <textarea id="final3" class="w-full min-h-[110px] mt-1 px-3 py-2 rounded-xl border border-slate-300 bg-white"></textarea>
+          <label class="text-xs text-slate-600 mt-2 block">미래</label>
+          <textarea id="final4" class="w-full min-h-[110px] mt-1 px-3 py-2 rounded-xl border border-slate-300 bg-white"></textarea>
+        </div>
+
+        <div class="p-3 rounded-xl border border-slate-200 bg-white">
+          <p class="text-sm text-slate-600 mb-2">최종 글(자동 합치기 결과)</p>
+          <textarea id="finalOut" class="w-full min-h-[180px] px-3 py-2 rounded-xl border border-slate-300 bg-slate-50"
+            placeholder="여기에 최종 글이 생성됩니다." readonly></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-4 pb-10">
+    <p class="text-xs text-slate-500">
+      사용 팁: 질문에 한 문장씩만 먼저 적고 → 단락 만들기로 문장을 정리하세요.
+    </p>
+  </footer>
+
+  <script>
+    // ---------- Helpers ----------
+    const $ = (id) => document.getElementById(id);
+
+    function setActiveTab(tabId) {
+      document.querySelectorAll(".tabPanel").forEach(p => p.classList.add("hidden"));
+      $(tabId).classList.remove("hidden");
+
+      document.querySelectorAll(".tabBtn").forEach(b => {
+        b.classList.remove("bg-slate-900", "text-white");
+        b.classList.add("bg-white", "border", "border-slate-300");
+      });
+      const activeBtn = document.querySelector(`.tabBtn[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add("bg-slate-900", "text-white");
+        activeBtn.classList.remove("bg-white");
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function normalizeSentence(s) {
+      if (!s) return "";
+      s = s.trim();
+      if (!s) return "";
+      // 문장 끝 마침표 보정
+      if (!/[.!?。？！]$/.test(s)) s += ".";
+      return s;
+    }
+
+    function joinSentences(arr) {
+      return arr.map(normalizeSentence).filter(Boolean).join(" ");
+    }
+
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("복사했습니다.");
+      } catch (e) {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("복사했습니다.");
+      }
+    }
+
+    function toggleVI(on) {
+      document.querySelectorAll(".viHelp").forEach(el => {
+        el.style.display = on ? "" : "none";
+      });
+      $("viState").textContent = on ? "켜짐" : "꺼짐";
+      localStorage.setItem("viHelpOn", on ? "1" : "0");
+    }
+
+    // ---------- Tab events ----------
+    document.querySelectorAll(".tabBtn").forEach(btn => {
+      btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+    });
+
+    // ---------- VI toggle ----------
+    let viOn = localStorage.getItem("viHelpOn");
+    viOn = viOn === null ? true : (viOn === "1");
+    toggleVI(viOn);
+
+    $("toggleVI").addEventListener("click", () => {
+      viOn = !viOn;
+      toggleVI(viOn);
+    });
+
+    // ---------- Paragraph builders ----------
+    $("makeP1").addEventListener("click", () => {
+      const a = $("i1").value;
+      const b = $("i2").value;
+      const c = $("i3").value;
+
+      const out = [
+        `제 고향은 ${a || "___"}에 있습니다`,
+        `${b || "___"}로 유명합니다`,
+        `오늘은 고향의 ${c || "변화"}에 대해 이야기해 보겠습니다`
+      ];
+      $("p1Out").value = joinSentences(out);
+    });
+
+    $("makeP2").addEventListener("click", () => {
+      const out = [
+        `어렸을 때 제 고향은 ${$("p2a").value || "___"}`,
+        `그때 집과 동네는 ${$("p2b").value || "___"}`,
+        `자연환경은 ${$("p2c").value || "___"}`,
+        `사람들은 ${$("p2d").value || "___"}`,
+        `특히 ${$("p2e").value || "___"}`
+      ];
+      $("p2Out").value = joinSentences(out);
+    });
+
+    $("makeP3").addEventListener("click", () => {
+      const change = $("p3a").value || "___";
+      const reason = $("p3b").value || "___";
+      const good = $("p3c").value || "___";
+      const best = $("p3d").value || "___";
+      const prob = $("p3e").value || "___";
+
+      const out = [
+        `요즘은 ${change}이/가 가장 크게 변했습니다`,
+        `${reason} ${change}이/가 달라지게 되었습니다`,
+        `변화의 장점은 ${good}입니다`,
+        `현재 고향의 좋은 점은 ${best}입니다`,
+        `하지만 ${prob}도 있습니다`
+      ];
+      $("p3Out").value = joinSentences(out);
+    });
+
+    $("makeP4").addEventListener("click", () => {
+      const wish = $("p4a").value || "___";
+      const why = $("p4b").value || "___";
+      const how = $("p4c").value || "___";
+      const one = $("p4d").value || "___";
+
+      const out = [
+        `앞으로 고향이 ${wish}면 좋겠습니다`,
+        `왜냐하면 ${why}기 때문입니다`,
+        `그래서 ${how}`,
+        `마지막으로, ${one}`
+      ];
+      $("p4Out").value = joinSentences(out);
+    });
+
+    // ---------- Save to final ----------
+    document.querySelectorAll(".saveBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const srcId = btn.dataset.save;
+        const targetId = btn.dataset.target;
+        $(targetId).value = $(srcId).value;
+        setActiveTab("tab6");
+      });
+    });
+
+    // ---------- Copy buttons ----------
+    document.querySelectorAll(".copyBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.copy;
+        copyToClipboard($(id).value || "");
+      });
+    });
+
+    // ---------- Final builder ----------
+    $("makeFinal").addEventListener("click", () => {
+      const parts = [
+        $("final1").value.trim(),
+        $("final2").value.trim(),
+        $("final3").value.trim(),
+        $("final4").value.trim()
+      ].filter(Boolean);
+
+      $("finalOut").value = parts.join("\n\n");
+    });
+
+    // ---------- Download as txt ----------
+    $("downloadTxt").addEventListener("click", () => {
+      const text = $("finalOut").value || "";
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "hometown_writing_KO-VI.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // ---------- Reset ----------
+    $("resetAll").addEventListener("click", () => {
+      if (!confirm("정말 전체 초기화할까요?")) return;
+      document.querySelectorAll("input, textarea").forEach(el => {
+        if (el.id === "p1Out" || el.id === "p2Out" || el.id === "p3Out" || el.id === "p4Out" || el.id === "finalOut") {
+          el.value = "";
+        } else {
+          el.value = "";
+        }
+      });
+      setActiveTab("tab1");
+    });
+
+    // init tab
+    setActiveTab("tab1");
+  </script>
+</body>
+</html>
