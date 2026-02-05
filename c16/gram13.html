@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>'N만하다' 크기 비교 게임</title>
     <style>
         :root {
@@ -21,23 +21,23 @@
             touch-action: none;
         }
 
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg-color);
+        html, body {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            /* 모바일 브라우저 주소창 대응 */
+            height: 100dvh; 
             overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
         }
 
         #game-container {
             width: 100%;
-            max-width: 800px;
             height: 100%;
-            max-height: 900px;
+            max-width: 800px; /* 태블릿/PC에서는 너무 넓어지지 않게 */
+            margin: 0 auto;
             background: white;
             display: flex;
             flex-direction: column;
@@ -45,83 +45,95 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        /* 둥근 모서리는 PC화면에서만 적용 */
+        /* 둥근 모서리는 PC화면(너비 800px 이상)에서만 적용 */
         @media (min-width: 801px) {
+            body {
+                padding: 2vh 0;
+                align-items: center;
+                justify-content: center;
+                display: flex;
+            }
             #game-container {
-                height: 95vh;
-                border-radius: 20px;
+                height: 96vh;
+                border-radius: 24px;
+                overflow: hidden;
             }
         }
 
-        /* Header */
+        /* --- Header --- */
         header {
-            padding: 15px 20px;
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top)); /* 노치 대응 */
             background: var(--primary-color);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
+            flex-shrink: 0; /* 크기 줄어들지 않음 */
+            z-index: 10;
         }
 
-        h1 { margin: 0; font-size: 1.2rem; }
-        .level-indicator { font-weight: bold; font-size: 1rem; }
+        h1 { margin: 0; font-size: 1.1rem; }
+        .level-indicator { font-weight: bold; font-size: 0.95rem; }
 
-        /* Question Area */
+        /* --- Question Area --- */
         .question-area {
-            padding: 15px 20px;
+            padding: 12px 16px;
             text-align: center;
             background: #E8F0FE;
-            border-bottom: 2px solid #D2E3FC;
+            border-bottom: 1px solid #D2E3FC;
             flex-shrink: 0;
+            z-index: 5;
         }
 
         .sentence {
-            font-size: 1.5rem;
+            font-size: clamp(1.1rem, 4vw, 1.4rem); /* 화면 크기에 따라 글자 크기 조절 */
             font-weight: bold;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             word-break: keep-all;
+            line-height: 1.3;
         }
 
         .instruction {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #555;
+            word-break: keep-all;
         }
 
-        /* Play Area - Grid Layout */
+        /* --- Play Area (Scrollable) --- */
         #play-area {
-            flex: 1;
+            flex: 1; /* 남은 공간 모두 차지 */
             position: relative;
             background-color: #fff;
-            padding: 20px;
+            padding: 16px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-auto-rows: minmax(100px, 120px);
-            gap: 15px;
-            overflow-y: auto;
+            grid-template-columns: 1fr 1fr; /* 2열 */
+            grid-auto-rows: minmax(90px, auto); /* 최소 높이 보장 */
+            gap: 12px;
+            overflow-y: auto; /* 내부 스크롤 */
             align-content: start;
+            -webkit-overflow-scrolling: touch;
         }
 
-        @media (max-width: 600px) {
+        /* 아주 작은 화면 대응 (아이폰 SE 등) */
+        @media (max-width: 360px) {
             #play-area {
-                grid-template-columns: 1fr; /* 모바일 1열 */
-                gap: 10px;
+                grid-template-columns: 1fr; /* 1열로 변경 */
                 padding: 10px;
+                gap: 10px;
             }
-            .sentence { font-size: 1.2rem; }
         }
 
-        /* Reference Item Card */
+        /* --- Items --- */
         .reference-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 15px;
-            border-radius: 15px;
+            padding: 8px 12px;
+            border-radius: 12px;
             background: #fafafa;
             border: 1px solid #eee;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
         .ref-object-wrapper {
@@ -129,26 +141,24 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 80px;
+            width: 70px;
             flex-shrink: 0;
-            margin-right: 10px;
+            margin-right: 8px;
         }
 
         .object-emoji {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             line-height: 1;
-            margin-bottom: 5px;
-            transform-origin: center center;
-            transition: transform 0.2s;
+            margin-bottom: 4px;
         }
 
         .object-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: bold;
             color: #666;
             background: rgba(0,0,0,0.05);
-            padding: 2px 8px;
-            border-radius: 8px;
+            padding: 2px 6px;
+            border-radius: 6px;
             white-space: nowrap;
         }
 
@@ -156,89 +166,91 @@
         .drop-zone {
             flex: 1;
             height: 100%;
-            min-height: 80px;
+            min-height: 70px;
             border: 2px dashed var(--zone-border);
-            border-radius: 12px;
+            border-radius: 10px;
             background-color: #f8fbff;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s;
         }
 
         .drop-zone::after {
             content: "여기";
             color: #cbd5e0;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            pointer-events: none;
         }
 
         .drop-zone.active {
             border-color: var(--zone-active);
             background-color: #eef6ff;
-            transform: scale(1.02);
-            box-shadow: 0 0 10px rgba(74, 137, 220, 0.2);
         }
 
-        .drop-zone.active::after {
-            color: var(--zone-active);
-            content: "놓으세요!";
-        }
-
-        /* Draggable Target */
+        /* --- Draggable Target --- */
         #draggable-target {
-            position: absolute;
-            display: none; /* JS 로딩 후 표시 */
+            position: absolute; /* Play Area가 아닌 전체 컨테이너 기준 */
+            display: none; 
             flex-direction: column;
             align-items: center;
             cursor: grab;
             z-index: 1000;
-            /* 초기 위치는 JS로 제어 */
-            padding: 10px;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(2px);
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 8px;
+            background: rgba(255,255,255,0.9);
             border: 2px solid white;
-            transition: transform 0.1s; /* 부드러운 크기 변화 */
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            /* 터치 영역 확보 */
+            min-width: 60px;
+            min-height: 60px;
+            justify-content: center;
         }
 
         #draggable-target:active {
             cursor: grabbing;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transform: scale(1.1) !important; /* 드래그 시 살짝 커짐 */
         }
         
         #draggable-target .object-emoji {
-            font-size: 3.5rem;
+            font-size: 3rem;
+            margin: 0;
         }
 
-        /* Controls */
+        /* --- Controls (Fixed Bottom) --- */
         .controls {
-            padding: 15px 20px;
+            padding: 12px 16px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom)); /* 하단 바 대응 */
             background: #fff;
             border-top: 1px solid #ddd;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             flex-shrink: 0;
-            z-index: 1001;
+            z-index: 20;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
 
         .slider-container {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: #f1f3f5;
-            padding: 10px 15px;
-            border-radius: 30px;
+            padding: 8px 12px;
+            border-radius: 24px;
+        }
+
+        .label-text {
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
 
         input[type=range] {
             width: 100%;
-            height: 8px;
+            height: 6px;
             border-radius: 5px;
             background: #d3d3d3;
             outline: none;
@@ -248,76 +260,78 @@
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: var(--primary-color);
             cursor: pointer;
             border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         button#check-btn {
             background: var(--success-color);
             color: white;
             border: none;
-            padding: 12px 28px;
-            border-radius: 30px;
-            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 0 #37BC9B;
-            transition: transform 0.1s;
+            box-shadow: 0 3px 0 #37BC9B;
             white-space: nowrap;
+            min-width: 70px;
         }
 
         button#check-btn:active {
-            transform: translateY(4px);
+            transform: translateY(3px);
             box-shadow: none;
         }
 
-        /* Modals */
+        /* --- Modals --- */
         .modal {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6);
-            z-index: 2000;
+            z-index: 3000;
             justify-content: center;
             align-items: center;
             text-align: center;
+            padding: 20px;
         }
 
         .modal-content {
             background: white;
-            padding: 30px;
+            padding: 24px;
             border-radius: 20px;
-            width: 85%;
-            max-width: 360px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: popIn 0.3s ease;
         }
 
-        @keyframes modalPop {
-            from { transform: scale(0.7); opacity: 0; }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
 
-        .modal h2 { margin: 10px 0; font-size: 1.5rem; }
-        .modal p { font-size: 1.1rem; color: #555; margin: 20px 0; line-height: 1.5; }
+        .modal h2 { margin: 8px 0; font-size: 1.3rem; }
+        .modal p { font-size: 1rem; margin: 16px 0 24px; line-height: 1.5; word-break: keep-all; }
         
         .modal button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
+            padding: 12px 0;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
         }
 
-        .status-icon { font-size: 4rem; display: block; margin-bottom: 15px; }
+        .status-icon { font-size: 3.5rem; display: block; margin-bottom: 8px; }
         .highlight { color: #E74C3C; }
         .highlight-blue { color: #2980B9; }
 
@@ -333,14 +347,14 @@
 
     <div class="question-area">
         <div class="sentence" id="sentence-text">로딩 중...</div>
-        <div class="instruction">이모지를 <strong>네모 칸</strong>에 끌어다 놓고 크기를 맞춰보세요!</div>
+        <div class="instruction">이모지를 <strong>네모 칸</strong>에 끌어다 놓고 크기를 맞추세요!</div>
     </div>
 
     <div id="play-area">
         <!-- JS로 내용 채움 -->
     </div>
 
-    <!-- 드래그 대상 -->
+    <!-- 드래그 대상 (플로팅) -->
     <div id="draggable-target">
         <div class="object-emoji" id="target-emoji">❓</div>
         <div class="object-label" id="target-label">대상</div>
@@ -348,9 +362,9 @@
 
     <div class="controls">
         <div class="slider-container">
-            <span style="font-size:0.9rem">작게</span>
+            <span class="label-text">작게</span>
             <input type="range" id="size-slider" min="0.4" max="2.6" step="0.1" value="1">
-            <span style="font-size:0.9rem">크게</span>
+            <span class="label-text">크게</span>
         </div>
         <button id="check-btn">확인</button>
     </div>
@@ -465,50 +479,46 @@
         }
     ];
 
-    // 상태 변수
     let currentLevelIdx = 0;
     let currentScale = 1.0;
     let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
-    // 초기화 함수
     function initGame() {
         const slider = document.getElementById('size-slider');
         const checkBtn = document.getElementById('check-btn');
         const nextBtn = document.getElementById('next-btn');
         const targetEl = document.getElementById('draggable-target');
 
-        // 이벤트 리스너 등록
-        // 슬라이더
         slider.addEventListener('input', updateTargetSize);
-        // 버튼
         checkBtn.addEventListener('click', checkAnswer);
         nextBtn.addEventListener('click', nextLevel);
         
-        // 드래그 (Mouse)
         targetEl.addEventListener('mousedown', dragStart);
         document.addEventListener('mousemove', dragMove);
         document.addEventListener('mouseup', dragEnd);
 
-        // 드래그 (Touch)
         targetEl.addEventListener('touchstart', dragStart, {passive: false});
         document.addEventListener('touchmove', dragMove, {passive: false});
         document.addEventListener('touchend', dragEnd);
 
-        // 첫 레벨 로드
         loadLevel(0);
+        
+        // 화면 리사이즈 시 위치 재조정 (선택 사항)
+        window.addEventListener('resize', () => {
+             // 리사이즈 시 타겟이 화면 밖으로 나가지 않게 간단한 조치
+             resetTargetPosition();
+        });
     }
 
     function loadLevel(idx) {
         currentLevelIdx = idx;
         const level = levels[idx];
         
-        // 텍스트 업데이트
         document.getElementById('current-level').textContent = idx + 1;
         document.getElementById('sentence-text').innerHTML = level.sentence;
         
-        // 타겟 설정
         const targetEl = document.getElementById('draggable-target');
         const targetEmoji = document.getElementById('target-emoji');
         const targetLabel = document.getElementById('target-label');
@@ -519,23 +529,10 @@
         currentScale = level.targetStartScale;
         slider.value = currentScale;
         
-        // 초기 위치 설정 (컨테이너 기준 우하단 고정)
-        // transform이나 right/bottom을 사용하지 않고 계산된 left/top 사용을 위해 초기화
-        targetEl.style.display = 'flex'; // 보이게 설정
+        targetEl.style.display = 'flex';
+        // transform에는 scale만 적용. 위치는 top/left로 제어
         targetEl.style.transform = `scale(${currentScale})`;
         
-        // 중요: 위치 초기화를 위해 잠시 렌더링 대기
-        requestAnimationFrame(() => {
-            const container = document.getElementById('game-container');
-            const cRect = container.getBoundingClientRect();
-            // 컨테이너 오른쪽 아래 배치
-            const initX = cRect.width - 100; 
-            const initY = cRect.height - 180;
-            
-            targetEl.style.left = initX + 'px';
-            targetEl.style.top = initY + 'px';
-        });
-
         // 그리드 생성
         const playArea = document.getElementById('play-area');
         playArea.innerHTML = '';
@@ -544,7 +541,6 @@
             const item = document.createElement('div');
             item.className = 'reference-item';
             
-            // 보기 영역
             const refWrapper = document.createElement('div');
             refWrapper.className = 'ref-object-wrapper';
             
@@ -560,7 +556,6 @@
             refWrapper.appendChild(emoji);
             refWrapper.appendChild(label);
 
-            // 드롭 존
             const zone = document.createElement('div');
             zone.className = 'drop-zone';
             zone.dataset.index = i;
@@ -570,6 +565,29 @@
             item.appendChild(zone);
             playArea.appendChild(item);
         });
+
+        // 위치 초기화: 화면 렌더링 후 실행
+        setTimeout(resetTargetPosition, 50);
+    }
+
+    function resetTargetPosition() {
+        const targetEl = document.getElementById('draggable-target');
+        const container = document.getElementById('game-container');
+        const controls = document.querySelector('.controls');
+        
+        if (!container || !targetEl) return;
+        
+        const cRect = container.getBoundingClientRect();
+        // 컨트롤 바 바로 위, 오른쪽 여백 조금
+        const controlsHeight = controls ? controls.offsetHeight : 80;
+        
+        // 안전하게 화면 하단 20%, 우측 20px 위치
+        const initX = cRect.width - targetEl.offsetWidth - 20; 
+        const initY = cRect.height - controlsHeight - targetEl.offsetHeight - 20;
+        
+        // 음수 좌표 방지
+        targetEl.style.left = Math.max(10, initX) + 'px';
+        targetEl.style.top = Math.max(10, initY) + 'px';
     }
 
     function updateTargetSize() {
@@ -579,26 +597,23 @@
         targetEl.style.transform = `scale(${currentScale})`;
     }
 
-    // --- 드래그 로직 ---
-
+    /* --- 드래그 로직 --- */
     function dragStart(e) {
         e.preventDefault();
         isDragging = true;
         
         const targetEl = document.getElementById('draggable-target');
-        const container = document.getElementById('game-container');
-        
-        // 좌표 정규화 (터치/마우스)
         const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         
         const tRect = targetEl.getBoundingClientRect();
-        const cRect = container.getBoundingClientRect();
+        const container = document.getElementById('game-container');
+        const cRect = container.getBoundingClientRect(); // 컨테이너의 절대 위치
 
-        // 타겟 내부에서의 클릭 위치 오프셋
+        // 타겟 내 클릭 위치 (오프셋)
         dragOffsetX = clientX - tRect.left;
         dragOffsetY = clientY - tRect.top;
-
+        
         targetEl.style.cursor = 'grabbing';
     }
 
@@ -613,47 +628,42 @@
         const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
 
-        // 컨테이너 기준 상대 좌표 계산
-        // (현재 마우스 위치) - (컨테이너 시작 위치) - (타겟 내부 클릭 오프셋)
+        // 컨테이너 기준 상대 좌표 = (현재 화면 좌표) - (컨테이너 화면 좌표) - (오프셋)
         let newLeft = clientX - cRect.left - dragOffsetX;
         let newTop = clientY - cRect.top - dragOffsetY;
 
-        // 화면 밖으로 나가지 않게 제한 (선택사항)
-        const maxLeft = cRect.width - targetEl.offsetWidth;
-        const maxTop = cRect.height - targetEl.offsetHeight;
+        // 경계 체크 (화면 밖으로 완전 사라짐 방지)
+        const maxLeft = cRect.width - 20;
+        const maxTop = cRect.height - 20;
         
-        // 약간의 여유를 두고 제한
-        newLeft = Math.max(-20, Math.min(newLeft, maxLeft + 20));
-        newTop = Math.max(-20, Math.min(newTop, maxTop + 20));
+        // 최소한의 일부는 보이게 (-20 ~ max)
+        newLeft = Math.max(-targetEl.offsetWidth + 20, Math.min(newLeft, maxLeft));
+        newTop = Math.max(-targetEl.offsetHeight + 20, Math.min(newTop, maxTop));
 
         targetEl.style.left = newLeft + 'px';
         targetEl.style.top = newTop + 'px';
 
-        // 드롭존 하이라이트 체크
         checkDropZone(clientX, clientY);
     }
 
     function dragEnd() {
         isDragging = false;
-        const targetEl = document.getElementById('draggable-target');
-        targetEl.style.cursor = 'grab';
-        
-        // 하이라이트 제거
+        document.getElementById('draggable-target').style.cursor = 'grab';
         document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active'));
     }
 
     function checkDropZone(x, y) {
-        // x, y는 뷰포트 기준 좌표 (마우스/터치 위치)
-        // 타겟의 중심점을 기준으로 체크하는 것이 더 자연스러움
+        // 드롭존 하이라이트 (시각적 피드백)
+        // 타겟 중심 좌표 계산
         const targetEl = document.getElementById('draggable-target');
         const tRect = targetEl.getBoundingClientRect();
-        const centerX = tRect.left + tRect.width / 2;
-        const centerY = tRect.top + tRect.height / 2;
+        const cx = tRect.left + tRect.width/2;
+        const cy = tRect.top + tRect.height/2;
 
         document.querySelectorAll('.drop-zone').forEach(zone => {
             const zRect = zone.getBoundingClientRect();
-            if (centerX >= zRect.left && centerX <= zRect.right &&
-                centerY >= zRect.top && centerY <= zRect.bottom) {
+            // 중심점이 존 안에 들어왔는지 확인
+            if (cx >= zRect.left && cx <= zRect.right && cy >= zRect.top && cy <= zRect.bottom) {
                 zone.classList.add('active');
             } else {
                 zone.classList.remove('active');
@@ -661,26 +671,23 @@
         });
     }
 
-    // --- 정답 확인 로직 ---
-
+    /* --- 정답 확인 --- */
     function checkAnswer() {
         const level = levels[currentLevelIdx];
         const targetEl = document.getElementById('draggable-target');
         const tRect = targetEl.getBoundingClientRect();
-        const centerX = tRect.left + tRect.width / 2;
-        const centerY = tRect.top + tRect.height / 2;
+        const cx = tRect.left + tRect.width/2;
+        const cy = tRect.top + tRect.height/2;
         
         let droppedZone = null;
 
         document.querySelectorAll('.drop-zone').forEach(zone => {
             const zRect = zone.getBoundingClientRect();
-            if (centerX >= zRect.left && centerX <= zRect.right &&
-                centerY >= zRect.top && centerY <= zRect.bottom) {
+            if (cx >= zRect.left && cx <= zRect.right && cy >= zRect.top && cy <= zRect.bottom) {
                 droppedZone = zone;
             }
         });
 
-        // 1. 위치 체크
         if (!droppedZone) {
             showModal(false, "물건을 <strong>네모 칸 안</strong>에 넣어주세요!");
             return;
@@ -692,11 +699,10 @@
             return;
         }
 
-        // 2. 크기 체크
         const correctRefData = level.references.find(r => r.isCorrect);
         const sizeDiff = Math.abs(currentScale - correctRefData.scale);
         
-        // 난이도 조절: 오차 범위 0.4
+        // 오차 범위 0.45
         if (sizeDiff <= 0.45) {
             showModal(true, level.msgCorrect);
         } else {
@@ -705,15 +711,12 @@
     }
 
     function nextLevel() {
-        const modal = document.getElementById('modal-feedback');
-        const clearModal = document.getElementById('modal-clear');
-        
-        modal.style.display = 'none';
+        document.getElementById('modal-feedback').style.display = 'none';
         
         if (currentLevelIdx < levels.length - 1) {
             loadLevel(currentLevelIdx + 1);
         } else {
-            clearModal.style.display = 'flex';
+            document.getElementById('modal-clear').style.display = 'flex';
         }
     }
 
@@ -728,7 +731,7 @@
         msgEl.innerHTML = msg;
 
         if (isSuccess) {
-            titleEl.textContent = "정답입니다!";
+            titleEl.textContent = "정답!";
             titleEl.style.color = "var(--success-color)";
             iconEl.textContent = "⭕";
             iconEl.className = "status-icon";
@@ -738,10 +741,9 @@
             } else {
                 nextBtn.textContent = "다음 문제";
             }
-            // 성공 시 다음 버튼 기능 연결
             nextBtn.onclick = nextLevel;
         } else {
-            titleEl.textContent = "다시 생각해보세요";
+            titleEl.textContent = "다시 해볼까요?";
             titleEl.style.color = "#E74C3C";
             iconEl.textContent = "❌";
             iconEl.className = "status-icon";
@@ -750,11 +752,7 @@
         }
     }
 
-    // 창이 완전히 로드된 후 실행하여 안전성 확보
-    window.onload = function() {
-        initGame();
-    };
-
+    window.onload = initGame;
 </script>
 </body>
 </html>
