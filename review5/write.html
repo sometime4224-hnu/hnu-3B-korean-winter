@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>고향 글쓰기 웹앱 (KO-VI) - 문장 도움 강화</title>
+  <title>고향 글쓰기 웹앱 (KO-VI) - 자동저장</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, -apple-system, "Noto Sans KR", Arial, sans-serif; }
@@ -13,7 +13,6 @@
     .muted { color: rgb(71 85 105); }
     .pill { display:inline-flex; align-items:center; padding:.2rem .55rem; border-radius:999px; border:1px solid rgb(203 213 225); background:rgb(248 250 252); font-size:.75rem; }
     textarea::placeholder { color: rgba(0,0,0,.35); }
-    .viHelp { }
     .exBox { background: rgb(248 250 252); border:1px solid rgb(226 232 240); border-radius: .9rem; padding: .75rem; }
     details > summary { list-style: none; }
     details > summary::-webkit-details-marker { display:none; }
@@ -27,12 +26,13 @@
   <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
     <div class="min-w-0">
       <h1 class="text-lg font-semibold truncate">고향 글쓰기 웹앱 (중급 2.5-3급) · KO-VI</h1>
-      <p class="text-xs text-slate-600 truncate">질문별 문장 만들기 + 문법/예문 도움(한국어 예문 제공) + 최종 글 생성</p>
+      <p class="text-xs text-slate-600 truncate">질문별 문장 만들기 + 문법/예문 도움 + 자동저장(localStorage)</p>
     </div>
     <div class="flex items-center gap-2">
       <button id="toggleVI" class="px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white hover:bg-slate-100 active:scale-[.99]">
         베트남어 도움말: <span id="viState" class="font-semibold">켜짐</span>
       </button>
+      <span id="saveStatus" class="text-xs text-slate-600 px-2">저장됨</span>
       <button id="resetAll" class="px-3 py-2 text-sm rounded-xl bg-slate-900 text-white hover:bg-slate-800 active:scale-[.99]">
         전체 초기화
       </button>
@@ -52,6 +52,10 @@
     <p class="mt-3 text-sm leading-relaxed text-slate-700">
       각 소질문 카드에서 <b>추천 문법·예문</b>을 보고 한 문장을 작성하세요.
       문장을 충분히 쌓은 뒤 <b>단락 만들기</b>로 정리하고, <b>최종 글</b> 탭에서 합칩니다.
+      작성 내용은 기기에 <b>자동 저장</b>됩니다.
+    </p>
+    <p class="mt-2 text-xs text-slate-500">
+      주의: 자동저장은 같은 기기/같은 브라우저에서만 유지됩니다(시크릿 모드/데이터 삭제 시 소실 가능).
     </p>
   </section>
 
@@ -66,15 +70,6 @@
       <button class="tabBtn ml-auto px-3 py-2 rounded-xl text-sm bg-slate-900 text-white hover:bg-slate-800" data-tab="tab6">최종 글</button>
     </div>
   </section>
-
-  <!-- 공통: 소질문 카드 템플릿(복붙용 설명) -->
-  <!--
-    각 소질문 카드 구성:
-    - 질문 + VI 도움
-    - "내 문장" input/textarea
-    - details: 추천 문법(짧은 설명) + 한국어 예문 여러 개 + (선택) VI 뜻
-    - 버튼: 예문 문장 삽입(클릭 시 내 문장에 넣고 수정하도록)
-  -->
 
   <!-- 1) 도입 -->
   <section id="tab1" class="tabPanel card p-4 space-y-4">
@@ -191,8 +186,8 @@
             <ul class="list-disc pl-5">
               <li>이번 글에서는 고향의 <b>변화</b>에 대해 이야기해 보겠습니다.</li>
               <li>저는 고향의 <b>좋은 점</b>을 설명하려고 합니다.</li>
-              <li>마지막으로 고향이 <b>앞으로 더 좋아지면 좋겠다</b>고 생각합니다.</li>
               <li>저는 고향의 과거와 현재를 <b>비교</b>해 보고 싶습니다.</li>
+              <li>마지막으로 고향이 앞으로 더 좋아지면 좋겠다고 생각합니다.</li>
             </ul>
             <p class="viHelp muted mt-1">VI 뜻: nói về… / muốn… / dự định…</p>
           </div>
@@ -200,7 +195,7 @@
             <button class="exInsert px-3 py-2 rounded-xl bg-slate-900 text-white text-sm" data-target="s3"
               data-text="이번 글에서는 고향의 변화에 대해 이야기해 보겠습니다.">예문 삽입</button>
             <button class="exInsert px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm" data-target="s3"
-              data-text="저는 고향의 좋은 점을 설명하려고 합니다.">예문 삽입</button>
+              data-text="저는 고향의 과거와 현재를 비교해 보고 싶습니다.">예문 삽입</button>
           </div>
         </div>
       </details>
@@ -237,10 +232,7 @@
         placeholder="내 문장: 어렸을 때 제 고향은 …(이)었습니다. / …했습니다."></textarea>
 
       <details class="mt-1">
-        <summary class="summaryBtn font-medium">
-          <span>추천 문법·예문 보기</span>
-          <span class="text-slate-500">▼</span>
-        </summary>
+        <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
           <div>
             <p class="font-semibold">추천 문법</p>
@@ -280,10 +272,7 @@
         placeholder="내 문장: 그때는 …이/가 많았습니다. 길이 …했습니다."></textarea>
 
       <details class="mt-1">
-        <summary class="summaryBtn font-medium">
-          <span>추천 문법·예문 보기</span>
-          <span class="text-slate-500">▼</span>
-        </summary>
+        <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
           <div>
             <p class="font-semibold">추천 문법</p>
@@ -323,10 +312,7 @@
         placeholder="내 문장: 나무가 많아서 … / 강이 있어서 …"></textarea>
 
       <details class="mt-1">
-        <summary class="summaryBtn font-medium">
-          <span>추천 문법·예문 보기</span>
-          <span class="text-slate-500">▼</span>
-        </summary>
+        <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
           <div>
             <p class="font-semibold">추천 문법</p>
@@ -366,10 +352,7 @@
         placeholder="내 문장: 사람들은 …했습니다. 이웃끼리 …했습니다."></textarea>
 
       <details class="mt-1">
-        <summary class="summaryBtn font-medium">
-          <span>추천 문법·예문 보기</span>
-          <span class="text-slate-500">▼</span>
-        </summary>
+        <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
           <div>
             <p class="font-semibold">추천 문법</p>
@@ -409,10 +392,7 @@
         placeholder="내 문장: …이/가 기억에 남습니다. 왜냐하면 …기 때문입니다."></textarea>
 
       <details class="mt-1">
-        <summary class="summaryBtn font-medium">
-          <span>추천 문법·예문 보기</span>
-          <span class="text-slate-500">▼</span>
-        </summary>
+        <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
           <div>
             <p class="font-semibold">추천 문법</p>
@@ -469,10 +449,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>N(이/가) 변하다</b> 2) <b>가장</b>(최상) 3) <b>특히</b>(강조)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>N(이/가) 변하다</b> 2) <b>가장</b>(최상) 3) <b>특히</b>(강조)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -506,10 +483,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>N 때문에</b>(원인) 2) <b>A/V-아서/어서</b> 3) <b>V-게 되다</b>(변화 결과)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>N 때문에</b>(원인) 2) <b>A/V-아서/어서</b> 3) <b>V-게 되다</b>(변화 결과)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -545,10 +519,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>덕분에</b>(긍정 결과) 2) <b>V-(으)ㄹ 수 있다</b>(가능) 3) <b>N(이/가) 좋아지다</b></p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>덕분에</b>(긍정 결과) 2) <b>V-(으)ㄹ 수 있다</b>(가능) 3) <b>N(이/가) 좋아지다</b></p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -582,10 +553,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>가장 …은/는</b> 2) <b>예를 들면</b> 3) <b>A/V-아서/어서</b>(이유)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>가장 …은/는</b> 2) <b>예를 들면</b> 3) <b>A/V-아서/어서</b>(이유)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -620,10 +588,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>A/V-지만</b>(대조) 2) <b>N 때문에</b>(원인) 3) <b>N(이/가) 심하다</b>(정도)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>A/V-지만</b>(대조) 2) <b>N 때문에</b>(원인) 3) <b>N(이/가) 심하다</b>(정도)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -675,10 +640,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>V-았/었으면 좋겠다</b>(바람) 2) <b>A-(으)면 좋겠다</b> 3) <b>더</b>(정도)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>V-았/었으면 좋겠다</b>(바람) 2) <b>A-(으)면 좋겠다</b> 3) <b>더</b>(정도)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -713,10 +675,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>왜냐하면 A/V-기 때문</b> 2) <b>V-(으)ㄹ 수 있다</b> 3) <b>사람들이/주민들이</b>(주어 확장)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>왜냐하면 A/V-기 때문</b> 2) <b>V-(으)ㄹ 수 있다</b> 3) <b>주민들이</b>(주어 확장)</p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -751,10 +710,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>V-(으)ㄹ 필요가 있다</b> 2) <b>V-(으)면 좋겠다</b> 3) <b>N을/를 늘리다/줄이다</b></p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>V-(으)ㄹ 필요가 있다</b> 2) <b>V-(으)면 좋겠다</b> 3) <b>N을/를 늘리다/줄이다</b></p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -789,10 +745,7 @@
       <details class="mt-1">
         <summary class="summaryBtn font-medium"><span>추천 문법·예문 보기</span><span class="text-slate-500">▼</span></summary>
         <div class="mt-2 space-y-2 text-sm leading-relaxed">
-          <div>
-            <p class="font-semibold">추천 문법</p>
-            <p>1) <b>저에게 N은/는 …이다</b> 2) <b>A-(으)ㄴ 곳</b>(관형) 3) <b>따뜻한/조용한/활기찬</b>(형용사)</p>
-          </div>
+          <div><p class="font-semibold">추천 문법</p><p>1) <b>저에게 N은/는 …이다</b> 2) <b>A-(으)ㄴ 곳</b>(관형) 3) <b>따뜻한/조용한/활기찬</b></p></div>
           <div>
             <p class="font-semibold">한국어 예문</p>
             <ul class="list-disc pl-5">
@@ -831,46 +784,14 @@
     <p class="text-sm text-slate-700">아래 표현을 글에 3개 이상 넣으세요.</p>
 
     <div class="grid gap-3">
-      <div class="exBox">
-        <p class="font-semibold">1) 어렸을 때는 N(이)었다</p>
-        <p class="small mt-1"><b>예문</b>: 어렸을 때는 우리 동네가 아주 조용한 마을이었습니다.</p>
-        <p class="viHelp small muted mt-1">VI: Hồi nhỏ…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">2) 요즘은/지금은</p>
-        <p class="small mt-1"><b>예문</b>: 요즘은 새 건물이 많이 생겨서 거리가 더 밝아졌습니다.</p>
-        <p class="viHelp small muted mt-1">VI: Dạo này…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">3) N이/가 많았다·늘었다·줄었다</p>
-        <p class="small mt-1"><b>예문</b>: 예전에는 논이 많았지만, 지금은 아파트가 늘었습니다.</p>
-        <p class="viHelp small muted mt-1">VI: nhiều/tăng/giảm</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">4) V-게 되다</p>
-        <p class="small mt-1"><b>예문</b>: 도로가 넓어져서 이동이 편해지게 되었습니다.</p>
-        <p class="viHelp small muted mt-1">VI: trở nên…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">5) N보다</p>
-        <p class="small mt-1"><b>예문</b>: 지금이 예전보다 훨씬 편리합니다.</p>
-        <p class="viHelp small muted mt-1">VI: hơn…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">6) A/V-지만</p>
-        <p class="small mt-1"><b>예문</b>: 교통이 편리하지만, 사람도 너무 많습니다.</p>
-        <p class="viHelp small muted mt-1">VI: nhưng…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">7) 왜냐하면 A/V-기 때문(에)</p>
-        <p class="small mt-1"><b>예문</b>: 저는 고향을 좋아합니다. 왜냐하면 사람들 사이가 따뜻하기 때문입니다.</p>
-        <p class="viHelp small muted mt-1">VI: bởi vì…</p>
-      </div>
-      <div class="exBox">
-        <p class="font-semibold">8) V-았/었으면 좋겠다</p>
-        <p class="small mt-1"><b>예문</b>: 앞으로 공원이 더 많아졌으면 좋겠습니다.</p>
-        <p class="viHelp small muted mt-1">VI: mong rằng…</p>
-      </div>
+      <div class="exBox"><p class="font-semibold">1) 어렸을 때는 N(이)었다</p><p class="small mt-1"><b>예문</b>: 어렸을 때는 우리 동네가 아주 조용한 마을이었습니다.</p><p class="viHelp small muted mt-1">VI: Hồi nhỏ…</p></div>
+      <div class="exBox"><p class="font-semibold">2) 요즘은/지금은</p><p class="small mt-1"><b>예문</b>: 요즘은 새 건물이 많이 생겨서 거리가 더 밝아졌습니다.</p><p class="viHelp small muted mt-1">VI: Dạo này…</p></div>
+      <div class="exBox"><p class="font-semibold">3) N이/가 많았다·늘었다·줄었다</p><p class="small mt-1"><b>예문</b>: 예전에는 논이 많았지만, 지금은 아파트가 늘었습니다.</p><p class="viHelp small muted mt-1">VI: nhiều/tăng/giảm</p></div>
+      <div class="exBox"><p class="font-semibold">4) V-게 되다</p><p class="small mt-1"><b>예문</b>: 도로가 넓어져서 이동이 편해지게 되었습니다.</p><p class="viHelp small muted mt-1">VI: trở nên…</p></div>
+      <div class="exBox"><p class="font-semibold">5) N보다</p><p class="small mt-1"><b>예문</b>: 지금이 예전보다 훨씬 편리합니다.</p><p class="viHelp small muted mt-1">VI: hơn…</p></div>
+      <div class="exBox"><p class="font-semibold">6) A/V-지만</p><p class="small mt-1"><b>예문</b>: 교통이 편리하지만, 사람도 너무 많습니다.</p><p class="viHelp small muted mt-1">VI: nhưng…</p></div>
+      <div class="exBox"><p class="font-semibold">7) 왜냐하면 A/V-기 때문(에)</p><p class="small mt-1"><b>예문</b>: 저는 고향을 좋아합니다. 왜냐하면 사람들 사이가 따뜻하기 때문입니다.</p><p class="viHelp small muted mt-1">VI: bởi vì…</p></div>
+      <div class="exBox"><p class="font-semibold">8) V-았/었으면 좋겠다</p><p class="small mt-1"><b>예문</b>: 앞으로 공원이 더 많아졌으면 좋겠습니다.</p><p class="viHelp small muted mt-1">VI: mong rằng…</p></div>
     </div>
   </section>
 
@@ -926,6 +847,76 @@
 <script>
   const $ = (id) => document.getElementById(id);
 
+  // =========================
+  // Auto Save (localStorage)
+  // =========================
+  const STORAGE_KEY = "hometown_writing_KO-VI_v2";
+  const SAVE_DELAY_MS = 300;
+  let saveTimer = null;
+
+  function setSaveStatus(text) {
+    const el = $("saveStatus");
+    if (el) el.textContent = text;
+  }
+
+  function collectAllTextareaValues() {
+    const data = {};
+    document.querySelectorAll("textarea").forEach(t => {
+      if (t.id) data[t.id] = t.value;
+    });
+    return data;
+  }
+
+  function saveToLocalStorageNow() {
+    try {
+      const data = collectAllTextareaValues();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        data
+      }));
+      setSaveStatus("저장됨");
+    } catch (e) {
+      setSaveStatus("저장 실패");
+      console.error(e);
+    }
+  }
+
+  function scheduleSave() {
+    setSaveStatus("저장 중…");
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveToLocalStorageNow();
+      saveTimer = null;
+    }, SAVE_DELAY_MS);
+  }
+
+  function restoreFromLocalStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      const data = parsed?.data || {};
+      Object.keys(data).forEach(id => {
+        const el = $(id);
+        if (el && el.tagName === "TEXTAREA") el.value = data[id];
+      });
+      setSaveStatus("복원됨");
+      return true;
+    } catch (e) {
+      console.error(e);
+      setSaveStatus("복원 실패");
+      return false;
+    }
+  }
+
+  function clearSavedData() {
+    localStorage.removeItem(STORAGE_KEY);
+    setSaveStatus("저장 데이터 삭제됨");
+  }
+
+  // =========================
+  // UI helpers
+  // =========================
   function setActiveTab(tabId) {
     document.querySelectorAll(".tabPanel").forEach(p => p.classList.add("hidden"));
     $(tabId).classList.remove("hidden");
@@ -977,7 +968,9 @@
     localStorage.setItem("viHelpOn", on ? "1" : "0");
   }
 
-  // tab
+  // =========================
+  // Init
+  // =========================
   document.querySelectorAll(".tabBtn").forEach(btn => {
     btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
   });
@@ -986,9 +979,9 @@
   let viOn = localStorage.getItem("viHelpOn");
   viOn = viOn === null ? true : (viOn === "1");
   toggleVI(viOn);
-  $("toggleVI").addEventListener("click", () => { viOn = !viOn; toggleVI(viOn); });
+  $("toggleVI").addEventListener("click", () => { viOn = !viOn; toggleVI(viOn); scheduleSave(); });
 
-  // example insert
+  // 예문 삽입
   document.querySelectorAll(".exInsert").forEach(btn => {
     btn.addEventListener("click", () => {
       const target = btn.dataset.target;
@@ -996,12 +989,12 @@
       const el = $(target);
       el.value = text;
       el.focus();
-      // 커서를 끝으로
       el.setSelectionRange(el.value.length, el.value.length);
+      scheduleSave();
     });
   });
 
-  // copy buttons
+  // 복사 버튼
   document.querySelectorAll(".copyBtn").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.dataset.copy;
@@ -1009,69 +1002,61 @@
     });
   });
 
-  // paragraph builders (문장 품질 개선 반영)
+  // 입력 시 자동 저장
+  document.querySelectorAll("textarea").forEach(t => {
+    t.addEventListener("input", scheduleSave);
+  });
+
+  // 페이지 떠날 때 즉시 저장(보험)
+  window.addEventListener("beforeunload", () => {
+    saveToLocalStorageNow();
+  });
+
+  // =========================
+  // Paragraph builders
+  // =========================
   $("makeP1").addEventListener("click", () => {
-    const out = [
-      $("s1").value,
-      $("s2").value,
-      $("s3").value
-    ];
-    $("p1Out").value = joinSentences(out);
+    $("p1Out").value = joinSentences([$("s1").value, $("s2").value, $("s3").value]);
+    scheduleSave();
   });
 
   $("makeP2").addEventListener("click", () => {
-    const out = [
-      $("s4").value,
-      $("s5").value,
-      $("s6").value,
-      $("s7").value,
-      $("s8").value
-    ];
-    $("p2Out").value = joinSentences(out);
+    $("p2Out").value = joinSentences([$("s4").value, $("s5").value, $("s6").value, $("s7").value, $("s8").value]);
+    scheduleSave();
   });
 
   $("makeP3").addEventListener("click", () => {
-    // 문장 생성부: 어색함/조사 문제 최소화 위해 학생 문장을 우선 결합
-    const out = [
-      $("s9").value,
-      $("s10").value,
-      $("s11").value,
-      $("s12").value,
-      $("s13").value
-    ];
-    $("p3Out").value = joinSentences(out);
+    $("p3Out").value = joinSentences([$("s9").value, $("s10").value, $("s11").value, $("s12").value, $("s13").value]);
+    scheduleSave();
   });
 
   $("makeP4").addEventListener("click", () => {
-    const out = [
-      $("s14").value,
-      $("s15").value,
-      $("s16").value,
-      $("s17").value
-    ];
-    $("p4Out").value = joinSentences(out);
+    $("p4Out").value = joinSentences([$("s14").value, $("s15").value, $("s16").value, $("s17").value]);
+    scheduleSave();
   });
 
-  // Save to final
+  // 저장 버튼(최종 글 칸으로)
   document.querySelectorAll(".saveBtn").forEach(btn => {
     btn.addEventListener("click", () => {
       const srcId = btn.dataset.save;
       const targetId = btn.dataset.target;
       $(targetId).value = $(srcId).value;
+      scheduleSave();
       setActiveTab("tab6");
     });
   });
 
-  // Auto fill (소질문 문장 -> 단락칸 자동 채우기)
+  // 자동 채우기
   $("autoFill").addEventListener("click", () => {
     $("final1").value = $("p1Out").value || joinSentences([$("s1").value, $("s2").value, $("s3").value]);
     $("final2").value = $("p2Out").value || joinSentences([$("s4").value, $("s5").value, $("s6").value, $("s7").value, $("s8").value]);
     $("final3").value = $("p3Out").value || joinSentences([$("s9").value, $("s10").value, $("s11").value, $("s12").value, $("s13").value]);
     $("final4").value = $("p4Out").value || joinSentences([$("s14").value, $("s15").value, $("s16").value, $("s17").value]);
+    scheduleSave();
     setActiveTab("tab6");
   });
 
-  // Final builder
+  // 최종 글 생성
   $("makeFinal").addEventListener("click", () => {
     const parts = [
       $("final1").value.trim(),
@@ -1080,9 +1065,10 @@
       $("final4").value.trim()
     ].filter(Boolean);
     $("finalOut").value = parts.join("\n\n");
+    scheduleSave();
   });
 
-  // Download as txt
+  // txt 저장
   $("downloadTxt").addEventListener("click", () => {
     const text = $("finalOut").value || "";
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -1096,13 +1082,18 @@
     URL.revokeObjectURL(url);
   });
 
-  // Reset
+  // 전체 초기화(저장 데이터도 삭제)
   $("resetAll").addEventListener("click", () => {
-    if (!confirm("정말 전체 초기화할까요?")) return;
+    if (!confirm("정말 전체 초기화할까요? (저장된 내용도 삭제됩니다)")) return;
     document.querySelectorAll("textarea").forEach(el => el.value = "");
+    clearSavedData();
     setActiveTab("tab1");
   });
 
+  // 최초 복원
+  restoreFromLocalStorage();
+
+  // 최초 탭
   setActiveTab("tab1");
 </script>
 </body>
