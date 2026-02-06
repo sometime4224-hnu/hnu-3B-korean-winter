@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>말하기 테스트(인터뷰) 준비 · 고향 (KO-VI) · 자동저장</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, "Noto Sans KR", Arial, sans-serif; }
+    .safe-bottom { padding-bottom: max(96px, env(safe-area-inset-bottom)); }
+    .shadow-soft { box-shadow: 0 10px 30px rgba(2,6,23,.06); }
+    .card { @apply bg-white border border-slate-200 rounded-3xl; }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display:none; }
+    .tap { -webkit-tap-highlight-color: transparent; }
+    .textarea { width:100%; border:1px solid rgb(203 213 225); border-radius: 1.25rem; padding: .85rem .9rem; background:#fff; font-size: .95rem; line-height: 1.35rem; }
+    .textarea:focus { outline:none; box-shadow: 0 0 0 4px rgba(59,130,246,.12); border-color: rgb(147 197 253); }
+    .btn { @apply tap inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold active:scale-[.99]; }
+    .btn-primary { @apply bg-slate-900 text-white hover:bg-slate-800; }
+    .btn-ghost { @apply bg-white border border-slate-200 text-slate-900 hover:bg-slate-50; }
+    .btn-muted { @apply bg-slate-100 text-slate-900 hover:bg-slate-200; }
+    .chip { @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700; }
+    .pill { @apply inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-extrabold text-slate-700; }
+    .helpPanel { background: rgb(248 250 252); border:1px solid rgb(226 232 240); border-radius: 1.25rem; padding: .85rem; }
+    .miniBtn { display:inline-flex; align-items:center; justify-content:center; padding:.6rem .85rem; border-radius:1.1rem; font-weight:800; font-size:.85rem; border:1px solid rgb(226 232 240); background:white; }
+    .miniPrimary { border-color: rgb(15 23 42); background: rgb(15 23 42); color:#fff; }
+    .miniMuted { background: rgb(241 245 249); }
+    .k { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 safe-bottom">
+  <!-- Top bar -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-base font-extrabold tracking-tight truncate">말하기 테스트(인터뷰) 준비 · 고향</h1>
+          <span id="saveChip" class="chip">
+            <span class="k">●</span>
+            <span id="saveStatus">저장됨</span>
+          </span>
+        </div>
+        <p id="stageHint" class="text-xs text-slate-600 truncate">지금: Q1 · 다음: Q2</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="toggleVI" class="btn btn-ghost px-3 py-2 text-xs">
+          VI <span id="viState" class="font-extrabold">ON</span>
+        </button>
+        <button id="openHelp" class="btn btn-ghost px-3 py-2 text-xs">도움말</button>
+        <button id="resetAll" class="btn btn-primary px-3 py-2 text-xs">초기화</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="max-w-5xl mx-auto px-4 pb-3">
+      <div class="card p-3 shadow-soft">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div id="qBadge" class="rounded-2xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2">Q1</div>
+            <div class="min-w-0">
+              <p id="qTitle" class="text-sm font-extrabold truncate">고향 소개를 시작하세요</p>
+              <p id="qSub" class="text-xs text-slate-600 truncate">짧게-자연스럽게-1-3문장</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="jumpPrev" class="btn btn-muted px-3 py-2 text-xs">이전</button>
+            <button id="jumpNext" class="btn btn-muted px-3 py-2 text-xs">다음</button>
+          </div>
+        </div>
+
+        <div class="mt-3 grid grid-cols-6 gap-2">
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-slate-900 text-white text-xs font-extrabold py-2" data-q="1">1</button>
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-extrabold py-2" data-q="2">2</button>
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-extrabold py-2" data-q="3">3</button>
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-extrabold py-2" data-q="4">4</button>
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-extrabold py-2" data-q="5">5</button>
+          <button class="qDot tap rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-extrabold py-2" data-q="6">6</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Help modal -->
+  <div id="helpModal" class="hidden fixed inset-0 z-[60]">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute left-0 right-0 bottom-0 max-w-5xl mx-auto px-4 pb-4">
+      <div class="card shadow-soft p-4 rounded-3xl">
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-sm font-extrabold">사용 방법(인터뷰 대비)</p>
+          <button id="closeHelp" class="btn btn-ghost px-3 py-2 text-xs">닫기</button>
+        </div>
+
+        <div class="mt-3 space-y-3 text-sm text-slate-700 leading-relaxed">
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <p class="font-bold">1) 질문 6개를 순서대로 연습</p>
+            <p>각 질문에 <b>핵심 2-3개</b>만 말하세요. 길게 말하지 마세요.</p>
+          </div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <p class="font-bold">2) 말하기용 답변은 “짧은 문장”</p>
+            <p><b>원고처럼 읽지 말고</b>, 문장을 짧게 끊어 말하세요.</p>
+          </div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <p class="font-bold">3) 예문 삽입 → 단어만 바꾸기</p>
+            <p><b>예문 삽입</b>을 누르고 지역/장소/이유만 바꾸세요.</p>
+          </div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <p class="font-bold">자동저장</p>
+            <p>입력하면 자동으로 저장됩니다. (같은 기기/같은 브라우저 기준)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Quick actions -->
+    <section class="card p-4 shadow-soft">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="chip">자동저장</span>
+        <span class="chip">예문 삽입</span>
+        <span class="chip">모범 답변(2-3문장)</span>
+        <span class="chip">인터뷰용 연결표현</span>
+      </div>
+
+      <div class="mt-3 grid grid-cols-2 sm:grid-cols-6 gap-2">
+        <button class="navBtn btn btn-ghost" data-q="1">Q1</button>
+        <button class="navBtn btn btn-ghost" data-q="2">Q2</button>
+        <button class="navBtn btn btn-ghost" data-q="3">Q3</button>
+        <button class="navBtn btn btn-ghost" data-q="4">Q4</button>
+        <button class="navBtn btn btn-ghost" data-q="5">Q5</button>
+        <button class="navBtn btn btn-primary" data-q="6">Q6</button>
+      </div>
+
+      <div class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button id="copyAll" class="btn btn-ghost">전체 답변 복사</button>
+        <button id="downloadJSON" class="btn btn-ghost">백업(.json)</button>
+        <button id="downloadTxt" class="btn btn-ghost">.txt 저장</button>
+        <button id="focusMode" class="btn btn-primary">집중 모드</button>
+      </div>
+
+      <p class="mt-3 text-xs text-slate-600">
+        팁: 답변은 <b>장소 → 특징 → 이유</b> 순서로 짧게 말하기.
+      </p>
+    </section>
+
+    <!-- Common speaking expressions -->
+    <section class="card p-4 shadow-soft">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-extrabold">인터뷰용 연결 표현(말하기용)</h2>
+          <p class="text-xs text-slate-600">짧게, 자연스럽게</p>
+        </div>
+        <span class="pill">필수</span>
+      </div>
+
+      <div class="mt-3 grid gap-2">
+        <div class="helpPanel">
+          <p class="font-extrabold text-sm">시작</p>
+          <p class="text-sm mt-1">먼저 제 고향을 소개하겠습니다. / 제 고향은 …에 있습니다.</p>
+          <p class="viHelp text-xs text-slate-600 mt-1">VI: Trước tiên, tôi xin giới thiệu quê tôi…</p>
+        </div>
+        <div class="helpPanel">
+          <p class="font-extrabold text-sm">예시</p>
+          <p class="text-sm mt-1">예를 들면 … / 특히 …</p>
+          <p class="viHelp text-xs text-slate-600 mt-1">VI: Ví dụ… / Đặc biệt…</p>
+        </div>
+        <div class="helpPanel">
+          <p class="font-extrabold text-sm">이유</p>
+          <p class="text-sm mt-1">왜냐하면 …기 때문입니다. / … 때문에 …합니다.</p>
+          <p class="viHelp text-xs text-slate-600 mt-1">VI: Bởi vì…</p>
+        </div>
+        <div class="helpPanel">
+          <p class="font-extrabold text-sm">비교(과거-현재)</p>
+          <p class="text-sm mt-1">예전에는 …했지만, 지금은 …합니다.</p>
+          <p class="viHelp text-xs text-slate-600 mt-1">VI: Trước đây… nhưng bây giờ…</p>
+        </div>
+        <div class="helpPanel">
+          <p class="font-extrabold text-sm">마무리</p>
+          <p class="text-sm mt-1">그래서 저는 고향이 좋습니다. / 저에게 고향은 …입니다.</p>
+          <p class="viHelp text-xs text-slate-600 mt-1">VI: Vì vậy tôi thích quê tôi…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Question panels -->
+    <section id="qPanel" class="space-y-4"></section>
+
+    <!-- Full script preview -->
+    <section class="card p-4 shadow-soft">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-extrabold">전체 답변(연습 스크립트)</h2>
+          <p class="text-xs text-slate-600">면접처럼 6문항 순서대로 읽으며 연습</p>
+        </div>
+        <span class="pill">자동 생성</span>
+      </div>
+
+      <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button id="makeScript" class="btn btn-primary">스크립트 생성</button>
+        <button id="copyScript" class="btn btn-ghost">스크립트 복사</button>
+        <button id="clearScript" class="btn btn-ghost">스크립트 지우기</button>
+        <button id="scrollTop" class="btn btn-muted">맨 위</button>
+      </div>
+
+      <div class="mt-3">
+        <textarea id="scriptOut" class="textarea bg-slate-50" rows="10" placeholder="여기에 생성됩니다." readonly></textarea>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom bar -->
+  <nav class="fixed left-0 right-0 bottom-0 z-50 bg-white/95 backdrop-blur border-t border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-3 grid grid-cols-6 gap-2">
+      <button class="bottomBtn btn btn-ghost px-2 py-3 text-xs" data-q="1">Q1</button>
+      <button class="bottomBtn btn btn-ghost px-2 py-3 text-xs" data-q="2">Q2</button>
+      <button class="bottomBtn btn btn-ghost px-2 py-3 text-xs" data-q="3">Q3</button>
+      <button class="bottomBtn btn btn-ghost px-2 py-3 text-xs" data-q="4">Q4</button>
+      <button class="bottomBtn btn btn-ghost px-2 py-3 text-xs" data-q="5">Q5</button>
+      <button class="bottomBtn btn btn-primary px-2 py-3 text-xs" data-q="6">Q6</button>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="pointer-events-none fixed left-0 right-0 bottom-[92px] z-[70] hidden">
+    <div class="max-w-5xl mx-auto px-4">
+      <div id="toastBox" class="pointer-events-auto card shadow-soft px-4 py-3 text-sm font-bold border rounded-3xl"></div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // =========================
+  // Data: 6 interview questions
+  // =========================
+  const QUESTIONS = [
+    {
+      id: 1,
+      title: "Q1. 고향은 어디입니까? 간단히 소개해 주세요.",
+      meta: "1-2문장",
+      vi: "VI: Quê bạn ở đâu? Hãy giới thiệu ngắn gọn.",
+      prompt: "예: 제 고향은 …에 있습니다. …로 유명합니다.",
+      grammar: [
+        { g:"N(은/는) …에 있다", ex:["제 고향은 하노이에 있습니다.","제 고향은 베트남 중부에 있습니다."] },
+        { g:"N(으)로 유명하다", ex:["제 고향은 바다로 유명합니다.","특히 야시장이 유명합니다."] }
+      ],
+      model: [
+        "제 고향은 다낭에 있습니다.",
+        "바다와 관광지로 유명합니다."
+      ],
+      examples: [
+        "제 고향은 하노이에 있습니다.",
+        "제 고향은 바다로 유명합니다."
+      ]
+    },
+    {
+      id: 2,
+      title: "Q2. 어렸을 때 고향은 어땠습니까?",
+      meta: "2-3문장",
+      vi: "VI: Khi còn nhỏ, quê bạn như thế nào?",
+      prompt: "예: 어렸을 때는 …(이)었습니다. …하곤 했습니다.",
+      grammar: [
+        { g:"어렸을 때는 N(이)었다", ex:["어렸을 때 제 고향은 조용한 마을이었습니다."] },
+        { g:"V-곤 했다", ex:["이웃끼리 서로 도와주곤 했습니다.","친구들과 강에서 놀곤 했습니다."] },
+        { g:"A/V-았다/었다", ex:["공기가 깨끗했습니다.","사람이 많지 않았습니다."] }
+      ],
+      model: [
+        "어렸을 때 제 고향은 지금보다 조용했습니다.",
+        "공기가 깨끗했고 사람들이 친절했습니다.",
+        "이웃끼리 서로 도와주곤 했습니다."
+      ],
+      examples: [
+        "어렸을 때 제 고향은 조용한 마을이었습니다.",
+        "이웃끼리 서로 도와주곤 했습니다."
+      ]
+    },
+    {
+      id: 3,
+      title: "Q3. 지금 고향에서 가장 크게 변한 것은 무엇입니까?",
+      meta: "2-3문장",
+      vi: "VI: Bây giờ quê bạn thay đổi lớn nhất là gì?",
+      prompt: "예: 요즘은 …가 늘었습니다. …게 되었습니다.",
+      grammar: [
+        { g:"요즘은/지금은", ex:["요즘은 차가 정말 많습니다."] },
+        { g:"N(이/가) 늘었다/줄었다", ex:["아파트가 많이 늘었습니다.","공원이 줄었습니다."] },
+        { g:"V-게 되다", ex:["길이 넓어져서 이동이 편해지게 되었습니다."] }
+      ],
+      model: [
+        "지금 고향에서는 건물이 많이 늘었습니다.",
+        "길이 넓어져서 이동이 편해졌습니다.",
+        "하지만 사람도 많아졌습니다."
+      ],
+      examples: [
+        "아파트가 많이 늘었습니다.",
+        "이동이 편해지게 되었습니다."
+      ]
+    },
+    {
+      id: 4,
+      title: "Q4. 변화의 장점과 단점(불편)은 무엇입니까?",
+      meta: "3-4문장",
+      vi: "VI: Ưu điểm và bất tiện của sự thay đổi là gì?",
+      prompt: "예: … 덕분에 …할 수 있습니다. 하지만 …도 있습니다.",
+      grammar: [
+        { g:"덕분에", ex:["대중교통이 좋아진 덕분에 빨리 갈 수 있습니다."] },
+        { g:"V-(으)ㄹ 수 있다", ex:["편하게 쇼핑할 수 있습니다."] },
+        { g:"A/V-지만", ex:["편리하지만 교통체증이 심합니다."] }
+      ],
+      model: [
+        "장점은 생활이 더 편리해진 것입니다.",
+        "지하철이 생긴 덕분에 빨리 이동할 수 있습니다.",
+        "하지만 교통체증이 심해졌습니다.",
+        "그래서 공기가 나빠진 느낌도 있습니다."
+      ],
+      examples: [
+        "지하철이 생긴 덕분에 빨리 이동할 수 있습니다.",
+        "편리하지만 교통체증이 심해졌습니다."
+      ]
+    },
+    {
+      id: 5,
+      title: "Q5. 고향에서 가장 좋아하는 장소(또는 음식)는 무엇이고, 왜 그렇습니까?",
+      meta: "3-4문장",
+      vi: "VI: Bạn thích nơi (hoặc món ăn) nào nhất ở quê và vì sao?",
+      prompt: "예: …이 가장 좋습니다. 왜냐하면 …기 때문입니다. 예를 들면 …",
+      grammar: [
+        { g:"N(이/가) 가장 좋다", ex:["저는 시장이 가장 좋습니다."] },
+        { g:"왜냐하면 A/V-기 때문", ex:["왜냐하면 분위기가 활기차기 때문입니다."] },
+        { g:"예를 들면", ex:["예를 들면, 주말에 사람들이 많이 모입니다."] }
+      ],
+      model: [
+        "저는 고향에서 시장이 가장 좋습니다.",
+        "왜냐하면 분위기가 활기차기 때문입니다.",
+        "예를 들면, 주말에 사람들이 많이 모여서 재미있습니다."
+      ],
+      examples: [
+        "저는 시장이 가장 좋습니다.",
+        "왜냐하면 분위기가 활기차기 때문입니다."
+      ]
+    },
+    {
+      id: 6,
+      title: "Q6. 앞으로 고향이 어떻게 되었으면 좋겠습니까? (바라는 점 + 이유 + 방법)",
+      meta: "3-4문장",
+      vi: "VI: Bạn mong quê mình sẽ như thế nào trong tương lai? (mong muốn + lý do + cách)",
+      prompt: "예: …했으면 좋겠습니다. 왜냐하면 …기 때문입니다. …할 필요가 있다고 생각합니다.",
+      grammar: [
+        { g:"V-았/었으면 좋겠다", ex:["앞으로 공기가 더 깨끗해졌으면 좋겠습니다."] },
+        { g:"왜냐하면 A/V-기 때문", ex:["왜냐하면 주민들이 더 건강해질 수 있기 때문입니다."] },
+        { g:"V-(으)ㄹ 필요가 있다", ex:["공원을 더 만들 필요가 있다고 생각합니다."] }
+      ],
+      model: [
+        "앞으로 공기가 더 깨끗해졌으면 좋겠습니다.",
+        "왜냐하면 주민들이 더 건강해질 수 있기 때문입니다.",
+        "공원을 더 만들 필요가 있다고 생각합니다.",
+        "그리고 대중교통도 더 늘리면 좋겠습니다."
+      ],
+      examples: [
+        "앞으로 공기가 더 깨끗해졌으면 좋겠습니다.",
+        "공원을 더 만들 필요가 있다고 생각합니다."
+      ]
+    }
+  ];
+
+  // =========================
+  // Auto Save (localStorage)
+  // =========================
+  const STORAGE_KEY = "speaking_interview_hometown_KO-VI_v1";
+  const SAVE_DELAY_MS = 250;
+  let saveTimer = null;
+
+  function setSaveStatus(text, state="ok") {
+    const el = $("saveStatus");
+    if (el) el.textContent = text;
+
+    const chip = $("saveChip");
+    if (!chip) return;
+    chip.classList.remove("border-emerald-200","bg-emerald-50","text-emerald-800","border-amber-200","bg-amber-50","text-amber-800","border-rose-200","bg-rose-50","text-rose-800");
+    chip.classList.add("border-slate-200","bg-white","text-slate-700");
+
+    if (state === "saving") {
+      chip.classList.remove("bg-white","text-slate-700","border-slate-200");
+      chip.classList.add("border-amber-200","bg-amber-50","text-amber-800");
+    } else if (state === "error") {
+      chip.classList.remove("bg-white","text-slate-700","border-slate-200");
+      chip.classList.add("border-rose-200","bg-rose-50","text-rose-800");
+    } else if (state === "restored") {
+      chip.classList.remove("bg-white","text-slate-700","border-slate-200");
+      chip.classList.add("border-emerald-200","bg-emerald-50","text-emerald-800");
+    }
+  }
+
+  function scheduleSave() {
+    setSaveStatus("저장 중…", "saving");
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try {
+        const payload = {
+          savedAt: Date.now(),
+          viHelpOn: localStorage.getItem("viHelpOn_speaking") || "1",
+          activeQ: window.__activeQ || 1,
+          answers: getAllAnswers(),
+          script: $("scriptOut").value || ""
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        setSaveStatus("저장됨", "ok");
+      } catch (e) {
+        console.error(e);
+        setSaveStatus("저장 실패", "error");
+      }
+      saveTimer = null;
+    }, SAVE_DELAY_MS);
+  }
+
+  function restore() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const p = JSON.parse(raw);
+      if (p?.answers) {
+        Object.keys(p.answers).forEach(k => {
+          const el = $(k);
+          if (el && el.tagName === "TEXTAREA") el.value = p.answers[k];
+        });
+      }
+      if (p?.script && $("scriptOut")) $("scriptOut").value = p.script;
+      if (p?.viHelpOn) localStorage.setItem("viHelpOn_speaking", p.viHelpOn);
+      window.__restoreQ = p?.activeQ || 1;
+      setSaveStatus("복원됨", "restored");
+      return true;
+    } catch (e) {
+      console.error(e);
+      setSaveStatus("복원 실패", "error");
+      return false;
+    }
+  }
+
+  function clearSavedData() {
+    localStorage.removeItem(STORAGE_KEY);
+    setSaveStatus("저장 데이터 삭제됨", "ok");
+  }
+
+  // =========================
+  // UI helpers
+  // =========================
+  function toast(msg, kind="info") {
+    const t = $("toast");
+    const box = $("toastBox");
+    if (!t || !box) return;
+    t.classList.remove("hidden");
+    box.className = "pointer-events-auto card shadow-soft px-4 py-3 text-sm font-bold border rounded-3xl";
+    if (kind === "ok") box.classList.add("border-emerald-200","bg-emerald-50","text-emerald-900");
+    else if (kind === "warn") box.classList.add("border-amber-200","bg-amber-50","text-amber-900");
+    else box.classList.add("border-slate-200","bg-white","text-slate-900");
+    box.textContent = msg;
+    setTimeout(()=> t.classList.add("hidden"), 1500);
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("복사했습니다.", "ok");
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      toast("복사했습니다.", "ok");
+    }
+  }
+
+  function toggleVI(on) {
+    document.querySelectorAll(".viHelp").forEach(el => el.style.display = on ? "" : "none");
+    $("viState").textContent = on ? "ON" : "OFF";
+    localStorage.setItem("viHelpOn_speaking", on ? "1" : "0");
+  }
+
+  function getAllAnswers() {
+    const ans = {};
+    for (let i=1;i<=6;i++) {
+      ans[`a${i}`] = $(`a${i}`)?.value || "";
+      ans[`k${i}`] = $(`k${i}`)?.value || "";
+    }
+    return ans;
+  }
+
+  function makeAnswerFromKeywords(i) {
+    const kw = ($(`k${i}`)?.value || "").trim();
+    if (!kw) return "";
+    // simple: keywords -> short sentence
+    // user will still edit; provide a scaffold
+    return `(${kw})`;
+  }
+
+  function buildFullScript() {
+    const lines = [];
+    for (const q of QUESTIONS) {
+      const a = ($(`a${q.id}`)?.value || "").trim();
+      lines.push(`Q${q.id}. ${q.title}`);
+      lines.push(a ? a : "(답변을 작성하세요)");
+      lines.push("");
+    }
+    return lines.join("\n");
+  }
+
+  // =========================
+  // Render Q panels
+  // =========================
+  function renderPanels() {
+    const container = $("qPanel");
+    container.innerHTML = "";
+
+    QUESTIONS.forEach(q => {
+      const card = document.createElement("section");
+      card.id = `Q${q.id}`;
+      card.className = "card p-4 shadow-soft";
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h2 class="text-base font-extrabold">${q.title}</h2>
+            <p class="text-xs text-slate-600 mt-1">권장 길이: <b>${q.meta}</b> · 말하기는 짧게 끊어 말하기</p>
+            <p class="viHelp text-xs text-slate-600 mt-1">${q.vi}</p>
+          </div>
+          <div class="flex flex-col gap-2 items-end">
+            <span class="pill">Q${q.id}</span>
+            <button class="btn btn-muted px-3 py-2 text-xs jumpBtn" data-q="${q.id}">이 질문으로</button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3">
+          <div class="helpPanel">
+            <p class="font-extrabold text-sm">핵심 키워드(메모)</p>
+            <p class="text-xs text-slate-600 mt-1">예: 장소/특징/이유 2-3개만</p>
+            <textarea id="k${q.id}" class="textarea mt-2" rows="2" placeholder="예: 다낭 · 바다 · 관광지"></textarea>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button class="miniBtn miniMuted kwToAns" data-q="${q.id}">키워드 → 답변 힌트</button>
+              <button class="miniBtn miniMuted clearOne" data-q="${q.id}">이 질문 지우기</button>
+            </div>
+          </div>
+
+          <div>
+            <p class="font-extrabold text-sm">내 답변(말하기용 원고)</p>
+            <p class="text-xs text-slate-600 mt-1">원고처럼 길게 쓰지 말고, 짧은 문장으로.</p>
+            <textarea id="a${q.id}" class="textarea mt-2" rows="4" placeholder="${q.prompt}"></textarea>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button class="miniBtn miniPrimary exInsert" data-target="a${q.id}" data-text="${q.model.join(" ")}">모범답변 삽입</button>
+              <button class="miniBtn exInsert" data-target="a${q.id}" data-text="${q.examples[0]}">예문 삽입</button>
+              <button class="miniBtn exInsert" data-target="a${q.id}" data-text="${q.examples[1] || q.examples[0]}">예문 삽입</button>
+              <button class="miniBtn miniMuted copyOne" data-q="${q.id}">답변 복사</button>
+            </div>
+          </div>
+
+          <details>
+            <summary class="miniBtn miniMuted w-full">추천 문법·예문(말하기용) 열기</summary>
+            <div class="helpPanel mt-2">
+              <p class="font-extrabold text-sm">추천 문법</p>
+              <ul class="mt-2 list-disc pl-5 text-sm text-slate-800">
+                ${q.grammar.map(x => `<li><b>${x.g}</b><br><span class="text-slate-600">${x.ex.join(" / ")}</span></li>`).join("")}
+              </ul>
+              <p class="viHelp text-xs text-slate-600 mt-3">VI: Mở phần này để dùng mẫu câu rồi thay từ.</p>
+            </div>
+          </details>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button class="btn btn-ghost navPrev" data-q="${q.id}">이전 질문</button>
+            <button class="btn btn-muted navNext" data-q="${q.id}">다음 질문</button>
+            <button class="btn btn-ghost makeScriptOne" data-q="${q.id}">스크립트에 반영</button>
+            <button class="btn btn-primary goTop">맨 위</button>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  // =========================
+  // Active Q / header
+  // =========================
+  const headerInfo = {
+    1: { title:"고향 소개를 시작하세요", sub:"장소 + 유명한 것 (1-2문장)" },
+    2: { title:"과거(어렸을 때) 설명", sub:"분위기 + 생활 (2-3문장)" },
+    3: { title:"현재 변화 설명", sub:"무엇이 변했는지 (2-3문장)" },
+    4: { title:"장단점 비교", sub:"장점 1-2 + 단점 1 (3-4문장)" },
+    5: { title:"좋아하는 장소/음식 + 이유", sub:"선택 1개 + 이유 + 예시 (3-4문장)" },
+    6: { title:"미래 바람 + 방법", sub:"바람 + 이유 + 방법 (3-4문장)" }
+  };
+
+  function setActiveQ(qNum, scroll=true) {
+    window.__activeQ = qNum;
+
+    $("qBadge").textContent = `Q${qNum}`;
+    $("qTitle").textContent = headerInfo[qNum].title;
+    $("qSub").textContent = headerInfo[qNum].sub;
+
+    const prev = qNum <= 1 ? 1 : qNum - 1;
+    const next = qNum >= 6 ? 6 : qNum + 1;
+    $("stageHint").textContent = `지금: Q${qNum} · 다음: Q${next}`;
+
+    // dots highlight
+    document.querySelectorAll(".qDot").forEach(btn => {
+      btn.classList.remove("bg-slate-900","text-white");
+      btn.classList.add("bg-white","text-slate-700","border","border-slate-200");
+    });
+    const dot = document.querySelector(`.qDot[data-q="${qNum}"]`);
+    if (dot) {
+      dot.classList.add("bg-slate-900","text-white");
+      dot.classList.remove("bg-white","text-slate-700");
+    }
+
+    // bottom highlight
+    document.querySelectorAll(".bottomBtn").forEach(b => {
+      b.classList.remove("bg-slate-900","text-white");
+      b.classList.add("bg-white","border","border-slate-200","text-slate-900");
+    });
+    const bb = document.querySelector(`.bottomBtn[data-q="${qNum}"]`);
+    if (bb) {
+      bb.classList.add("bg-slate-900","text-white");
+      bb.classList.remove("bg-white","text-slate-900");
+    }
+
+    // scroll to card
+    if (scroll) {
+      const sec = $(`Q${qNum}`);
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    scheduleSave();
+  }
+
+  // =========================
+  // Init
+  // =========================
+  renderPanels();
+  restore();
+
+  // VI init
+  let viOn = localStorage.getItem("viHelpOn_speaking");
+  viOn = viOn === null ? true : (viOn === "1");
+  toggleVI(viOn);
+
+  $("toggleVI").addEventListener("click", () => {
+    viOn = !viOn;
+    toggleVI(viOn);
+    scheduleSave();
+    toast(viOn ? "베트남어 도움말: ON" : "베트남어 도움말: OFF", "ok");
+  });
+
+  // Help modal
+  $("openHelp").addEventListener("click", ()=> $("helpModal").classList.remove("hidden"));
+  $("closeHelp").addEventListener("click", ()=> $("helpModal").classList.add("hidden"));
+  $("helpModal").addEventListener("click", (e)=> { if (e.target === $("helpModal")) $("helpModal").classList.add("hidden"); });
+
+  // dots
+  document.querySelectorAll(".qDot").forEach(btn => {
+    btn.addEventListener("click", ()=> setActiveQ(parseInt(btn.dataset.q,10)));
+  });
+
+  // top nav
+  document.querySelectorAll(".navBtn").forEach(b=>{
+    b.addEventListener("click", ()=> setActiveQ(parseInt(b.dataset.q,10)));
+  });
+
+  // bottom nav
+  document.querySelectorAll(".bottomBtn").forEach(b=>{
+    b.addEventListener("click", ()=> setActiveQ(parseInt(b.dataset.q,10)));
+  });
+
+  // jump prev/next
+  $("jumpPrev").addEventListener("click", ()=> setActiveQ(Math.max(1, (window.__activeQ||1)-1)));
+  $("jumpNext").addEventListener("click", ()=> setActiveQ(Math.min(6, (window.__activeQ||1)+1)));
+
+  // bind dynamic buttons
+  function bindDynamic() {
+    // input autosave
+    document.querySelectorAll("textarea").forEach(t => t.addEventListener("input", scheduleSave));
+
+    // insert
+    document.querySelectorAll(".exInsert").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const text = btn.dataset.text;
+        const el = $(target);
+        if (!el) return;
+        el.value = text;
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+        scheduleSave();
+        toast("문장을 넣었습니다. 단어만 바꾸세요.", "ok");
+      });
+    });
+
+    // copy one
+    document.querySelectorAll(".copyOne").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const q = btn.dataset.q;
+        copyToClipboard($(`a${q}`)?.value || "");
+      });
+    });
+
+    // clear one
+    document.querySelectorAll(".clearOne").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const q = btn.dataset.q;
+        if (!confirm(`Q${q} 답변을 지울까요?`)) return;
+        $(`a${q}`).value = "";
+        $(`k${q}`).value = "";
+        scheduleSave();
+        toast(`Q${q} 삭제`, "ok");
+      });
+    });
+
+    // keywords -> hint
+    document.querySelectorAll(".kwToAns").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const q = btn.dataset.q;
+        const hint = makeAnswerFromKeywords(q);
+        if (!hint) { toast("키워드를 먼저 적으세요.", "warn"); return; }
+        const el = $(`a${q}`);
+        el.value = (el.value.trim() ? (el.value.trim() + "\n") : "") + hint;
+        el.focus();
+        scheduleSave();
+        toast("키워드 힌트를 넣었습니다. 문장으로 바꾸세요.", "ok");
+      });
+    });
+
+    // prev/next inside card
+    document.querySelectorAll(".navPrev").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const q = parseInt(btn.dataset.q,10);
+        setActiveQ(Math.max(1, q-1));
+      });
+    });
+    document.querySelectorAll(".navNext").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const q = parseInt(btn.dataset.q,10);
+        setActiveQ(Math.min(6, q+1));
+      });
+    });
+
+    document.querySelectorAll(".goTop").forEach(btn=>{
+      btn.addEventListener("click", ()=> window.scrollTo({top:0, behavior:"smooth"}));
+    });
+
+    // script reflect
+    document.querySelectorAll(".makeScriptOne").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        $("scriptOut").value = buildFullScript();
+        scheduleSave();
+        toast("스크립트를 갱신했습니다.", "ok");
+      });
+    });
+
+    // jump button
+    document.querySelectorAll(".jumpBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=> setActiveQ(parseInt(btn.dataset.q,10)));
+    });
+  }
+  bindDynamic();
+
+  // Script actions
+  $("makeScript").addEventListener("click", ()=>{
+    $("scriptOut").value = buildFullScript();
+    scheduleSave();
+    toast("스크립트 생성 완료", "ok");
+  });
+  $("copyScript").addEventListener("click", ()=> copyToClipboard($("scriptOut").value || ""));
+  $("clearScript").addEventListener("click", ()=>{
+    $("scriptOut").value = "";
+    scheduleSave();
+    toast("스크립트 삭제", "ok");
+  });
+
+  // Copy all
+  $("copyAll").addEventListener("click", ()=>{
+    const parts = [];
+    for (let i=1;i<=6;i++) {
+      const a = ($(`a${i}`)?.value || "").trim();
+      parts.push(`Q${i}. ${QUESTIONS[i-1].title}\n${a ? a : "(답변 없음)"}`);
+    }
+    copyToClipboard(parts.join("\n\n"));
+  });
+
+  // Downloads
+  function downloadBackupJSON() {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      activeQ: window.__activeQ || 1,
+      viHelpOn: localStorage.getItem("viHelpOn_speaking") || "1",
+      answers: getAllAnswers(),
+      script: $("scriptOut").value || ""
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "speaking_interview_hometown_backup.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("백업(.json) 저장 완료", "ok");
+  }
+  $("downloadJSON").addEventListener("click", downloadBackupJSON);
+
+  $("downloadTxt").addEventListener("click", ()=>{
+    const text = $("scriptOut").value || buildFullScript();
+    const blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "speaking_interview_hometown_script.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(".txt 저장 완료", "ok");
+  });
+
+  // Focus mode (hide everything except active question card)
+  let focusOn = false;
+  $("focusMode").addEventListener("click", ()=>{
+    focusOn = !focusOn;
+    const container = $("qPanel");
+    if (!container) return;
+    if (focusOn) {
+      container.querySelectorAll("section").forEach(sec=>{
+        if (sec.id !== `Q${window.__activeQ || 1}`) sec.classList.add("hidden");
+      });
+      $("focusMode").textContent = "전체 보기";
+      toast("집중 모드", "ok");
+    } else {
+      container.querySelectorAll("section").forEach(sec=> sec.classList.remove("hidden"));
+      $("focusMode").textContent = "집중 모드";
+      toast("전체 보기", "ok");
+    }
+    scheduleSave();
+  });
+
+  // Reset
+  $("resetAll").addEventListener("click", ()=>{
+    if (!confirm("정말 전체 초기화할까요? (저장된 내용도 삭제됩니다)")) return;
+    for (let i=1;i<=6;i++) {
+      $(`a${i}`).value = "";
+      $(`k${i}`).value = "";
+    }
+    $("scriptOut").value = "";
+    clearSavedData();
+    localStorage.setItem("viHelpOn_speaking", viOn ? "1" : "0");
+    toast("초기화 완료", "ok");
+    setActiveQ(1, true);
+  });
+
+  // Save on unload
+  window.addEventListener("beforeunload", ()=> {
+    try {
+      const payload = {
+        savedAt: Date.now(),
+        viHelpOn: localStorage.getItem("viHelpOn_speaking") || "1",
+        activeQ: window.__activeQ || 1,
+        answers: getAllAnswers(),
+        script: $("scriptOut").value || ""
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch(e) {}
+  });
+
+  // scroll top
+  $("scrollTop").addEventListener("click", ()=> window.scrollTo({top:0, behavior:"smooth"}));
+
+  // Initial active Q
+  const startQ = window.__restoreQ || 1;
+  setActiveQ(startQ, false);
+  // If focus was previously on, do not restore (keep simple)
+
+</script>
+</body>
+</html>
