@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 문법 연구소: N만하다 & V-(으)ㄹ 만하다</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .emoji-animate {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-6 shadow-lg">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-3xl font-bold mb-2">🎓 한국어 문법 연구소</h1>
+            <p class="opacity-90">비교와 가치를 표현하는 두 가지 문법 배우기</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="max-w-3xl mx-auto mt-6 px-4">
+        <div class="flex rounded-lg bg-gray-200 p-1">
+            <button onclick="switchTab('noun')" id="btn-noun" class="flex-1 py-3 px-4 rounded-md text-sm font-medium bg-white text-indigo-600 shadow-sm transition-all duration-200">
+                1. N만하다 (명사)
+            </button>
+            <button onclick="switchTab('verb')" id="btn-verb" class="flex-1 py-3 px-4 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-200">
+                2. V-(으)ㄹ 만하다 (동사)
+            </button>
+            <button onclick="switchTab('quiz')" id="btn-quiz" class="flex-1 py-3 px-4 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-200">
+                3. 실전 퀴즈
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto mt-6 px-4 pb-20">
+
+        <!-- SECTION 1: N만하다 -->
+        <section id="tab-noun" class="tab-content active space-y-6">
+            <!-- Explanation Card -->
+            <div class="card p-6 border-l-4 border-indigo-500">
+                <h2 class="text-xl font-bold text-indigo-700 mb-3">📌 문법 설명: N만하다</h2>
+                <p class="mb-2 text-lg">명사(N) 뒤에 붙어서 <strong>'크기나 정도가 비슷함'</strong>을 나타냅니다.</p>
+                <div class="bg-indigo-50 p-3 rounded-lg text-sm text-indigo-800">
+                    <span class="font-bold">공식:</span> 명사 + 만하다<br>
+                    <span class="text-xs text-gray-500">(띄어쓰기: 원칙적으로 붙여 씁니다. 'N만 하다')</span>
+                </div>
+            </div>
+
+            <!-- Interactive Visualizer -->
+            <div class="card p-6 text-center">
+                <h3 class="text-lg font-bold mb-4">👀 크기 비교 체험하기</h3>
+                <p class="text-gray-600 mb-6">아래 버튼을 눌러 예문을 확인해보세요.</p>
+                
+                <div class="flex justify-center gap-2 mb-8 flex-wrap">
+                    <button onclick="changeSize('bean')" class="px-4 py-2 bg-green-100 text-green-700 rounded-full hover:bg-green-200 font-bold transition">콩 (Bean)</button>
+                    <button onclick="changeSize('fist')" class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 font-bold transition">주먹 (Fist)</button>
+                    <button onclick="changeSize('house')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 font-bold transition">집채 (House)</button>
+                </div>
+
+                <div class="h-40 flex items-center justify-center relative bg-gray-50 rounded-xl overflow-hidden mb-4 border border-gray-200">
+                    <div id="compare-object" class="text-6xl emoji-animate">🐭</div>
+                    <div id="compare-text" class="absolute bottom-2 text-sm text-gray-400">쥐 (Mouse)</div>
+                </div>
+
+                <div id="noun-result-text" class="text-xl font-bold text-gray-800 h-8">
+                    쥐가 작아요.
+                </div>
+                <div id="noun-explanation" class="text-sm text-gray-500 mt-2 h-6">
+                    (기본 상태)
+                </div>
+            </div>
+
+            <!-- Examples List -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold mb-3">📝 자주 쓰는 표현</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded mr-2 mt-1">크기</span>
+                        <span>얼굴이 <strong>주먹만해요</strong>. <br><span class="text-sm text-gray-500">(얼굴이 아주 작아요)</span></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded mr-2 mt-1">정도</span>
+                        <span>그 강아지는 <strong>나만해요</strong>. <br><span class="text-sm text-gray-500">(강아지 키가 나랑 비슷해요)</span></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded mr-2 mt-1">과장</span>
+                        <span>간이 <strong>콩알만해졌어요</strong>. <br><span class="text-sm text-gray-500">(너무 놀라서 간이 작아진 것 같아요)</span></span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 2: V-(으)ㄹ 만하다 -->
+        <section id="tab-verb" class="tab-content space-y-6">
+            <!-- Explanation Card -->
+            <div class="card p-6 border-l-4 border-pink-500">
+                <h2 class="text-xl font-bold text-pink-700 mb-3">📌 문법 설명: V-(으)ㄹ 만하다</h2>
+                <p class="mb-2 text-lg">동사(V) 뒤에 붙어 <strong>'가치'</strong>나 <strong>'가능성'</strong>을 나타냅니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-pink-50 p-3 rounded-lg">
+                        <strong class="text-pink-700 block mb-1">1. 가치 (Recommendation)</strong>
+                        "그 영화는 볼 만해요."<br>
+                        <span class="text-xs text-gray-500">(볼 가치가 있어요. 추천해요.)</span>
+                    </div>
+                    <div class="bg-pink-50 p-3 rounded-lg">
+                        <strong class="text-pink-700 block mb-1">2. 가능성 (Possibility)</strong>
+                        "참을 만해요."<br>
+                        <span class="text-xs text-gray-500">(참을 수 있는 정도예요.)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conjugation Lab -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold mb-4">🔧 활용 연습 (Conjugation)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="py-2 text-sm text-gray-500">조건</th>
+                                <th class="py-2 text-sm text-gray-500">규칙</th>
+                                <th class="py-2 text-sm text-gray-500">예시 (클릭하세요!)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 font-semibold">받침 X</td>
+                                <td class="py-3 text-pink-600 font-bold">+ ㄹ 만하다</td>
+                                <td class="py-3">
+                                    <button onclick="showConj('가다', '갈 만해요', '갈 가치가 있어요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">가다</button>
+                                    <button onclick="showConj('보다', '볼 만해요', '재미있어서 추천해요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">보다</button>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 font-semibold">받침 O</td>
+                                <td class="py-3 text-pink-600 font-bold">+ 을 만하다</td>
+                                <td class="py-3">
+                                    <button onclick="showConj('먹다', '먹을 만해요', '맛이 괜찮아요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">먹다</button>
+                                    <button onclick="showConj('믿다', '믿을 만해요', '신뢰할 수 있어요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">믿다</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-semibold">ㄹ 받침</td>
+                                <td class="py-3 text-pink-600 font-bold">ㄹ 탈락 + ㄹ 만하다</td>
+                                <td class="py-3">
+                                    <button onclick="showConj('살다', '살 만해요', '생활하기 괜찮아요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">살다</button>
+                                    <button onclick="showConj('만들다', '만들 만해요', '만들 가치가 있어요.')" class="bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">만들다</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Conjugation Result Display -->
+                <div id="conj-result" class="mt-4 p-4 bg-gray-800 text-white rounded-lg text-center hidden">
+                    <div class="text-sm text-gray-400 mb-1">결과 (Result)</div>
+                    <div id="conj-word" class="text-2xl font-bold mb-2"></div>
+                    <div id="conj-meaning" class="text-sm text-yellow-300"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: QUIZ -->
+        <section id="tab-quiz" class="tab-content space-y-6">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">🧠 실전 퀴즈</h2>
+                
+                <!-- Quiz 1 -->
+                <div class="mb-8 pb-6 border-b border-gray-100">
+                    <p class="font-bold mb-3">1. 다음 문장을 완성하세요.</p>
+                    <p class="bg-gray-100 p-4 rounded-lg mb-4 text-center">"우박이 <span class="text-indigo-600 font-bold">________</span>." (Hail is the size of a bean.)</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="checkAnswer(1, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">① 콩만하다</button>
+                        <button onclick="checkAnswer(1, true, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">② 콩알만하다</button>
+                        <button onclick="checkAnswer(1, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">③ 콩할 만하다</button>
+                        <button onclick="checkAnswer(1, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">④ 콩일 만하다</button>
+                    </div>
+                    <div id="feedback-1" class="hidden mt-3 text-sm font-bold"></div>
+                </div>
+
+                <!-- Quiz 2 -->
+                <div class="mb-8 pb-6 border-b border-gray-100">
+                    <p class="font-bold mb-3">2. "이 책은 정말 재미있어요. 추천해요!"와 같은 뜻은?</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="checkAnswer(2, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">① 이 책은 읽을 뻔했어요.</button>
+                        <button onclick="checkAnswer(2, true, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">② 이 책은 읽을 만해요.</button>
+                        <button onclick="checkAnswer(2, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">③ 이 책은 읽는 척해요.</button>
+                    </div>
+                    <div id="feedback-2" class="hidden mt-3 text-sm font-bold"></div>
+                </div>
+
+                <!-- Quiz 3 -->
+                <div>
+                    <p class="font-bold mb-3">3. 다음 중 연결이 <span class="text-red-500">틀린</span> 것은?</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="checkAnswer(3, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">① 듣다 → 들을 만하다 (O)</button>
+                        <button onclick="checkAnswer(3, false, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">② 가다 → 갈 만하다 (O)</button>
+                        <button onclick="checkAnswer(3, true, this)" class="quiz-btn border p-3 rounded hover:bg-gray-50 text-left">③ 살다 → 살을 만하다 (X)</button>
+                    </div>
+                    <div id="feedback-3" class="hidden mt-3 text-sm font-bold"></div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-6 text-gray-500 text-sm border-t">
+        <p>한국어 문법 학습 도우미</p>
+    </footer>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Show selected content
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Reset buttons styling
+            const buttons = ['noun', 'verb', 'quiz'];
+            buttons.forEach(btn => {
+                const el = document.getElementById(`btn-${btn}`);
+                if (btn === tabName) {
+                    el.className = 'flex-1 py-3 px-4 rounded-md text-sm font-medium bg-white text-indigo-600 shadow-sm transition-all duration-200';
+                } else {
+                    el.className = 'flex-1 py-3 px-4 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-200';
+                }
+            });
+        }
+
+        // Feature 1: Noun Size Comparison Logic
+        function changeSize(type) {
+            const emojiEl = document.getElementById('compare-object');
+            const textEl = document.getElementById('compare-text');
+            const resultEl = document.getElementById('noun-result-text');
+            const explainEl = document.getElementById('noun-explanation');
+            
+            // Reset transforms
+            emojiEl.style.transform = 'scale(1)';
+
+            if (type === 'bean') {
+                emojiEl.innerText = '🫘'; // Bean emoji
+                textEl.innerText = '콩 (Bean)';
+                setTimeout(() => emojiEl.style.transform = 'scale(0.3)', 50);
+                resultEl.innerHTML = "<span class='text-indigo-600'>콩알만해요.</span>";
+                explainEl.innerText = "(아주 작아요 / It's as small as a bean)";
+            } else if (type === 'fist') {
+                emojiEl.innerText = '👊'; // Fist emoji
+                textEl.innerText = '주먹 (Fist)';
+                setTimeout(() => emojiEl.style.transform = 'scale(1.2)', 50);
+                resultEl.innerHTML = "<span class='text-indigo-600'>주먹만해요.</span>";
+                explainEl.innerText = "(보통 얼굴이나 과일 크기를 비교할 때 / Size of a fist)";
+            } else if (type === 'house') {
+                emojiEl.innerText = '🏠'; // House emoji
+                textEl.innerText = '집채 (House)';
+                setTimeout(() => emojiEl.style.transform = 'scale(2.5)', 50);
+                resultEl.innerHTML = "<span class='text-indigo-600'>집채만해요.</span>";
+                explainEl.innerText = "(파도나 호랑이 등이 아주 클 때 / Huge like a house)";
+            }
+        }
+
+        // Feature 2: Verb Conjugation Logic
+        function showConj(base, result, meaning) {
+            const resultDiv = document.getElementById('conj-result');
+            const wordDiv = document.getElementById('conj-word');
+            const meanDiv = document.getElementById('conj-meaning');
+
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('block', 'animate-pulse');
+            
+            // Remove animation class after plays once
+            setTimeout(() => resultDiv.classList.remove('animate-pulse'), 500);
+
+            wordDiv.innerHTML = `${base} → <span class="text-pink-400">${result}</span>`;
+            meanDiv.innerText = meaning;
+        }
+
+        // Feature 3: Quiz Logic
+        function checkAnswer(qId, isCorrect, btnElement) {
+            const feedbackEl = document.getElementById(`feedback-${qId}`);
+            
+            // Disable siblings to prevent multiple guesses
+            const parent = btnElement.parentElement;
+            const siblings = parent.getElementsByTagName('button');
+            for(let btn of siblings) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                btnElement.classList.remove('hover:bg-gray-50');
+                btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                feedbackEl.innerText = "🎉 정답입니다! (Correct)";
+                feedbackEl.classList.add('text-green-600');
+            } else {
+                btnElement.classList.remove('hover:bg-gray-50');
+                btnElement.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                
+                // Explain specific wrong answers
+                let explanation = "";
+                if(qId === 3) explanation = " '살다'는 ㄹ받침이므로 'ㄹ'이 탈락하고 '살 만하다'가 됩니다.";
+                
+                feedbackEl.innerText = "😢 오답입니다. 다시 생각해보세요." + explanation;
+                feedbackEl.classList.add('text-red-600');
+            }
+        }
+    </script>
+</body>
+</html>
+
