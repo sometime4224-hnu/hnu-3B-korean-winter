@@ -34,26 +34,28 @@
   <div class="max-w-6xl mx-auto px-4 py-6 md:py-10">
     <!-- Header -->
     <div class="soft-shadow bg-white rounded-2xl p-5 md:p-6 border border-slate-100">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold tracking-tight">TOPIK 쓰기 52번 연습 (서술절 빈칸)</h1>
-          <p class="text-sm md:text-base text-slate-600 mt-2">
-            빈칸에는 <span class="font-semibold">명사</span>가 아니라 <span class="font-semibold">서술절(서술어가 있는 구/절)</span>을 쓰세요.
-            의미가 같으면 <span class="font-semibold">유사한 답</span>도 정답 처리될 수 있습니다.
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight truncate">TOPIK 쓰기 52번 (서술절 빈칸)</h1>
+            <span class="hidden md:inline-flex text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-700">14·15·16과</span>
+          </div>
+          <p class="text-sm md:text-base text-slate-600 mt-2 leading-6">
+            빈칸에는 <span class="font-semibold">서술절</span>(서술어 포함)을 쓰세요. 의미가 같으면 유사 답도 정답 처리될 수 있습니다.
           </p>
           <p class="text-xs md:text-sm text-slate-500 mt-1">
-            PC: <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> = 채점하기 · 모바일: 하단 버튼 사용
+            PC: <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> 채점 · 모바일: 하단 버튼
           </p>
         </div>
 
         <div class="flex flex-wrap gap-2 items-center justify-start md:justify-end">
           <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border bg-slate-50">
             <input id="toggleVn" type="checkbox" class="w-4 h-4" />
-            <span class="text-sm font-semibold">베트남어 도움 표시</span>
+            <span class="text-sm font-semibold">VN 도움</span>
           </label>
 
           <button id="btnCopy" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold">
-            내 답 복사
+            답안 복사
           </button>
           <button id="btnReset" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold">
             초기화
@@ -72,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Tabs -->
+      <!-- Tabs (simplified) -->
       <div class="mt-5 flex gap-2 flex-wrap">
         <button class="tabBtn px-3 py-2 rounded-xl border bg-slate-900 text-white text-sm font-semibold" data-step="0">14과</button>
         <button class="tabBtn px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold" data-step="1">15과</button>
@@ -85,12 +87,12 @@
       <!-- LEFT: Passage + Inputs -->
       <div class="soft-shadow bg-white rounded-2xl border border-slate-100 p-5 md:p-6">
         <div class="flex items-start justify-between gap-3">
-          <div>
-            <h2 id="lessonTitle" class="text-lg md:text-xl font-bold">14과 읽기: 도낏자루 썩는 줄 모른다</h2>
-            <p class="text-sm text-slate-600 mt-1">지문을 읽고, 빈칸에 알맞은 <span class="font-semibold">서술절</span>을 쓰십시오.</p>
+          <div class="min-w-0">
+            <h2 id="lessonTitle" class="text-lg md:text-xl font-bold truncate">14과 읽기: 도낏자루 썩는 줄 모른다</h2>
+            <p class="text-sm text-slate-600 mt-1">지문을 읽고 빈칸에 알맞은 <span class="font-semibold">서술절</span>을 쓰십시오.</p>
           </div>
           <button id="btnGradeTop" class="hidden md:inline-flex px-3 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:opacity-90">
-            채점하기
+            채점
           </button>
         </div>
 
@@ -102,50 +104,61 @@
         <!-- Feedback summary -->
         <div id="summaryArea" class="mt-6 hidden">
           <div class="rounded-2xl border bg-slate-50 p-4">
-            <div class="flex flex-col gap-1">
-              <div class="text-sm font-bold">채점 결과</div>
-              <div id="summaryText" class="text-sm text-slate-700"></div>
-              <div id="summaryTextVn" class="text-sm text-slate-600 mt-1 hidden"></div>
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-sm font-bold">채점 결과</div>
+                <div id="summaryText" class="text-sm text-slate-700 mt-1"></div>
+                <div id="summaryTextVn" class="text-sm text-slate-600 mt-1 hidden"></div>
+              </div>
+              <button id="btnClearMarks" class="shrink-0 px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold">
+                표시 지우기
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Strategy + Hint panel (adaptive) -->
+      <!-- RIGHT: Panels -->
       <div class="space-y-6">
-        <!-- Strategy -->
+        <!-- Strategy (accordion) -->
         <div class="soft-shadow bg-white rounded-2xl border border-slate-100 p-5 md:p-6">
-          <h3 class="text-base md:text-lg font-bold">52번 풀이 요령(쉬운 한국어)</h3>
-          <ol class="mt-3 space-y-2 text-sm md:text-[15px] text-slate-700 list-decimal list-inside">
-            <li>빈칸 앞뒤 1-2문장을 먼저 읽습니다.</li>
-            <li>빈칸은 ‘무슨 내용’인지 먼저 정합니다(이유, 변화, 행동, 설명).</li>
-            <li>지문에서 같은 뜻 문장을 찾아 <span class="font-semibold">서술절</span>로 씁니다.</li>
-            <li>말투(입니다/합니다)를 맞춥니다.</li>
-            <li>마지막에 소리 내어 읽고 어색하면 고칩니다.</li>
-          </ol>
+          <button id="btnToggleStrategy" class="w-full flex items-center justify-between gap-3">
+            <div class="text-base md:text-lg font-bold text-left">풀이 요령</div>
+            <div id="strategyChevron" class="text-slate-500 text-sm font-semibold">접기</div>
+          </button>
 
-          <div id="strategyVn" class="mt-4 hidden">
-            <h4 class="text-sm font-bold text-slate-800">Mẹo làm bài (Tiếng Việt)</h4>
-            <ul class="mt-2 space-y-1 text-sm text-slate-700 list-disc list-inside">
-              <li>Đọc 1-2 câu trước và sau chỗ trống.</li>
-              <li>Xác định loại nội dung cần điền (lý do, thay đổi, hành động...).</li>
-              <li>Tìm câu có nghĩa tương tự trong đoạn và viết thành mệnh đề có vị ngữ.</li>
-              <li>Giữ đúng văn phong “입니다/합니다”.</li>
-              <li>Đọc lại toàn câu để kiểm tra tự nhiên.</li>
-            </ul>
+          <div id="strategyBody" class="mt-3">
+            <ol class="space-y-2 text-sm md:text-[15px] text-slate-700 list-decimal list-inside">
+              <li>빈칸 앞뒤 1-2문장을 먼저 읽습니다.</li>
+              <li>빈칸이 ‘무슨 내용’인지 먼저 정합니다(이유/변화/행동/설명).</li>
+              <li>지문에서 같은 뜻 문장을 찾아 <span class="font-semibold">서술절</span>로 씁니다.</li>
+              <li>말투(입니다/합니다)를 맞춥니다.</li>
+              <li>소리 내어 읽고 어색하면 고칩니다.</li>
+            </ol>
+
+            <div id="strategyVn" class="mt-4 hidden">
+              <h4 class="text-sm font-bold text-slate-800">Mẹo làm bài (VN)</h4>
+              <ul class="mt-2 space-y-1 text-sm text-slate-700 list-disc list-inside">
+                <li>Đọc 1-2 câu trước và sau chỗ trống.</li>
+                <li>Xác định nội dung cần điền (lý do, thay đổi, hành động...).</li>
+                <li>Tìm câu tương tự trong đoạn và viết thành mệnh đề có vị ngữ.</li>
+                <li>Giữ đúng văn phong “입니다/합니다”.</li>
+                <li>Đọc lại để kiểm tra tự nhiên.</li>
+              </ul>
+            </div>
           </div>
         </div>
 
         <!-- Per-blank cue panel -->
         <div class="soft-shadow bg-white rounded-2xl border border-slate-100 p-5 md:p-6">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="text-base md:text-lg font-bold">빈칸 유도 질문(답 떠올리기)</h3>
+            <h3 class="text-base md:text-lg font-bold">빈칸 유도 질문</h3>
             <button id="btnToggleAll" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold">
               힌트 모두 펼치기
             </button>
           </div>
 
-          <div id="cueArea" class="mt-4 space-y-4">
+          <div id="cueArea" class="mt-4 space-y-3">
             <!-- injected -->
           </div>
         </div>
@@ -175,9 +188,16 @@
     <div class="md:hidden h-20"></div>
   </div>
 
+  <!-- Toast -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div id="toastBox" class="soft-shadow rounded-2xl border bg-white px-4 py-3 text-sm font-semibold text-slate-800">
+      알림
+    </div>
+  </div>
+
 <script>
 (() => {
-  const STORAGE_KEY = "topik52_clause_practice_v1";
+  const STORAGE_KEY = "topik52_clause_practice_v2";
 
   const normalize = (s) => (s ?? "")
     .replace(/\s+/g, " ")
@@ -220,8 +240,8 @@
           tokens: ["넓", "밝"],
           cueK: "동굴은 안으로 갈수록 어떻게 변했나요?",
           cueV: "Càng đi vào trong hang thì nó thay đổi như thế nào?",
-          helpK: "‘갈수록’ 뜻이 필요합니다. 결과는 ‘넓다/밝다’ 쪽입니다.",
-          helpV: "Cần nghĩa “càng… càng…”. Kết quả liên quan đến “rộng/sáng”."
+          helpK: "‘갈수록’ 구조가 필요합니다. 결과는 ‘넓다/밝다’ 쪽입니다.",
+          helpV: "Cần cấu trúc “càng… càng…”. Kết quả liên quan đến “rộng/sáng”."
         },
         {
           id: "14-2",
@@ -235,8 +255,8 @@
           tokens: ["시간"],
           cueK: "너무 재미있어서 무엇을 못 느꼈나요?",
           cueV: "Mải xem đến mức không cảm nhận được điều gì?",
-          helpK: "‘시간’이 들어가면 거의 맞습니다. ‘모르다/잊다’가 함께 오면 더 좋습니다.",
-          helpV: "Nếu có “thời gian” + “không biết/quên” là gần đúng."
+          helpK: "‘시간’ + ‘모르다/잊다’가 핵심입니다.",
+          helpV: "Từ khóa: “thời gian” + “không biết/quên”."
         }
       ]
     },
@@ -264,8 +284,8 @@
           tokens: ["알아", "절약"],
           cueK: "가계부를 쓰는 이유는 무엇인가요?",
           cueV: "Tại sao phải ghi sổ chi tiêu?",
-          helpK: "구조는 ‘(어디/어떻게) + 알아야 + (절약/아끼다)’.",
-          helpV: "Mẫu câu: “phải biết (tiêu ở đâu/như thế nào) thì mới tiết kiệm được”."
+          helpK: "구조: ‘(어디/어떻게) + 알아야 + (절약/아끼다)’.",
+          helpV: "Mẫu: “phải biết … thì mới tiết kiệm được”."
         },
         {
           id: "15-2",
@@ -306,7 +326,7 @@
           tokens: ["무료", "이용"],
           cueK: "인공 암벽장은 돈을 내야 하나요? 또 무엇을 할 수 있나요?",
           cueV: "Có phải trả tiền không? Và có thể làm/học gì?",
-          helpK: "핵심 단어: ‘무료’ + ‘이용’ + ‘배울 수 있다(암벽 등반)’.",
+          helpK: "핵심: ‘무료’ + ‘이용’ + ‘(암벽 등반) 배울 수 있다’.",
           helpV: "Từ khóa: “miễn phí” + “sử dụng” + “có thể học (leo núi)”."
         },
         {
@@ -321,8 +341,8 @@
           tokens: ["의자"],
           cueK: "레일바이크는 왜 가족이 타기 좋나요?",
           cueV: "Vì sao rail bike phù hợp cho gia đình?",
-          helpK: "이유는 ‘좌석 사이 작은 의자’입니다. 그래서 ‘어린이+가족’이 가능합니다.",
-          helpV: "Lý do: có ghế nhỏ giữa 2 ghế → gia đình có trẻ em cũng dùng được."
+          helpK: "이유는 ‘좌석 사이 작은 의자’입니다 → ‘어린이+가족’ 가능.",
+          helpV: "Lý do: có ghế nhỏ giữa 2 ghế → gia đình có trẻ em dùng được."
         }
       ]
     }
@@ -351,13 +371,29 @@
   const btnReset = document.getElementById("btnReset");
   const btnCopy = document.getElementById("btnCopy");
   const btnToggleAll = document.getElementById("btnToggleAll");
+  const btnClearMarks = document.getElementById("btnClearMarks");
+
+  const btnToggleStrategy = document.getElementById("btnToggleStrategy");
+  const strategyBody = document.getElementById("strategyBody");
+  const strategyChevron = document.getElementById("strategyChevron");
 
   const tabBtns = [...document.querySelectorAll(".tabBtn")];
+
+  const toast = document.getElementById("toast");
+  const toastBox = document.getElementById("toastBox");
+  let toastTimer = null;
+  const showToast = (msg) => {
+    toastBox.textContent = msg;
+    toast.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add("hidden"), 1200);
+  };
 
   let state = {
     step: 0,
     showVn: false,
-    answers: {} // blankId -> string
+    answers: {},     // blankId -> string
+    marks: {}        // blankId -> {ok:boolean, empty:boolean, reasonK?:string, reasonV?:string}
   };
 
   const loadState = () => {
@@ -366,6 +402,7 @@
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") state = { ...state, ...parsed };
+      if (!state.marks) state.marks = {};
     } catch (_) {}
   };
 
@@ -378,34 +415,53 @@
     ta.style.height = Math.max(ta.scrollHeight, 44) + "px";
   };
 
+  const inputBaseCls =
+    "w-full md:w-[min(520px,100%)] rounded-xl border bg-white px-3 py-2 " +
+    "focus:outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 " +
+    "placeholder:text-slate-400 text-[15px] leading-6 transition";
+
+  const applyMarkStyle = (el, mark) => {
+    el.classList.remove("border-slate-200","border-emerald-300","border-rose-300","bg-emerald-50","bg-rose-50");
+    el.classList.add("border-slate-200");
+    if (!mark) return;
+    if (mark.ok) {
+      el.classList.add("border-emerald-300","bg-emerald-50");
+    } else if (!mark.empty) {
+      el.classList.add("border-rose-300","bg-rose-50");
+    }
+  };
+
   const makeInput = (blank) => {
     const val = state.answers[blank.id] ?? "";
-    const commonCls =
-      "w-full md:w-[min(520px,100%)] rounded-xl border border-slate-200 bg-white px-3 py-2 " +
-      "focus:outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 " +
-      "placeholder:text-slate-400 text-[15px] leading-6";
+    const mark = state.marks?.[blank.id];
 
     let el;
     if (blank.inputType === "textarea") {
       el = document.createElement("textarea");
       el.rows = 2;
-      el.className = commonCls + " min-h-[44px] resize-none";
+      el.className = inputBaseCls + " min-h-[44px] resize-none border-slate-200";
       el.placeholder = blank.placeholder;
       el.value = val;
       el.addEventListener("input", () => {
         state.answers[blank.id] = el.value;
+        // 입력 변경 시 기존 채점표시를 느슨하게 제거(즉시 재채점 유도)
+        if (state.marks?.[blank.id]) delete state.marks[blank.id];
         saveState();
         autoResize(el);
       });
       setTimeout(() => autoResize(el), 0);
+      el.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key === "Enter") gradeCurrent();
+      });
     } else {
       el = document.createElement("input");
       el.type = "text";
-      el.className = commonCls + " h-[44px]";
+      el.className = inputBaseCls + " h-[44px] border-slate-200";
       el.placeholder = blank.placeholder;
       el.value = val;
       el.addEventListener("input", () => {
         state.answers[blank.id] = el.value;
+        if (state.marks?.[blank.id]) delete state.marks[blank.id];
         saveState();
       });
       el.addEventListener("keydown", (e) => {
@@ -414,6 +470,7 @@
     }
 
     el.setAttribute("data-blank-input", blank.id);
+    applyMarkStyle(el, mark);
     return el;
   };
 
@@ -424,7 +481,6 @@
       p.className = "text-slate-900";
       p.innerHTML = part.html;
 
-      // Replace placeholder spans with input controls
       const targets = p.querySelectorAll("[data-blank]");
       targets.forEach(t => {
         const id = t.getAttribute("data-blank");
@@ -443,6 +499,14 @@
     });
   };
 
+  const statusBadgeHtml = (blankId) => {
+    const m = state.marks?.[blankId];
+    if (!m) return `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600">미채점</span>`;
+    if (m.ok) return `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">정답</span>`;
+    if (m.empty) return `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600">미입력</span>`;
+    return `<span class="text-xs font-semibold px-2 py-1 rounded-full bg-rose-100 text-rose-700">오답</span>`;
+  };
+
   const renderCues = (lesson) => {
     cueArea.innerHTML = "";
     lesson.blanks.forEach((b, idx) => {
@@ -453,14 +517,18 @@
       header.className = "flex items-start justify-between gap-3";
 
       const left = document.createElement("div");
+      left.className = "min-w-0";
       left.innerHTML = `
-        <div class="text-sm font-bold">빈칸 (${idx+1})</div>
+        <div class="flex items-center gap-2">
+          <div class="text-sm font-bold">빈칸 (${idx+1})</div>
+          ${statusBadgeHtml(b.id)}
+        </div>
         <div class="mt-1 text-sm text-slate-700">${b.cueK}</div>
         <div class="mt-1 text-sm text-slate-600 vnLine ${state.showVn ? "" : "hidden"}">${b.cueV}</div>
       `;
 
       const right = document.createElement("div");
-      right.className = "flex gap-2";
+      right.className = "flex gap-2 shrink-0";
       right.innerHTML = `
         <button class="btnHint px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold" data-id="${b.id}">
           힌트
@@ -478,9 +546,11 @@
       detail.setAttribute("data-detail", b.id);
       detail.innerHTML = `
         <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-          <div class="text-sm font-semibold text-slate-800">힌트(쉬운 한국어)</div>
+          <div class="text-sm font-semibold text-slate-800">힌트</div>
           <div class="mt-1 text-sm text-slate-700">${b.helpK}</div>
-          <div class="mt-2 text-sm text-slate-600 vnLine ${state.showVn ? "" : "hidden"}"><span class="font-semibold text-slate-700">Gợi ý (VN)</span><br>${b.helpV}</div>
+          <div class="mt-2 text-sm text-slate-600 vnLine ${state.showVn ? "" : "hidden"}">
+            <span class="font-semibold text-slate-700">Gợi ý (VN)</span><br>${b.helpV}
+          </div>
         </div>
       `;
 
@@ -491,24 +561,40 @@
         <div class="rounded-xl bg-white border border-slate-200 p-3">
           <div class="text-sm font-semibold text-slate-800">원문 정답(참고)</div>
           <div class="mt-1 text-sm text-slate-700">${b.correct}</div>
-          <div class="mt-2 text-xs text-slate-500">유사 표현도 의미가 같으면 정답으로 처리할 수 있습니다.</div>
+          <div class="mt-2 text-xs text-slate-500">유사 표현도 의미가 같으면 정답 처리될 수 있습니다.</div>
         </div>
       `;
+
+      const markLine = document.createElement("div");
+      markLine.className = "mt-3";
+      markLine.setAttribute("data-markline", b.id);
+
+      const m = state.marks?.[b.id];
+      if (m && !m.ok && !m.empty) {
+        markLine.innerHTML = `
+          <div class="rounded-xl border border-rose-200 bg-rose-50 p-3">
+            <div class="text-sm font-semibold text-rose-800">오답 이유</div>
+            <div class="mt-1 text-sm text-rose-700">${m.reasonK ?? "의미가 맞지 않습니다"}</div>
+            <div class="mt-2 text-sm text-rose-700 vnLine ${state.showVn ? "" : "hidden"}">${m.reasonV ?? "Chưa đúng ý"}</div>
+          </div>
+        `;
+      } else {
+        markLine.innerHTML = "";
+      }
 
       card.appendChild(header);
       card.appendChild(detail);
       card.appendChild(answer);
+      card.appendChild(markLine);
 
       cueArea.appendChild(card);
     });
 
-    // Bind buttons
     cueArea.querySelectorAll(".btnHint").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-id");
         const el = cueArea.querySelector(`[data-detail="${id}"]`);
-        if (!el) return;
-        el.classList.toggle("hidden");
+        if (el) el.classList.toggle("hidden");
       });
     });
 
@@ -516,8 +602,7 @@
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-id");
         const el = cueArea.querySelector(`[data-answer="${id}"]`);
-        if (!el) return;
-        el.classList.toggle("hidden");
+        if (el) el.classList.toggle("hidden");
       });
     });
   };
@@ -525,14 +610,13 @@
   const setTabs = (step) => {
     tabBtns.forEach(btn => {
       const s = Number(btn.getAttribute("data-step"));
-      if (s === step) {
-        btn.className = "tabBtn px-3 py-2 rounded-xl border bg-slate-900 text-white text-sm font-semibold";
-      } else {
-        btn.className = "tabBtn px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold";
-      }
+      btn.className = (s === step)
+        ? "tabBtn px-3 py-2 rounded-xl border bg-slate-900 text-white text-sm font-semibold"
+        : "tabBtn px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold";
     });
   };
 
+  let allExpanded = false;
   const render = () => {
     const lesson = lessons[state.step];
     lessonTitle.textContent = lesson.title;
@@ -543,19 +627,20 @@
 
     setTabs(state.step);
 
-    // VN toggle
     toggleVn.checked = !!state.showVn;
     strategyVn.classList.toggle("hidden", !state.showVn);
     summaryTextVn.classList.toggle("hidden", !state.showVn);
 
+    // 힌트 상태는 과 이동 시 리셋(직관성)
+    allExpanded = false;
+    btnToggleAll.textContent = "힌트 모두 펼치기";
+
     renderPassage(lesson);
     renderCues(lesson);
 
-    // Hide summary when switching
     summaryArea.classList.add("hidden");
     scoreLabel.textContent = "점수: -";
 
-    // Enable/disable prev/next
     const isFirst = state.step === 0;
     const isLast = state.step === lessons.length - 1;
     btnPrev.disabled = isFirst;
@@ -574,21 +659,16 @@
     const aN = normalize(a);
     const cN = normalize(blank.correct);
 
-    if (aN === cN) return { ok: true, exact: true };
+    if (aN === cN) return { ok: true, exact: true, empty: false };
 
-    // regex accept
     for (const rx of blank.accept) {
-      try {
-        if (rx.test(a)) return { ok: true, exact: false };
-      } catch (_) {}
+      try { if (rx.test(a)) return { ok: true, exact: false, empty: false }; } catch (_) {}
     }
 
-    // token accept (loose)
     if (blank.tokens?.length && hasAllTokens(a, blank.tokens)) {
-      return { ok: true, exact: false, loose: true };
+      return { ok: true, exact: false, loose: true, empty: false };
     }
 
-    // Provide missing token hint
     let missing = [];
     if (blank.tokens?.length) {
       const t = normalize(a);
@@ -603,6 +683,13 @@
     };
   };
 
+  const applyMarksToInputs = (lesson) => {
+    lesson.blanks.forEach(b => {
+      const el = document.querySelector(`[data-blank-input="${b.id}"]`);
+      if (el) applyMarkStyle(el, state.marks?.[b.id]);
+    });
+  };
+
   const gradeCurrent = () => {
     const lesson = lessons[state.step];
     let total = lesson.blanks.length;
@@ -611,9 +698,12 @@
     const linesK = [];
     const linesV = [];
 
+    if (!state.marks) state.marks = {};
+
     lesson.blanks.forEach((b, i) => {
       const ans = state.answers[b.id] || "";
       const result = gradeBlank(b, ans);
+      state.marks[b.id] = result;
 
       if (result.ok) {
         correct += 1;
@@ -637,11 +727,21 @@
     summaryArea.classList.remove("hidden");
     summaryTextVn.classList.toggle("hidden", !state.showVn);
 
+    applyMarksToInputs(lesson);
+    renderCues(lesson); // 우측 패널의 배지/오답 이유 반영
+
     saveState();
-    // Scroll a bit for visibility on mobile
+
     if (window.innerWidth < 768) {
       summaryArea.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const clearMarks = () => {
+    state.marks = {};
+    saveState();
+    render();
+    showToast("채점 표시를 지웠습니다.");
   };
 
   const gotoStep = (step) => {
@@ -650,7 +750,6 @@
     render();
   };
 
-  // Copy answers
   const buildAnswerText = () => {
     const parts = [];
     lessons.forEach(lesson => {
@@ -664,8 +763,6 @@
     return parts.join("\n");
   };
 
-  // Toggle all hints
-  let allExpanded = false;
   const toggleAllHints = () => {
     const lesson = lessons[state.step];
     allExpanded = !allExpanded;
@@ -676,11 +773,9 @@
     btnToggleAll.textContent = allExpanded ? "힌트 모두 접기" : "힌트 모두 펼치기";
   };
 
-  // Bind events
+  // Events
   tabBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      gotoStep(Number(btn.getAttribute("data-step")));
-    });
+    btn.addEventListener("click", () => gotoStep(Number(btn.getAttribute("data-step"))));
   });
 
   toggleVn.addEventListener("change", () => {
@@ -706,32 +801,42 @@
 
   btnReset.addEventListener("click", () => {
     state.answers = {};
+    state.marks = {};
     saveState();
     render();
+    showToast("초기화 완료");
   });
 
   btnCopy.addEventListener("click", async () => {
     const text = buildAnswerText();
     try {
       await navigator.clipboard.writeText(text);
-      alert("복사되었습니다.");
+      showToast("복사 완료");
     } catch (e) {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = text;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      alert("복사되었습니다.");
+      showToast("복사 완료");
     }
   });
 
   btnToggleAll.addEventListener("click", toggleAllHints);
+  btnClearMarks.addEventListener("click", clearMarks);
 
-  // Ctrl+Enter grading for textarea too
+  // Ctrl+Enter (global)
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.key === "Enter") gradeCurrent();
+  });
+
+  // Strategy accordion
+  let strategyOpen = true;
+  btnToggleStrategy.addEventListener("click", () => {
+    strategyOpen = !strategyOpen;
+    strategyBody.classList.toggle("hidden", !strategyOpen);
+    strategyChevron.textContent = strategyOpen ? "접기" : "펼치기";
   });
 
   // Init
