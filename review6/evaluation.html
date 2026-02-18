@@ -10,6 +10,7 @@ const EvaluationQuizApp = () => {
   const [isPcMode, setIsPcMode] = useState(false);
 
   // 평가하기 문제 데이터 (총 17문제)
+  // **텍스트**로 감싸진 부분은 UI에서 굵게/밑줄 처리됩니다.
   const questions = [
     // [1-3] 무엇에 대한 이야기입니까?
     {
@@ -189,6 +190,24 @@ const EvaluationQuizApp = () => {
     setIsPcMode(!isPcMode);
   };
 
+  // 텍스트 내의 **강조** 구문을 파싱하여 렌더링하는 함수
+  const renderQuestionText = (text) => {
+    if (!text) return null;
+    
+    const parts = text.split(/(\*\*.*?\*\*)/);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <span key={index} className="font-bold text-teal-700 underline decoration-teal-500 underline-offset-4">
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 py-4 px-4 font-sans select-none flex items-center justify-center">
       <div className={`w-full transition-all duration-300 ease-in-out ${isPcMode ? 'max-w-4xl' : 'max-w-md'} bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200`}>
@@ -272,7 +291,8 @@ const EvaluationQuizApp = () => {
               {/* 질문 영역 */}
               <div className={`${isPcMode ? 'md:sticky md:top-4' : ''}`}>
                 <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed whitespace-pre-wrap break-keep">
-                  {questions[currentQuestion].question}
+                  {/* 여기서 렌더링 함수 사용 */}
+                  {renderQuestionText(questions[currentQuestion].question)}
                 </h2>
                 
                 {/* PC 모드에서만 보이는 해설 */}
