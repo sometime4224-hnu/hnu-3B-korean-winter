@@ -1,460 +1,509 @@
-import React, { useState } from 'react';
-import { CheckCircle, XCircle, RefreshCw, BookOpen, ChevronRight, Monitor, Smartphone, PenTool, FileText } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 3B 읽고 쓰기 복습</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap');
 
-const ReadingWritingQuizApp = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showScore, setShowScore] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [isPcMode, setIsPcMode] = useState(false);
-
-  // 읽기/쓰기 문제 데이터 (총 15문제)
-  // 정밀 검토 완료된 데이터
-  const questions = [
-    // [1] 주제 찾기 - 보기 수정 완료
-    {
-      id: 1,
-      category: "주제 찾기",
-      passage: "우리 대학 신입생들이 '로미오와 줄리엣'을 무대에 올립니다. 후배들의 멋진 연기를 기대해 주세요.\n\n• 일시 : 5월 16일 (오후 8시)\n• 장소 : 열린 마당",
-      question: "이 글은 무엇에 대한 글입니까?",
-      options: ["연극", "콘서트", "음악회", "영화"], // PDF 원문 보기로 수정됨
-      answer: 0, // '연극'이 1번 보기이므로 인덱스 0
-      explanation: "'무대에 올리다', '연기', '로미오와 줄리엣' 등의 키워드로 보아 '연극'에 대한 안내문입니다."
-    },
-    // [2] 유의어 찾기
-    {
-      id: 2,
-      category: "유의어 찾기",
-      question: "밑줄 친 부분과 의미가 비슷한 것을 고르십시오.\n\n\"다음 달에 여행 갈 생각을 하면 벌써부터 **마음이 설렌다**.\"",
-      options: ["가슴이 아프다", "마음이 편안하다", "가슴이 뛴다", "마음에 여유가 생긴다"],
-      answer: 2,
-      explanation: "'마음이 설레다'는 기쁘거나 기대감으로 가슴이 두근거린다는 의미이므로 '가슴이 뛴다'와 가장 비슷합니다."
-    },
-    // [3] 내용 일치 - 텍스트 교정 ('다뤘는데' -> '다투었는데')
-    {
-      id: 3,
-      category: "내용 이해",
-      passage: "얼마 전 여자 친구와 사소한 오해로 다투었는데 여자 친구에게서 헤어지자는 말을 들었습니다. 실은 지난 수요일이 여자 친구의 생일이었는데 야근 때문에 만나지 못했습니다. 그래서 여자 친구에게 주말에 만나서 축하해 주겠다고 하고 동료들과 저녁을 먹으러 갔습니다. 그런데 거기서 제 여자 친구를 만나고 말았습니다. 여자 친구는 저를 보자마자 화를 내며 밖으로 나가버렸습니다. 한 여직원이 춥다고 해서 잠깐 팔짱을 끼고 있었거든요. 여자 친구가 큰 오해를 하고 있는 것 같습니다. 어떻게 해야 여자 친구와 다시 화해할 수 있을까요?",
-      question: "이 글의 내용과 같은 것을 고르십시오.",
-      options: [
-        "남자는 여자에게 전화를 걸어 헤어지자고 했다.",
-        "남자는 여자 친구와 화해하는 방법을 알고 있다.",
-        "남자는 여자 친구의 생일날 다른 여자와 데이트를 했다.",
-        "남자는 여자 친구의 오해를 풀어 주고 싶어서 이 글을 썼다."
-      ],
-      answer: 3,
-      explanation: "글쓴이는 오해로 인해 여자 친구와 멀어졌고, 화해하고 싶어 하는 마음을 표현하고 있습니다."
-    },
-    // [4] 순서 배열
-    {
-      id: 4,
-      category: "순서 배열",
-      passage: "<텐트 치는 방법>\n(가) 장소를 정했으면 울퉁불퉁한 바닥을 평평하게 정리하고 텐트를 세운다.\n(나) 바람이 불어도 텐트가 쓰러지지 않도록 줄을 이용해서 나무나 바위에 잘 묶는다.\n(다) 캠핑을 하기 위해서 텐트를 칠 때에는 먼저 장소를 잘 선택해야 한다.\n(라) 장소를 선택할 때 바다나 강에서 너무 가까운 곳은 피하는 것이 안전하다.",
-      question: "순서대로 맞게 나열한 것을 고르십시오.",
-      options: [
-        "(라)-(다)-(가)-(나)",
-        "(다)-(나)-(가)-(라)",
-        "(다)-(라)-(가)-(나)",
-        "(라)-(가)-(나)-(다)"
-      ],
-      answer: 2,
-      explanation: "장소 선택의 중요성(다) -> 장소 선택 시 주의점(라) -> 바닥 정리 및 설치(가) -> 마무리 고정(나) 순서가 자연스럽습니다."
-    },
-    // [5-6] 지문 읽기 (우쿨렐레)
-    {
-      id: 5,
-      category: "빈칸 채우기",
-      passage: "'우쿨렐레'는 하와이에서 자주 (       ) 악기이다. 모양은 기타와 비슷한데 기타보다 작아서 장난감처럼 보이기도 한다. 목 부분은 가늘고 길며 4개의 줄이 있다. 이 줄을 손으로 튕겨서 연주한다.",
-      question: "빈칸에 들어갈 알맞은 것을 고르십시오.",
-      options: ["부는", "누르는", "연주하는", "노래하는"],
-      answer: 2,
-      explanation: "악기를 다루는 일반적인 표현은 '연주하다'이며, 뒤 문장에서도 '손으로 튕겨서 연주한다'라고 설명하고 있습니다."
-    },
-    {
-      id: 6,
-      category: "내용 이해",
-      passage: "우쿨렐레는 크기가 작고 가벼워서 휴대하기 쉽고 아이들도 쉽게 배울 수 있다. 한 달만 배우면 간단한 노래를 연주할 수 있다고 하니까 누구나 한번 배워 볼 만하다.",
-      question: "이 글의 내용과 같은 것을 고르십시오.",
-      options: [
-        "우쿨렐레는 기타와 모양과 크기가 같다.",
-        "우쿨렐레는 하와이에서 인기 있는 장난감이다.",
-        "한 달 정도 배우면 누구나 간단한 노래를 연주할 수 있다.",
-        "악기의 크기가 너무 작아서 어른들이 들고 연주하기는 쉽지 않다."
-      ],
-      answer: 2,
-      explanation: "본문에 '한 달만 배우면 간단한 노래를 연주할 수 있다'고 명시되어 있습니다."
-    },
-    // [7-8] 지문 읽기 (매운 음식) - '엔도르핀 이' 띄어쓰기 수정
-    {
-      id: 7,
-      category: "문맥 파악",
-      passage: "매운 음식은 스트레스를 푸는 데 효과가 있고 다이어트에도 도움이 된다. 캡사이신이 지방을 빼 주기 때문이다. 그러나 (       ). 짬뽕이나 떡볶이와 같은 매운 음식은 생각보다 칼로리가 높은 편이다. 게다가 짠맛이 강해서 자주 먹는 것은 다이어트에 좋지 않다.",
-      question: "빈칸에 들어갈 알맞은 말을 고르십시오.",
-      options: [
-        "매운 음식이 언제나 많이 팔리는 것은 아니다",
-        "매운 음식을 어디에서나 먹을 수 있는 것은 아니다",
-        "매운 음식을 먹는다고 해서 누구나 살이 찌는 것은 아니다",
-        "매운 음식이라고 해서 다 다이어트에 도움을 주는 것은 아니다"
-      ],
-      answer: 3,
-      explanation: "앞부분에서는 다이어트 효과를 말했지만, '그러나' 뒤에는 칼로리가 높아 다이어트에 좋지 않은 경우를 설명하므로 4번이 적절합니다."
-    },
-    {
-      id: 8,
-      category: "중심 생각",
-      passage: "매운 음식은 건강에 좋지 않다고 생각하는 사람들이 많다. 실제로 많이 먹으면 배탈이 날 수도 있다. 하지만 적당히 매운 음식은 스트레스 해소와 다이어트에 도움이 되기도 한다. 매운 맛의 아픔을 잊기 위해 우리의 뇌에서는 엔도르핀이 나오는데 이 엔도르핀 덕분에 기분이 좋아진다고 한다.",
-      question: "이 글의 중심 생각을 고르십시오.",
-      options: [
-        "건강을 위해 매운 음식을 먹지 말아야 한다.",
-        "매운 음식이 항상 건강에 나쁜 것은 아니다.",
-        "매운 음식을 먹어야만 스트레스를 풀 수 있다.",
-        "매운 음식은 칼로리가 높아서 다이어트에 좋지 않다."
-      ],
-      answer: 1,
-      explanation: "매운 음식이 나쁘다는 편견과 달리 장점도 있다는 것을 설명하고 있으므로, '항상 나쁜 것은 아니다'가 중심 생각입니다."
-    },
-    // [9] 문장 넣기
-    {
-      id: 9,
-      category: "문장 삽입",
-      passage: "1박 2일 코스로 여행을 다녀오고 싶다면 강원도가 가 볼 만하다. ( ㉠ ) 먼저 설악산은 한국에서 3번째로 높은 산이며 경치가 아름답기로 유명하다. ( ㉡ ) 만약 등산 경험이 없다면 케이블카를 타고 올라가는 것이 좋다. ( ㉢ ) 성인 요금은 9천원이며 3세 미만의 아이는 요금을 내지 않아도 된다. ( ㉣ )",
-      question: "다음 문장이 들어가기에 가장 알맞은 곳을 고르십시오.\n\n<보기> 강원도는 산과 바다가 있어 자연을 즐기고 싶은 사람들에게 매우 좋은 곳이기 때문이다.",
-      options: ["㉠", "㉡", "㉢", "㉣"],
-      answer: 0,
-      explanation: "강원도를 추천하는 첫 문장에 대한 '이유(때문이다)'를 설명하는 문장이므로 바로 뒤인 ㉠에 들어가는 것이 자연스럽습니다."
-    },
-    // [10] 주제 찾기
-    {
-      id: 10,
-      category: "주제 파악",
-      passage: "얼마 전 인터넷에 유명 연예인에 대한 거짓 소문이 퍼졌다... (중략) ... 우리는 인터넷 덕분에 편리한 생활을 하고 있다. 하지만 다른 사람들이 자신을 볼 수 없다고 해서 함부로 행동하면 안 된다. 인터넷이 발전하면 발전할수록 상대방을 배려하는 인터넷 예절을 꼭 지켜야 한다.",
-      question: "이 글의 주제로 가장 알맞은 것을 고르십시오.",
-      options: [
-        "인터넷에 퍼진 소문은 믿지 않는 게 좋다.",
-        "좋지 않은 소문일수록 함께 아는 것이 중요하다.",
-        "인터넷에 글을 올리면 짧은 시간에 빨리 퍼뜨릴 수 있다.",
-        "인터넷은 많은 사람들이 사용하는 공간이므로 함부로 이야기하거나 행동해서는 안 된다."
-      ],
-      answer: 3,
-      explanation: "글의 결론 부분에서 인터넷 예절을 지키고 함부로 행동하지 말 것을 강조하고 있습니다."
-    },
-    // [11-13] 과일 고르기
-    {
-      id: 11,
-      category: "글의 목적",
-      passage: "귤을 고를 때에는 아기 주먹만 한 작은 크기의 귤이 좋다. 이보다 작으면 먹기에 불편하고 크면 클수록 단맛이 덜하기 때문이다... 사과는 겉이 매끄럽고 딱딱한 것이 좋다... 딸기는 새끼손가락만 한 길이가 좋다... 수박은 검정색 줄무늬가 진하면 진할수록 좋다.",
-      question: "필자가 이 글을 쓴 목적을 고르십시오.",
-      options: [
-        "자신이 키운 과일을 팔려고",
-        "좋아하는 과일을 소개하려고",
-        "좋은 과일 고르는 방법을 소개하려고",
-        "과일이 몸에 좋은 이유를 설명하려고"
-      ],
-      answer: 2,
-      explanation: "여러 가지 과일의 좋은 상태를 구별하는 방법을 설명하고 있습니다."
-    },
-    {
-      id: 12,
-      category: "빈칸 채우기",
-      passage: "사과는 겉이 매끄럽고 딱딱한 것이 좋다. 하지만 (       ). 좀 거칠어도 빨간 사과가 맛있다. 그리고 너무 큰 사과보다 어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다고 한다.",
-      question: "빈칸에 가장 알맞은 것을 고르십시오.",
-      options: [
-        "중요한 것은 모양이다",
-        "중요한 것은 소리이다",
-        "중요한 것은 사과의 색이다",
-        "중요한 것은 사과의 가격이다"
-      ],
-      answer: 2,
-      explanation: "빈칸 뒤에 '좀 거칠어도 **빨간 사과**가 맛있다'는 내용이 나오므로, 겉면의 매끄러움보다 '색깔'이 중요하다는 내용이 연결됩니다."
-    },
-    {
-      id: 13,
-      category: "내용 일치",
-      passage: "너무 큰 딸기는 속이 비어 있을 수 있다... 수박은 검정색 줄무늬가 진하면 진할수록 좋다... 귤은 크면 클수록 단맛이 덜하다... 사과는 중간 크기가 맛있다.",
-      question: "이 글의 내용과 같은 것을 고르십시오.",
-      options: [
-        "딸기는 크면 클수록 달다.",
-        "귤은 작으면 작을수록 맛있다.",
-        "중간 크기의 사과가 가장 맛있다.",
-        "수박은 꼭지 색깔이 진한 것을 골라야 한다."
-      ],
-      answer: 2,
-      explanation: "본문에 '어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다'고 명시되어 있습니다."
-    },
-    // [14-15] 쓰기 (주관식 변형)
-    {
-      id: 14,
-      category: "쓰기 (빈칸)",
-      passage: "[잃어버린 수첩을 찾습니다]\n지난 금요일 오후 휴게실에서 수첩을 잃어버렸습니다. 겉은 노란색이고 크기는 ( ㉠ ) 정도입니다. 수첩 안에는 가족사진이 들어 있습니다.",
-      question: "㉠에 들어갈 말로 가장 적절한 문장을 고르십시오.",
-      options: [
-        "어른 손바닥만 한",
-        "운동장만 한",
-        "개미만 한",
-        "사람 키만 한"
-      ],
-      answer: 0,
-      explanation: "수첩의 크기를 묘사할 때 관용적으로 '손바닥만 하다'라는 표현을 자주 사용합니다."
-    },
-    {
-      id: 15,
-      category: "쓰기 (빈칸)",
-      passage: "저에게는 아주 소중한 물건입니다. 혹시 수첩을 보시거나 가지고 계신 분은 아래 번호로 ( ㉡ ).\n\n김민준 010-9022-XXXX",
-      question: "㉡에 들어갈 말로 가장 적절한 문장을 고르십시오.",
-      options: [
-        "연락해 주시기 바랍니다",
-        "사 주시기 바랍니다",
-        "버려 주시기 바랍니다",
-        "기다려 주시기 바랍니다"
-      ],
-      answer: 0,
-      explanation: "분실물을 찾을 때 연락처를 남기며 연락을 부탁하는 표현이 적절합니다."
-    }
-  ];
-
-  const handleAnswerClick = (index) => {
-    if (selectedAnswer !== null) return;
-
-    setSelectedAnswer(index);
-    const correct = index === questions[currentQuestion].answer;
-    setIsCorrect(correct);
-
-    if (correct) {
-      setScore(score + 1);
-    }
-  };
-
-  const handleNextQuestion = () => {
-    setSelectedAnswer(null);
-    setIsCorrect(null);
-    
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowScore(true);
-    }
-  };
-
-  const restartQuiz = () => {
-    setScore(0);
-    setCurrentQuestion(0);
-    setShowScore(false);
-    setSelectedAnswer(null);
-    setIsCorrect(null);
-  };
-
-  const toggleMode = () => {
-    setIsPcMode(!isPcMode);
-  };
-
-  // 텍스트 렌더링 (강조 표시 지원)
-  const renderText = (text) => {
-    if (!text) return null;
-    const parts = text.split(/(\*\*.*?\*\*)/);
-    return parts.map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return (
-          <span key={index} className="font-bold text-amber-700 underline decoration-amber-500 underline-offset-4">
-            {part.slice(2, -2)}
-          </span>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
-  return (
-    <div className="min-h-screen bg-orange-50 py-4 px-4 font-sans select-none flex items-center justify-center">
-      <div className={`w-full transition-all duration-300 ease-in-out ${isPcMode ? 'max-w-5xl' : 'max-w-md'} bg-white rounded-2xl shadow-xl overflow-hidden border border-orange-200`}>
-        
-        {/* 헤더 */}
-        <div className="bg-amber-600 p-4 md:p-6 text-white relative">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-              <PenTool className="w-6 h-6" />
-              한국어 3B 읽고 쓰기
-            </h1>
-            
-            <button 
-              onClick={toggleMode}
-              className="flex items-center gap-2 bg-amber-700 hover:bg-amber-800 px-3 py-1.5 rounded-full text-xs md:text-sm transition-colors border border-amber-500 shadow-sm"
-              title={isPcMode ? "모바일 모드로 전환" : "PC/가로 모드로 전환"}
-            >
-              {isPcMode ? <Smartphone className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
-              <span className="hidden sm:inline">{isPcMode ? "모바일 모드" : "PC 모드"}</span>
-            </button>
-          </div>
-          <p className="text-amber-100 text-sm opacity-90">16-18과 복습 6 (읽기/쓰기)</p>
-        </div>
-
-        {showScore ? (
-          // 결과 화면
-          <div className="p-8 md:p-12 text-center animate-fade-in">
-            <div className="mb-8">
-              <div className="inline-block p-4 rounded-full bg-amber-50 mb-4">
-                {score === questions.length ? (
-                  <CheckCircle className="w-16 h-16 text-amber-600" />
-                ) : (
-                  <RefreshCw className="w-16 h-16 text-amber-600" />
-                )}
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">학습 완료!</h2>
-              <div className="text-6xl font-bold text-amber-600 mb-4 tracking-tight">
-                {score} <span className="text-2xl text-gray-400 font-normal">/ {questions.length}</span>
-              </div>
-              <p className="text-gray-500 text-lg">
-                {score === questions.length 
-                  ? "훌륭합니다! 읽기와 쓰기 실력이 완벽하네요! 📝" 
-                  : score >= 10 
-                    ? "잘했어요! 지문을 꼼꼼히 읽는 습관이 좋네요." 
-                    : "수고하셨어요. 지문을 다시 천천히 읽어보세요."}
-              </p>
-            </div>
-            <button 
-              onClick={restartQuiz}
-              className="w-full md:w-auto md:min-w-[200px] py-4 px-8 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-lg mx-auto"
-            >
-              <RefreshCw className="w-5 h-5" />
-              다시 풀기
-            </button>
-          </div>
-        ) : (
-          // 퀴즈 화면
-          <div className="p-4 md:p-8">
-            {/* 상단 정보 */}
-            <div className="flex justify-between items-center mb-6 text-sm text-gray-500 font-medium">
-              <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-100">
-                {questions[currentQuestion].category}
-              </span>
-              <span>
-                {currentQuestion + 1} <span className="text-gray-300">/</span> {questions.length}
-              </span>
-            </div>
-
-            {/* 진행바 */}
-            <div className="w-full bg-gray-100 rounded-full h-2.5 mb-6 overflow-hidden">
-              <div 
-                className="bg-amber-500 h-full rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              ></div>
-            </div>
-
-            {/* 메인 컨텐츠 영역 */}
-            <div className={`transition-all duration-300 ${isPcMode ? 'grid grid-cols-1 lg:grid-cols-2 gap-8 items-start' : 'flex flex-col gap-6'}`}>
-              
-              {/* 왼쪽: 지문 및 질문 영역 */}
-              <div className="space-y-6">
-                {/* 지문 박스 (지문이 있는 경우에만 표시) */}
-                {questions[currentQuestion].passage && (
-                  <div className="bg-stone-50 p-5 rounded-xl border border-stone-200 text-gray-700 leading-relaxed whitespace-pre-wrap font-serif text-lg shadow-inner">
-                    <div className="flex items-center gap-2 mb-2 text-stone-500 text-sm font-sans font-bold uppercase tracking-wider">
-                      <FileText className="w-4 h-4" />
-                      Passage
-                    </div>
-                    {renderText(questions[currentQuestion].passage)}
-                  </div>
-                )}
-
-                {/* 질문 */}
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed break-keep">
-                  <span className="text-amber-600 mr-2">Q.</span>
-                  {renderText(questions[currentQuestion].question)}
-                </h2>
-
-                {/* PC 모드 해설 (왼쪽 하단) */}
-                {isPcMode && selectedAnswer !== null && (
-                  <div className="hidden lg:block animate-fade-in-up">
-                    <div className={`p-5 rounded-xl border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                      <p className={`font-bold text-lg mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'} flex items-center gap-2`}>
-                        {isCorrect ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                        {isCorrect ? "정답입니다!" : "아쉽네요."}
-                      </p>
-                      <p className="text-gray-700 leading-relaxed">
-                        💡 {questions[currentQuestion].explanation}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 오른쪽: 보기 및 버튼 영역 */}
-              <div className="flex flex-col gap-3">
-                {questions[currentQuestion].options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerClick(index)}
-                    disabled={selectedAnswer !== null}
-                    className={`
-                      w-full text-left p-4 md:p-5 rounded-xl border-2 transition-all duration-200 flex justify-between items-center
-                      ${selectedAnswer === null 
-                        ? "border-gray-100 bg-white hover:border-amber-300 hover:bg-amber-50 hover:shadow-md active:scale-[0.98]" 
-                        : index === questions[currentQuestion].answer 
-                          ? "border-green-500 bg-green-50 text-green-800 font-bold shadow-sm" 
-                          : index === selectedAnswer 
-                            ? "border-red-400 bg-red-50 text-red-800 shadow-sm"
-                            : "border-gray-100 bg-gray-50 text-gray-400 opacity-60"
-                      }
-                    `}
-                  >
-                    <span className="text-lg">{option}</span>
-                    {selectedAnswer !== null && index === questions[currentQuestion].answer && (
-                      <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 ml-2" />
-                    )}
-                    {selectedAnswer !== null && index === selectedAnswer && index !== questions[currentQuestion].answer && (
-                      <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 ml-2" />
-                    )}
-                  </button>
-                ))}
-
-                {/* 모바일 해설 (또는 PC 좁은 화면) */}
-                {(!isPcMode || window.innerWidth < 1024) && selectedAnswer !== null && (
-                  <div className="mt-4 lg:hidden animate-fade-in-up">
-                    <div className={`p-4 rounded-xl mb-4 border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                      <p className={`font-bold mb-1 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                        {isCorrect ? "정답입니다!" : "아쉽네요."}
-                      </p>
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        💡 {questions[currentQuestion].explanation}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* 다음 문제 버튼 */}
-                {selectedAnswer !== null && (
-                  <button 
-                    onClick={handleNextQuestion}
-                    className="w-full py-4 mt-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg animate-bounce-short"
-                  >
-                    {currentQuestion < questions.length - 1 ? "다음 문제" : "결과 보기"}
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <style>{`
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-        @keyframes bounce-short {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
+        
+        .font-serif {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceShort {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
         .animate-fade-in-up {
-          animation: fade-in-up 0.4s ease-out forwards;
+            animation: fadeInUp 0.4s ease-out forwards;
         }
         .animate-bounce-short {
-          animation: bounce-short 1s ease-in-out infinite;
+            animation: bounceShort 1s ease-in-out infinite;
         }
-      `}</style>
-    </div>
-  );
-};
+    </style>
+</head>
+<body class="min-h-screen bg-orange-50 flex items-center justify-center p-4">
 
-export default ReadingWritingQuizApp;
+    <!-- Main Container -->
+    <div id="app-container" class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-orange-200 transition-all duration-300 ease-in-out">
+        
+        <!-- Header -->
+        <div class="bg-amber-600 p-4 md:p-6 text-white relative">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+                    <i data-lucide="pen-tool" class="w-6 h-6"></i>
+                    한국어 3B 읽고 쓰기
+                </h1>
+                
+                <!-- Mode Toggle Button -->
+                <button id="mode-toggle" class="flex items-center gap-2 bg-amber-700 hover:bg-amber-800 px-3 py-1.5 rounded-full text-xs md:text-sm transition-colors border border-amber-500 shadow-sm" title="화면 모드 전환">
+                    <i id="mode-icon" data-lucide="monitor" class="w-4 h-4"></i>
+                    <span id="mode-text" class="hidden sm:inline">PC 모드</span>
+                </button>
+            </div>
+            <p class="text-amber-100 text-sm opacity-90">16-18과 복습 6 (읽기/쓰기)</p>
+        </div>
+
+        <!-- Content Area -->
+        <div id="content-area" class="p-4 md:p-8">
+            <!-- Rendered by JS -->
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data ---
+        const questions = [
+            {
+                id: 1,
+                category: "주제 찾기",
+                passage: "우리 대학 신입생들이 '로미오와 줄리엣'을 무대에 올립니다. 후배들의 멋진 연기를 기대해 주세요.\n\n• 일시 : 5월 16일 (오후 8시)\n• 장소 : 열린 마당",
+                question: "이 글은 무엇에 대한 글입니까?",
+                options: ["연극", "콘서트", "음악회", "영화"],
+                answer: 0,
+                explanation: "'무대에 올리다', '연기', '로미오와 줄리엣' 등의 키워드로 보아 '연극'에 대한 안내문입니다."
+            },
+            {
+                id: 2,
+                category: "유의어 찾기",
+                question: "밑줄 친 부분과 의미가 비슷한 것을 고르십시오.\n\n\"다음 달에 여행 갈 생각을 하면 벌써부터 **마음이 설렌다**.\"",
+                options: ["가슴이 아프다", "마음이 편안하다", "가슴이 뛴다", "마음에 여유가 생긴다"],
+                answer: 2,
+                explanation: "'마음이 설레다'는 기쁘거나 기대감으로 가슴이 두근거린다는 의미이므로 '가슴이 뛴다'와 가장 비슷합니다."
+            },
+            {
+                id: 3,
+                category: "내용 이해",
+                passage: "얼마 전 여자 친구와 사소한 오해로 다투었는데 여자 친구에게서 헤어지자는 말을 들었습니다. 실은 지난 수요일이 여자 친구의 생일이었는데 야근 때문에 만나지 못했습니다. 그래서 여자 친구에게 주말에 만나서 축하해 주겠다고 하고 동료들과 저녁을 먹으러 갔습니다. 그런데 거기서 제 여자 친구를 만나고 말았습니다. 여자 친구는 저를 보자마자 화를 내며 밖으로 나가버렸습니다. 한 여직원이 춥다고 해서 잠깐 팔짱을 끼고 있었거든요. 여자 친구가 큰 오해를 하고 있는 것 같습니다. 어떻게 해야 여자 친구와 다시 화해할 수 있을까요?",
+                question: "이 글의 내용과 같은 것을 고르십시오.",
+                options: [
+                    "남자는 여자에게 전화를 걸어 헤어지자고 했다.",
+                    "남자는 여자 친구와 화해하는 방법을 알고 있다.",
+                    "남자는 여자 친구의 생일날 다른 여자와 데이트를 했다.",
+                    "남자는 여자 친구의 오해를 풀어 주고 싶어서 이 글을 썼다."
+                ],
+                answer: 3,
+                explanation: "글쓴이는 오해로 인해 여자 친구와 멀어졌고, 화해하고 싶어 하는 마음을 표현하고 있습니다."
+            },
+            {
+                id: 4,
+                category: "순서 배열",
+                passage: "<텐트 치는 방법>\n(가) 장소를 정했으면 울퉁불퉁한 바닥을 평평하게 정리하고 텐트를 세운다.\n(나) 바람이 불어도 텐트가 쓰러지지 않도록 줄을 이용해서 나무나 바위에 잘 묶는다.\n(다) 캠핑을 하기 위해서 텐트를 칠 때에는 먼저 장소를 잘 선택해야 한다.\n(라) 장소를 선택할 때 바다나 강에서 너무 가까운 곳은 피하는 것이 안전하다.",
+                question: "순서대로 맞게 나열한 것을 고르십시오.",
+                options: [
+                    "(라)-(다)-(가)-(나)",
+                    "(다)-(나)-(가)-(라)",
+                    "(다)-(라)-(가)-(나)",
+                    "(라)-(가)-(나)-(다)"
+                ],
+                answer: 2,
+                explanation: "장소 선택의 중요성(다) -> 장소 선택 시 주의점(라) -> 바닥 정리 및 설치(가) -> 마무리 고정(나) 순서가 자연스럽습니다."
+            },
+            {
+                id: 5,
+                category: "빈칸 채우기",
+                passage: "'우쿨렐레'는 하와이에서 자주 (       ) 악기이다. 모양은 기타와 비슷한데 기타보다 작아서 장난감처럼 보이기도 한다. 목 부분은 가늘고 길며 4개의 줄이 있다. 이 줄을 손으로 튕겨서 연주한다.",
+                question: "빈칸에 들어갈 알맞은 것을 고르십시오.",
+                options: ["부는", "누르는", "연주하는", "노래하는"],
+                answer: 2,
+                explanation: "악기를 다루는 일반적인 표현은 '연주하다'이며, 뒤 문장에서도 '손으로 튕겨서 연주한다'라고 설명하고 있습니다."
+            },
+            {
+                id: 6,
+                category: "내용 이해",
+                passage: "우쿨렐레는 크기가 작고 가벼워서 휴대하기 쉽고 아이들도 쉽게 배울 수 있다. 한 달만 배우면 간단한 노래를 연주할 수 있다고 하니까 누구나 한번 배워 볼 만하다.",
+                question: "이 글의 내용과 같은 것을 고르십시오.",
+                options: [
+                    "우쿨렐레는 기타와 모양과 크기가 같다.",
+                    "우쿨렐레는 하와이에서 인기 있는 장난감이다.",
+                    "한 달 정도 배우면 누구나 간단한 노래를 연주할 수 있다.",
+                    "악기의 크기가 너무 작아서 어른들이 들고 연주하기는 쉽지 않다."
+                ],
+                answer: 2,
+                explanation: "본문에 '한 달만 배우면 간단한 노래를 연주할 수 있다'고 명시되어 있습니다."
+            },
+            {
+                id: 7,
+                category: "문맥 파악 (빈칸 채우기)",
+                passage: "매운 음식은 건강에 좋지 않다고 생각하는 사람들이 많다. 실제로 매운 음식을 많이 먹으면 입과 혀가 아프고 배탈이 날 수도 있다. 하지만 적당히 매운 음식은 스트레스를 푸는 데 큰 효과가 있다. 매운 맛의 아픔을 잊기 위해 우리의 뇌에서는 엔도르핀이 나오는데 이 엔도르핀 덕분에 기분이 좋아진다고 한다. 또 매운 음식을 자주 먹으면 다이어트에도 도움이 된다. 매운 음식 안에 들어 있는 캡사이신이 몸속의 지방을 빼 주기 때문이다. \n\n그러나 (       ). 짬뽕이나 떡볶이와 같은 매운 음식은 생각보다 칼로리가 높은 편이다. 게다가 이런 음식들은 짠맛이 강하기 때문에 자주 먹는 것은 다이어트에 좋지 않다.",
+                question: "빈칸에 들어갈 알맞은 말을 고르십시오.",
+                options: [
+                    "매운 음식이 언제나 많이 팔리는 것은 아니다",
+                    "매운 음식을 어디에서나 먹을 수 있는 것은 아니다",
+                    "매운 음식을 먹는다고 해서 누구나 살이 찌는 것은 아니다",
+                    "매운 음식이라고 해서 다 다이어트에 도움을 주는 것은 아니다"
+                ],
+                answer: 3,
+                explanation: "앞부분에서는 매운 음식이 다이어트에 도움이 된다고 했지만, '그러나' 뒤에는 칼로리가 높아 다이어트에 좋지 않은 경우를 설명하므로 '다 도움을 주는 것은 아니다'가 적절합니다."
+            },
+            {
+                id: 8,
+                category: "중심 생각",
+                passage: "매운 음식은 건강에 좋지 않다고 생각하는 사람들이 많다. 실제로 매운 음식을 많이 먹으면 입과 혀가 아프고 배탈이 날 수도 있다. 하지만 적당히 매운 음식은 스트레스를 푸는 데 큰 효과가 있다. 매운 맛의 아픔을 잊기 위해 우리의 뇌에서는 엔도르핀이 나오는데 이 엔도르핀 덕분에 기분이 좋아진다고 한다. 또 매운 음식을 자주 먹으면 다이어트에도 도움이 된다. 매운 음식 안에 들어 있는 캡사이신이 몸속의 지방을 빼 주기 때문이다. \n\n그러나 매운 음식이라고 해서 다 다이어트에 도움을 주는 것은 아니다. 짬뽕이나 떡볶이와 같은 매운 음식은 생각보다 칼로리가 높은 편이다. 게다가 이런 음식들은 짠맛이 강하기 때문에 자주 먹는 것은 다이어트에 좋지 않다.",
+                question: "이 글의 중심 생각을 고르십시오.",
+                options: [
+                    "건강을 위해 매운 음식을 먹지 말아야 한다.",
+                    "매운 음식이 항상 건강에 나쁜 것은 아니다.",
+                    "매운 음식을 먹어야만 스트레스를 풀 수 있다.",
+                    "매운 음식은 칼로리가 높아서 다이어트에 좋지 않다."
+                ],
+                answer: 1,
+                explanation: "매운 음식이 나쁘다는 편견과 달리 장점(스트레스 해소, 다이어트)도 있다는 것을 설명하고 있으므로, '항상 나쁜 것은 아니다'가 중심 생각입니다."
+            },
+            {
+                id: 9,
+                category: "문장 삽입",
+                passage: "1박 2일 코스로 여행을 다녀오고 싶다면 강원도가 가 볼 만하다. ( ㉠ ) 먼저 설악산은 한국에서 3번째로 높은 산이며 경치가 아름답기로 유명하다. ( ㉡ ) 만약 등산 경험이 없다면 케이블카를 타고 올라가는 것이 좋다. ( ㉢ ) 성인 요금은 9천원이며 3세 미만의 아이는 요금을 내지 않아도 된다. ( ㉣ )",
+                question: "다음 문장이 들어가기에 가장 알맞은 곳을 고르십시오.\n\n<보기> 강원도는 산과 바다가 있어 자연을 즐기고 싶은 사람들에게 매우 좋은 곳이기 때문이다.",
+                options: ["㉠", "㉡", "㉢", "㉣"],
+                answer: 0,
+                explanation: "강원도를 추천하는 첫 문장에 대한 '이유(때문이다)'를 설명하는 문장이므로 바로 뒤인 ㉠에 들어가는 것이 자연스럽습니다."
+            },
+            {
+                id: 10,
+                category: "주제 파악",
+                passage: "얼마 전 인터넷에 유명 연예인에 대한 거짓 소문이 퍼졌다... (중략) ... 우리는 인터넷 덕분에 편리한 생활을 하고 있다. 하지만 다른 사람들이 자신을 볼 수 없다고 해서 함부로 행동하면 안 된다. 인터넷이 발전하면 발전할수록 상대방을 배려하는 인터넷 예절을 꼭 지켜야 한다.",
+                question: "이 글의 주제로 가장 알맞은 것을 고르십시오.",
+                options: [
+                    "인터넷에 퍼진 소문은 믿지 않는 게 좋다.",
+                    "좋지 않은 소문일수록 함께 아는 것이 중요하다.",
+                    "인터넷에 글을 올리면 짧은 시간에 빨리 퍼뜨릴 수 있다.",
+                    "인터넷은 많은 사람들이 사용하는 공간이므로 함부로 이야기하거나 행동해서는 안 된다."
+                ],
+                answer: 3,
+                explanation: "글의 결론 부분에서 인터넷 예절을 지키고 함부로 행동하지 말 것을 강조하고 있습니다."
+            },
+            {
+                id: 11,
+                category: "글의 목적",
+                passage: "귤을 고를 때에는 아기 주먹만 한 작은 크기의 귤이 좋다. 이보다 작으면 먹기에 불편하고 크면 클수록 단맛이 덜하기 때문이다. 그리고 귤의 밑 부분이 울퉁불퉁한 것이 평평한 것보다 달다.\n\n사과는 겉이 매끄럽고 딱딱한 것이 좋다. 하지만 (       ). 좀 거칠어도 빨간 사과가 맛있다. 그리고 너무 큰 사과보다 어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다고 한다.\n\n너무 큰 딸기는 속이 비어 있을 수 있으니 새끼손가락만 한 길이의 딸기를 고르는 것이 좋다. 그리고 겉이 매끄럽고 색이 진한 것을 골라야 하고 겉이 울퉁불퉁한 것은 좋지 않다. 그리고 딸기의 꼭지 부분까지 빨갛다면 잘 익은 딸기이다.\n\n마지막으로 수박은 검정색 줄무늬가 진하면 진할수록 좋다. 그리고 수박 꼭지가 싱싱한 것을 골라야 한다.",
+                question: "필자가 이 글을 쓴 목적을 고르십시오.",
+                options: [
+                    "자신이 키운 과일을 팔려고",
+                    "좋아하는 과일을 소개하려고",
+                    "좋은 과일 고르는 방법을 소개하려고",
+                    "과일이 몸에 좋은 이유를 설명하려고"
+                ],
+                answer: 2,
+                explanation: "여러 가지 과일의 좋은 상태를 구별하는 방법을 설명하고 있습니다."
+            },
+            {
+                id: 12,
+                category: "빈칸 채우기",
+                passage: "귤을 고를 때에는 아기 주먹만 한 작은 크기의 귤이 좋다. 이보다 작으면 먹기에 불편하고 크면 클수록 단맛이 덜하기 때문이다. 그리고 귤의 밑 부분이 울퉁불퉁한 것이 평평한 것보다 달다.\n\n사과는 겉이 매끄럽고 딱딱한 것이 좋다. 하지만 (       ). 좀 거칠어도 빨간 사과가 맛있다. 그리고 너무 큰 사과보다 어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다고 한다.\n\n너무 큰 딸기는 속이 비어 있을 수 있으니 새끼손가락만 한 길이의 딸기를 고르는 것이 좋다. 그리고 겉이 매끄럽고 색이 진한 것을 골라야 하고 겉이 울퉁불퉁한 것은 좋지 않다. 그리고 딸기의 꼭지 부분까지 빨갛다면 잘 익은 딸기이다.\n\n마지막으로 수박은 검정색 줄무늬가 진하면 진할수록 좋다. 그리고 수박 꼭지가 싱싱한 것을 골라야 한다.",
+                question: "빈칸에 가장 알맞은 것을 고르십시오.",
+                options: [
+                    "중요한 것은 모양이다",
+                    "중요한 것은 소리이다",
+                    "중요한 것은 사과의 색이다",
+                    "중요한 것은 사과의 가격이다"
+                ],
+                answer: 2,
+                explanation: "빈칸 뒤에 '좀 거칠어도 **빨간 사과**가 맛있다'는 내용이 나오므로, 겉면의 매끄러움보다 '색깔'이 중요하다는 내용이 연결됩니다."
+            },
+            {
+                id: 13,
+                category: "내용 일치",
+                passage: "귤을 고를 때에는 아기 주먹만 한 작은 크기의 귤이 좋다. 이보다 작으면 먹기에 불편하고 크면 클수록 단맛이 덜하기 때문이다. 그리고 귤의 밑 부분이 울퉁불퉁한 것이 평평한 것보다 달다.\n\n사과는 겉이 매끄럽고 딱딱한 것이 좋다. 하지만 (       ). 좀 거칠어도 빨간 사과가 맛있다. 그리고 너무 큰 사과보다 어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다고 한다.\n\n너무 큰 딸기는 속이 비어 있을 수 있으니 새끼손가락만 한 길이의 딸기를 고르는 것이 좋다. 그리고 겉이 매끄럽고 색이 진한 것을 골라야 하고 겉이 울퉁불퉁한 것은 좋지 않다. 그리고 딸기의 꼭지 부분까지 빨갛다면 잘 익은 딸기이다.\n\n마지막으로 수박은 검정색 줄무늬가 진하면 진할수록 좋다. 그리고 수박 꼭지가 싱싱한 것을 골라야 한다.",
+                question: "이 글의 내용과 같은 것을 고르십시오.",
+                options: [
+                    "딸기는 크면 클수록 달다.",
+                    "귤은 작으면 작을수록 맛있다.",
+                    "중간 크기의 사과가 가장 맛있다.",
+                    "수박은 꼭지 색깔이 진한 것을 골라야 한다."
+                ],
+                answer: 2,
+                explanation: "본문에 '어른 주먹만 한 중간 크기의 사과가 더 달고 맛있다'고 명시되어 있습니다."
+            },
+            {
+                id: 14,
+                category: "쓰기 (빈칸)",
+                passage: "[잃어버린 수첩을 찾습니다]\n지난 금요일 오후 휴게실에서 수첩을 잃어버렸습니다. 겉은 노란색이고 크기는 ( ㉠ ) 정도입니다. 수첩 안에는 가족사진이 들어 있습니다. \n\n저에게는 아주 소중한 물건입니다. 혹시 수첩을 보시거나 가지고 계신 분은 아래 번호로 ( ㉡ ).\n\n김민준 010-9022-XXXX",
+                question: "㉠에 들어갈 말로 가장 적절한 문장을 고르십시오.",
+                options: [
+                    "어른 손바닥만 한",
+                    "운동장만 한",
+                    "개미만 한",
+                    "사람 키만 한"
+                ],
+                answer: 0,
+                explanation: "수첩의 크기를 묘사할 때 관용적으로 '손바닥만 하다'라는 표현을 자주 사용합니다."
+            },
+            {
+                id: 15,
+                category: "쓰기 (빈칸)",
+                passage: "[잃어버린 수첩을 찾습니다]\n지난 금요일 오후 휴게실에서 수첩을 잃어버렸습니다. 겉은 노란색이고 크기는 ( ㉠ ) 정도입니다. 수첩 안에는 가족사진이 들어 있습니다. \n\n저에게는 아주 소중한 물건입니다. 혹시 수첩을 보시거나 가지고 계신 분은 아래 번호로 ( ㉡ ).\n\n김민준 010-9022-XXXX",
+                question: "㉡에 들어갈 말로 가장 적절한 문장을 고르십시오.",
+                options: [
+                    "연락해 주시기 바랍니다",
+                    "사 주시기 바랍니다",
+                    "버려 주시기 바랍니다",
+                    "기다려 주시기 바랍니다"
+                ],
+                answer: 0,
+                explanation: "분실물을 찾을 때 연락처를 남기며 연락을 부탁하는 표현이 적절합니다."
+            }
+        ];
+
+        // --- State ---
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let isCorrect = null;
+        let isPcMode = false;
+
+        // --- DOM Elements ---
+        const appContainer = document.getElementById('app-container');
+        const contentArea = document.getElementById('content-area');
+        const modeToggleBtn = document.getElementById('mode-toggle');
+        const modeIcon = document.getElementById('mode-icon');
+        const modeText = document.getElementById('mode-text');
+
+        // --- Initialization ---
+        function init() {
+            lucide.createIcons();
+            renderQuiz();
+
+            modeToggleBtn.addEventListener('click', toggleMode);
+        }
+
+        // --- Functions ---
+        function toggleMode() {
+            isPcMode = !isPcMode;
+            
+            // Toggle Container Width
+            if (isPcMode) {
+                appContainer.classList.remove('max-w-md');
+                appContainer.classList.add('max-w-5xl');
+                modeText.innerText = "모바일 모드";
+                modeIcon.setAttribute('data-lucide', 'smartphone');
+            } else {
+                appContainer.classList.remove('max-w-5xl');
+                appContainer.classList.add('max-w-md');
+                modeText.innerText = "PC 모드";
+                modeIcon.setAttribute('data-lucide', 'monitor');
+            }
+            
+            lucide.createIcons(); // Refresh icons
+            renderQuiz(); // Re-render content to adjust layout if needed
+        }
+
+        function renderText(text) {
+            if (!text) return '';
+            // Replace **text** with styled span
+            return text.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-amber-700 underline decoration-amber-500 underline-offset-4">$1</span>');
+        }
+
+        function handleAnswer(index) {
+            if (selectedAnswer !== null) return; // Prevent multiple clicks
+
+            selectedAnswer = index;
+            const q = questions[currentQuestion];
+            isCorrect = (index === q.answer);
+
+            if (isCorrect) score++;
+
+            renderQuiz(); // Re-render to show feedback
+        }
+
+        function nextQuestion() {
+            selectedAnswer = null;
+            isCorrect = null;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuiz();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            let message = "";
+            if (score === questions.length) message = "훌륭합니다! 읽기와 쓰기 실력이 완벽하네요! 📝";
+            else if (score >= 10) message = "잘했어요! 지문을 꼼꼼히 읽는 습관이 좋네요.";
+            else message = "수고하셨어요. 지문을 다시 천천히 읽어보세요.";
+
+            const html = `
+                <div class="text-center animate-fade-in-up py-4 md:py-8">
+                    <div class="mb-8">
+                        <div class="inline-block p-4 rounded-full bg-amber-50 mb-4">
+                            ${score === questions.length 
+                                ? `<i data-lucide="check-circle" class="w-16 h-16 text-amber-600"></i>`
+                                : `<i data-lucide="refresh-cw" class="w-16 h-16 text-amber-600"></i>`
+                            }
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">학습 완료!</h2>
+                        <div class="text-6xl font-bold text-amber-600 mb-4 tracking-tight">
+                            ${score} <span class="text-2xl text-gray-400 font-normal">/ ${questions.length}</span>
+                        </div>
+                        <p class="text-gray-500 text-lg">${message}</p>
+                    </div>
+                    <button onclick="restartQuiz()" class="w-full md:w-auto md:min-w-[200px] py-4 px-8 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-lg mx-auto">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        다시 풀기
+                    </button>
+                </div>
+            `;
+            contentArea.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            isCorrect = null;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const q = questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+            // Layout determination based on mode
+            const gridClass = isPcMode 
+                ? "grid grid-cols-1 lg:grid-cols-2 gap-8 items-start" 
+                : "flex flex-col gap-6";
+            
+            const passageHtml = q.passage ? `
+                <div class="bg-stone-50 p-5 rounded-xl border border-stone-200 text-gray-700 leading-relaxed whitespace-pre-wrap font-serif text-lg shadow-inner mb-6">
+                    <div class="flex items-center gap-2 mb-2 text-stone-500 text-sm font-sans font-bold uppercase tracking-wider">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        Passage
+                    </div>
+                    ${renderText(q.passage)}
+                </div>
+            ` : '';
+
+            // Feedback Block HTML (Reusable)
+            const feedbackHtml = (selectedAnswer !== null) ? `
+                <div class="animate-fade-in-up mt-4">
+                    <div class="p-4 rounded-xl mb-4 border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <p class="font-bold mb-1 ${isCorrect ? 'text-green-700' : 'text-red-700'} flex items-center gap-2">
+                             ${isCorrect 
+                                ? `<i data-lucide="check-circle" class="w-5 h-5"></i> 정답입니다!` 
+                                : `<i data-lucide="x-circle" class="w-5 h-5"></i> 아쉽네요.`}
+                        </p>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            💡 ${q.explanation}
+                        </p>
+                    </div>
+                </div>
+            ` : '';
+
+            // Next Button HTML
+            const nextBtnHtml = (selectedAnswer !== null) ? `
+                <button onclick="nextQuestion()" class="w-full py-4 mt-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg animate-bounce-short">
+                    ${currentQuestion < questions.length - 1 ? "다음 문제" : "결과 보기"}
+                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                </button>
+            ` : '';
+
+            // Options List HTML
+            let optionsHtml = '<div class="flex flex-col gap-3">';
+            q.options.forEach((opt, idx) => {
+                let btnClass = "w-full text-left p-4 md:p-5 rounded-xl border-2 transition-all duration-200 flex justify-between items-center ";
+                let iconHtml = "";
+
+                if (selectedAnswer === null) {
+                    btnClass += "border-gray-100 bg-white hover:border-amber-300 hover:bg-amber-50 hover:shadow-md cursor-pointer active:scale-[0.98]";
+                } else {
+                    if (idx === q.answer) {
+                        btnClass += "border-green-500 bg-green-50 text-green-800 font-bold shadow-sm";
+                        iconHtml = `<i data-lucide="check-circle" class="w-6 h-6 text-green-600 flex-shrink-0 ml-2"></i>`;
+                    } else if (idx === selectedAnswer) {
+                        btnClass += "border-red-400 bg-red-50 text-red-800 shadow-sm";
+                        iconHtml = `<i data-lucide="x-circle" class="w-6 h-6 text-red-500 flex-shrink-0 ml-2"></i>`;
+                    } else {
+                        btnClass += "border-gray-100 bg-gray-50 text-gray-400 opacity-60";
+                    }
+                }
+
+                // Add onclick only if not answered
+                const clickHandler = selectedAnswer === null ? `onclick="handleAnswer(${idx})"` : "";
+
+                optionsHtml += `
+                    <button ${clickHandler} class="${btnClass}" ${selectedAnswer !== null ? 'disabled' : ''}>
+                        <span class="text-lg">${opt}</span>
+                        ${iconHtml}
+                    </button>
+                `;
+            });
+            optionsHtml += '</div>';
+
+            // Construct Final HTML
+            const html = `
+                <!-- Top Info -->
+                <div class="flex justify-between items-center mb-6 text-sm text-gray-500 font-medium">
+                    <span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-100">
+                        ${q.category}
+                    </span>
+                    <span>
+                        ${currentQuestion + 1} <span class="text-gray-300">/</span> ${questions.length}
+                    </span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div class="bg-amber-500 h-full rounded-full transition-all duration-500 ease-out" style="width: ${progress}%"></div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="${gridClass}">
+                    
+                    <!-- Left Column (Question) -->
+                    <div class="space-y-6">
+                        ${passageHtml}
+                        
+                        <h2 class="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed break-keep">
+                            <span class="text-amber-600 mr-2">Q.</span>
+                            ${renderText(q.question)}
+                        </h2>
+
+                        <!-- PC Mode Explanation (Visible only on PC when answered) -->
+                        <div class="hidden lg:block">
+                            ${isPcMode ? feedbackHtml : ''}
+                        </div>
+                    </div>
+
+                    <!-- Right Column (Options & Mobile Feedback) -->
+                    <div class="flex flex-col gap-3">
+                        ${optionsHtml}
+                        
+                        <!-- Mobile Feedback (Visible on Mobile or PC narrow, or if PC mode is off) -->
+                        <div class="${isPcMode ? 'lg:hidden' : ''}">
+                            ${feedbackHtml}
+                        </div>
+
+                        ${nextBtnHtml}
+                    </div>
+
+                </div>
+            `;
+
+            contentArea.innerHTML = html;
+            lucide.createIcons(); // Re-initialize icons for new DOM
+        }
+
+        // Start App
+        init();
+
+    </script>
+</body>
+</html>
