@@ -1,0 +1,373 @@
+import React, { useState } from 'react';
+import { CheckCircle, XCircle, RefreshCw, BookOpen, ChevronRight, Monitor, Smartphone, Award } from 'lucide-react';
+
+const EvaluationQuizApp = () => {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showScore, setShowScore] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [isPcMode, setIsPcMode] = useState(false);
+
+  // 평가하기 문제 데이터 (총 17문제)
+  const questions = [
+    // [1-3] 무엇에 대한 이야기입니까?
+    {
+      id: 1,
+      category: "주제 찾기",
+      question: "다음은 무엇에 대한 이야기입니까?\n\n\"이번 공연을 보기 위해서 해외에서 온 팬들도 많다고 해요.\"",
+      options: ["영화", "관객", "대본", "연극"],
+      answer: 3,
+      explanation: "'공연'이라는 단어와 가장 잘 어울리는 예술 장르는 '연극'입니다. 영화는 주로 '상영'한다고 합니다."
+    },
+    {
+      id: 2,
+      category: "주제 찾기",
+      question: "다음은 무엇에 대한 이야기입니까?\n\n\"김 부장님이 곧 회사를 그만둘 거라는 말이 회사 안에 돌고 있다.\"",
+      options: ["오해", "실망", "화해", "소문"],
+      answer: 3,
+      explanation: "회사 안에 어떤 말이 돌고 있다는 것은 '소문'에 대한 설명입니다."
+    },
+    {
+      id: 3,
+      category: "주제 찾기",
+      question: "다음은 무엇에 대한 이야기입니까?\n\n\"답답한 도시를 떠나 자연 속에서 하룻밤을 지내면 마음에 여유가 생기는 것 같다.\"",
+      options: ["서핑", "암벽 등반", "캠핑", "번지 점프"],
+      answer: 2,
+      explanation: "도시를 떠나 자연 속에서 잠을 자며 지내는 활동은 '캠핑'입니다."
+    },
+    // [4-7] 빈칸 채우기
+    {
+      id: 4,
+      category: "빈칸 채우기",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"용산은 전자 제품이 싸기로 (       ) 곳이다.\"",
+      options: ["인기 있는", "유명한", "발전한", "설명한"],
+      answer: 1,
+      explanation: "'~기로 유명하다'는 어떤 특징으로 이름이 널리 알려져 있다는 관용 표현입니다."
+    },
+    {
+      id: 5,
+      category: "빈칸 채우기",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"조용한 음악을 들으면서 천천히 숨을 쉬면 마음이 (       ).\"",
+      options: ["편안해져요", "신이 나요", "뛰어요", "일어나요"],
+      answer: 0,
+      explanation: "조용한 음악과 심호흡은 마음을 차분하고 '편안하게' 만듭니다."
+    },
+    {
+      id: 6,
+      category: "빈칸 채우기",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"농부는 아내에게 들킬까 봐 거울을 옷장 속에 몰래 (       ).\"",
+      options: ["빼앗았어요", "깨뜨렸어요", "들여다봤어요", "숨겼어요"],
+      answer: 3,
+      explanation: "남에게 들키지 않게(몰래) 하는 행동은 물건을 안 보이는 곳에 두는 '숨기다'입니다."
+    },
+    {
+      id: 7,
+      category: "빈칸 채우기",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"배낭여행을 하다가 런던에서 (       ) 고등학교 동창을 만났는데 얼마나 반가웠는지 모른다.\"",
+      options: ["깜짝", "몰래", "우연히", "분명히"],
+      answer: 2,
+      explanation: "뜻하지 않게 만난 상황이므로 '우연히'가 가장 적절합니다."
+    },
+    // [8-10] 유의어 찾기
+    {
+      id: 8,
+      category: "유의어 찾기",
+      question: "밑줄 친 부분과 바꿀 수 있는 것을 고르십시오.\n\n\"카페에서 주앙 씨가 피아노 **연주하는** 것을 봤는데 정말 멋있던데요.\"",
+      options: ["치는", "부는", "켜는", "누르는"],
+      answer: 0,
+      explanation: "피아노를 연주하다는 '피아노를 치다'와 같은 의미입니다. (현악기: 켜다, 관악기: 불다)"
+    },
+    {
+      id: 9,
+      category: "유의어 찾기",
+      question: "밑줄 친 부분과 바꿀 수 있는 것을 고르십시오.\n\n\"배우 유성이 재벌 2세와 결혼한다는 소문이 **나서** 이제 모르는 사람이 없다.\"",
+      options: ["퍼뜨려서", "퍼져서", "지나가서", "나와서"],
+      answer: 1,
+      explanation: "소문이 나다는 소문이 널리 알려지다는 뜻인 '퍼지다'와 바꿀 수 있습니다."
+    },
+    {
+      id: 10,
+      category: "유의어 찾기",
+      question: "밑줄 친 부분과 바꿀 수 있는 것을 고르십시오.\n\n\"까만색 양복을 입은 남자가 저 집으로 들어가는 걸 제가 **분명히** 봤다니까요.\"",
+      options: ["틀림없이", "일부러", "실수로", "저절로"],
+      answer: 0,
+      explanation: "확실하게 보았다는 의미인 '분명히'는 '틀림없이'와 유의어입니다."
+    },
+    // [11-14] 문법 빈칸 채우기
+    {
+      id: 11,
+      category: "관용어",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"(       ) 월급을 모아 언제 집을 살지 걱정이다.\"",
+      options: ["모기만 한", "쥐꼬리만 한", "손바닥만 한", "엄지손가락만 한"],
+      answer: 1,
+      explanation: "월급이나 수입이 매우 적음을 비유할 때 '쥐꼬리만 하다'라고 합니다."
+    },
+    {
+      id: 12,
+      category: "문법 (척하다)",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"지난번에 소개팅 한 남자를 학교에서 만났지만 그냥 (       )했다.\"",
+      options: ["본 척", "보는 척", "못 보는 척", "못 본 척"],
+      answer: 3,
+      explanation: "과거에 일어난 사실(봤음)을 반대로 행동한 것이므로 '못 본 척하다'가 문맥상 자연스럽습니다."
+    },
+    {
+      id: 13,
+      category: "문법 (강조)",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"저는 그 돈을 가져가지 않았어요. 정말 (       ).\"",
+      options: ["안 가져가다니", "안 가져갔다니까요", "안 가져갈 생각이에요", "안 가져가고 말았어요"],
+      answer: 1,
+      explanation: "앞에서 말한 내용을 다시 한번 강하게 주장하거나 확인시켜 줄 때 '-다니까요'를 사용합니다."
+    },
+    {
+      id: 14,
+      category: "문법 (결과)",
+      question: "빈칸에 제일 알맞은 것을 고르십시오.\n\n\"눈길에 미끄러지지 않으려고 조심했지만 결국 (       ).\"",
+      options: ["미끄러질 뻔했어요", "미끄러지지 않으면 안 돼요", "미끄러지고 말았어요", "미끄러지는 척했어요"],
+      answer: 2,
+      explanation: "의도하지 않았지만 결국 좋지 않은 결과가 일어났을 때 '-고 말다'를 사용합니다."
+    },
+    // [15-17] 문맥적 의미 파악
+    {
+      id: 15,
+      category: "의미 파악",
+      question: "밑줄 친 부분과 의미가 비슷한 것을 고르십시오.\n\n\"조금 덥긴 하지만 **참을 만해요**.\"",
+      options: ["참다니요", "참을 수 있어요", "참는 척해요", "참을 생각이에요"],
+      answer: 1,
+      explanation: "'-(으)ㄹ 만하다'는 그럴 가치가 있거나 능히 감당할 수 있다는 뜻으로, 여기서는 '참을 수 있다'와 비슷합니다."
+    },
+    {
+      id: 16,
+      category: "의미 파악",
+      question: "밑줄 친 부분과 의미가 비슷한 것을 고르십시오.\n\n\"이가 아파서 딱딱한 음식은 **먹을 생각도 못 해요**.\"",
+      options: ["안 먹을 생각이에요", "정말 먹을 만해요", "전혀 못 먹어요", "먹고 말았어요"],
+      answer: 2,
+      explanation: "'-(으)ㄹ 생각도 못 하다'는 엄두를 내지 못할 정도로 불가능하다는 뜻이므로 '전혀 못 먹다'와 의미가 통합니다."
+    },
+    {
+      id: 17,
+      category: "의미 파악",
+      question: "밑줄 친 부분과 의미가 비슷한 것을 고르십시오.\n\n\"우리 팀이 더 잘했는데 경기에서 지다니 **그럴 리가 없어요**.\"",
+      options: ["틀림없어요", "그럴 만해요", "믿어지지 않아요", "그렇다니까요"],
+      answer: 2,
+      explanation: "'그럴 리가 없다'는 어떤 사실을 강하게 부정하거나 믿을 수 없을 때 사용하므로 '믿어지지 않다'와 의미가 가장 가깝습니다."
+    }
+  ];
+
+  const handleAnswerClick = (index) => {
+    if (selectedAnswer !== null) return;
+
+    setSelectedAnswer(index);
+    const correct = index === questions[currentQuestion].answer;
+    setIsCorrect(correct);
+
+    if (correct) {
+      setScore(score + 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+    
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setShowScore(true);
+    }
+  };
+
+  const restartQuiz = () => {
+    setScore(0);
+    setCurrentQuestion(0);
+    setShowScore(false);
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+  };
+
+  const toggleMode = () => {
+    setIsPcMode(!isPcMode);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-4 px-4 font-sans select-none flex items-center justify-center">
+      <div className={`w-full transition-all duration-300 ease-in-out ${isPcMode ? 'max-w-4xl' : 'max-w-md'} bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200`}>
+        
+        {/* 헤더 */}
+        <div className="bg-teal-600 p-4 md:p-6 text-white relative">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+              <Award className="w-6 h-6" />
+              한국어 3B 평가하기
+            </h1>
+            
+            {/* 모드 전환 토글 버튼 */}
+            <button 
+              onClick={toggleMode}
+              className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-full text-xs md:text-sm transition-colors border border-teal-500 shadow-sm"
+              title={isPcMode ? "모바일 모드로 전환" : "PC/가로 모드로 전환"}
+            >
+              {isPcMode ? <Smartphone className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+              <span className="hidden sm:inline">{isPcMode ? "모바일 모드" : "PC 모드"}</span>
+            </button>
+          </div>
+          <p className="text-teal-100 text-sm opacity-90">16-18과 복습 6 (총 17문제)</p>
+        </div>
+
+        {showScore ? (
+          // 결과 화면
+          <div className="p-8 md:p-12 text-center animate-fade-in">
+            <div className="mb-8">
+              <div className="inline-block p-4 rounded-full bg-teal-50 mb-4">
+                {score === questions.length ? (
+                  <CheckCircle className="w-16 h-16 text-teal-600" />
+                ) : (
+                  <RefreshCw className="w-16 h-16 text-teal-600" />
+                )}
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">평가 완료!</h2>
+              <div className="text-6xl font-bold text-teal-600 mb-4 tracking-tight">
+                {score} <span className="text-2xl text-gray-400 font-normal">/ {questions.length}</span>
+              </div>
+              <p className="text-gray-500 text-lg">
+                {score === questions.length 
+                  ? "대단해요! 만점입니다! 💯" 
+                  : score >= 12 
+                    ? "훌륭해요! 합격권 점수입니다." 
+                    : "수고하셨어요. 복습이 조금 더 필요해요."}
+              </p>
+            </div>
+            <button 
+              onClick={restartQuiz}
+              className="w-full md:w-auto md:min-w-[200px] py-4 px-8 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-lg mx-auto"
+            >
+              <RefreshCw className="w-5 h-5" />
+              다시 풀기
+            </button>
+          </div>
+        ) : (
+          // 퀴즈 화면
+          <div className="p-4 md:p-8">
+            {/* 상단 정보 */}
+            <div className="flex justify-between items-center mb-6 text-sm text-gray-500 font-medium">
+              <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full border border-teal-100">
+                {questions[currentQuestion].category}
+              </span>
+              <span>
+                {currentQuestion + 1} <span className="text-gray-300">/</span> {questions.length}
+              </span>
+            </div>
+
+            {/* 진행바 */}
+            <div className="w-full bg-gray-100 rounded-full h-2.5 mb-8 overflow-hidden">
+              <div 
+                className="bg-teal-500 h-full rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              ></div>
+            </div>
+
+            {/* 메인 컨텐츠 영역 */}
+            <div className={`transition-all duration-300 ${isPcMode ? 'grid grid-cols-1 md:grid-cols-2 gap-8 items-start' : 'flex flex-col gap-6'}`}>
+              
+              {/* 질문 영역 */}
+              <div className={`${isPcMode ? 'md:sticky md:top-4' : ''}`}>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-relaxed whitespace-pre-wrap break-keep">
+                  {questions[currentQuestion].question}
+                </h2>
+                
+                {/* PC 모드에서만 보이는 해설 */}
+                {isPcMode && selectedAnswer !== null && (
+                  <div className="mt-6 hidden md:block animate-fade-in-up">
+                    <div className={`p-5 rounded-xl border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                      <p className={`font-bold text-lg mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'} flex items-center gap-2`}>
+                        {isCorrect ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                        {isCorrect ? "정답입니다!" : "아쉽네요."}
+                      </p>
+                      <p className="text-gray-700 leading-relaxed">
+                        💡 {questions[currentQuestion].explanation}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 보기 및 버튼 영역 */}
+              <div className="flex flex-col gap-3">
+                {questions[currentQuestion].options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerClick(index)}
+                    disabled={selectedAnswer !== null}
+                    className={`
+                      w-full text-left p-4 md:p-5 rounded-xl border-2 transition-all duration-200 flex justify-between items-center
+                      ${selectedAnswer === null 
+                        ? "border-gray-100 bg-white hover:border-teal-300 hover:bg-teal-50 hover:shadow-md active:scale-[0.98]" 
+                        : index === questions[currentQuestion].answer 
+                          ? "border-green-500 bg-green-50 text-green-800 font-bold shadow-sm" 
+                          : index === selectedAnswer 
+                            ? "border-red-400 bg-red-50 text-red-800 shadow-sm"
+                            : "border-gray-100 bg-gray-50 text-gray-400 opacity-60"
+                      }
+                    `}
+                  >
+                    <span className="text-lg">{option}</span>
+                    {selectedAnswer !== null && index === questions[currentQuestion].answer && (
+                      <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 ml-2" />
+                    )}
+                    {selectedAnswer !== null && index === selectedAnswer && index !== questions[currentQuestion].answer && (
+                      <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 ml-2" />
+                    )}
+                  </button>
+                ))}
+
+                {/* 모바일용 해설 */}
+                {(!isPcMode || window.innerWidth < 768) && selectedAnswer !== null && (
+                  <div className="mt-4 md:hidden animate-fade-in-up">
+                    <div className={`p-4 rounded-xl mb-4 border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                      <p className={`font-bold mb-1 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                        {isCorrect ? "정답입니다!" : "아쉽네요."}
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        💡 {questions[currentQuestion].explanation}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 다음 문제 버튼 */}
+                {selectedAnswer !== null && (
+                  <button 
+                    onClick={handleNextQuestion}
+                    className="w-full py-4 mt-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg animate-bounce-short"
+                  >
+                    {currentQuestion < questions.length - 1 ? "다음 문제" : "결과 보기"}
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <style>{`
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce-short {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.4s ease-out forwards;
+        }
+        .animate-bounce-short {
+          animation: bounce-short 1s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default EvaluationQuizApp;
