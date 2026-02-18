@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>한국어 쓰기(빈칸) 학습용 웹앱</title>
+  
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card-bg: #181b21;
+      --card-border: #2a313c;
+      --text: #eceff4;
+      --text-sub: #a0aab9;
+      --primary: #5c87f2;
+      --primary-dim: rgba(92, 135, 242, 0.15);
+      --success: #26c281;
+      --error: #ff4b4b;
+      --warn: #ffb347;
+      --radius: 12px;
+      --transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* --- Header & Layout --- */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 17, 21, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 20px;
+    }
+
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      transition: max-width 0.4s ease;
+    }
+
+    /* Grid Mode (PC 가로 모드) 활성화 시 스타일 */
+    .wrap.grid-mode {
+      max-width: 1400px;
+    }
+    
+    main { padding: 24px 20px 60px; }
+
+    /* Navigation / Grid Layout Container */
+    .passage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Grid Mode일 때 격자 배치 */
+    .grid-mode .passage-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      align-items: start;
+    }
+
+    h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .sub { margin: 4px 0 16px; font-size: 14px; color: var(--text-sub); }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    button {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    button:hover { background: #232830; border-color: #4a5568; }
+    button:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #4a76e6; border-color: #4a76e6; }
+
+    /* Toggle Switch */
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-sub);
+      user-select: none;
+    }
+    .toggle-label:hover { color: var(--text); }
+    .toggle-label input { accent-color: var(--primary); }
+
+    /* Progress Bar */
+    .progress-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 200px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #232830;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), #a29bfe);
+      transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .progress-text { font-size: 12px; color: var(--text-sub); }
+
+    /* --- Card Style --- */
+    section.passage {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    /* Grid mode일 때 카드 호버 효과 */
+    .grid-mode section.passage:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-color: #4a5568;
+    }
+
+    .ptitle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .ptitle h2 { font-size: 16px; margin: 0; color: var(--primary); }
+    .tag {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: #232830;
+      border-radius: 4px;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* Passage Text Area */
+    .passage-text {
+      background: #1e2229;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      line-height: 1.8;
+      border-left: 3px solid var(--card-border);
+    }
+
+    /* Blanks */
+    .blank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
+      padding: 0 8px;
+      height: 28px;
+      margin: 0 4px;
+      border-radius: 4px;
+      background: #14161b;
+      border-bottom: 2px solid #3f4857;
+      color: var(--warn);
+      font-weight: 700;
+      font-size: 14px;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .blank-filled { color: var(--text); border-bottom-color: var(--primary); }
+    .blank-correct {
+      color: #fff;
+      background: var(--success);
+      border-bottom-color: transparent;
+      box-shadow: 0 0 10px rgba(38, 194, 129, 0.4);
+    }
+    .blank-wrong {
+      color: #fff;
+      background: var(--error);
+      border-bottom-color: transparent;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* Quiz Area */
+    fieldset {
+      border: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+    legend {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-sub);
+      display: block;
+      width: 100%;
+    }
+    
+    .opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .opts { grid-template-columns: 1fr; }
+    }
+
+    /* Custom Radio Styling */
+    label.opt {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      background: #232830;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+    label.opt:hover { background: #2d333d; }
+    
+    /* Hide Default Radio */
+    label.opt input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #5a6578;
+      border-radius: 50%;
+      margin-right: 10px;
+      position: relative;
+      transition: var(--transition);
+    }
+    
+    label.opt input[type="radio"]:checked {
+      border-color: var(--primary);
+      background: var(--primary);
+      box-shadow: inset 0 0 0 3px #232830;
+    }
+
+    /* Option States */
+    label.opt:has(input:checked) {
+      background: var(--primary-dim);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    
+    /* Correct/Wrong States */
+    label.opt.opt-correct {
+      background: rgba(38, 194, 129, 0.15) !important;
+      border-color: var(--success) !important;
+    }
+    label.opt.opt-correct input {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    
+    label.opt.opt-wrong {
+      background: rgba(255, 75, 75, 0.15) !important;
+      border-color: var(--error) !important;
+      opacity: 0.7;
+    }
+    label.opt.opt-wrong input {
+      background: var(--error);
+      border-color: var(--error);
+    }
+
+    .answer-tag {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--success);
+      background: rgba(38, 194, 129, 0.1);
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: none;
+    }
+    body.show-answers label.opt[data-correct="true"] .answer-tag { display: inline-block; }
+
+    /* Controls & Feedback */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 16px;
+    }
+    .feedback {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+    .feedback strong { color: var(--primary); }
+
+    /* View Mode Toggle Button Specifics */
+    #viewModeBtn {
+      display: none; /* Mobile hidden */
+    }
+    @media (min-width: 768px) {
+      #viewModeBtn { display: inline-block; }
+    }
+
+    .mini-tip {
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 12px;
+      margin-top: 30px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap" id="mainWrap">
+      <div style="margin-bottom:12px;">
+        <h1>한국어 빈칸 채우기 학습</h1>
+        <p class="sub">문맥에 맞는 단어를 선택하여 문장을 완성하세요.</p>
+      </div>
+
+      <div class="topbar">
+        <div class="btns">
+          <button type="button" class="btn-primary" id="gradeAllBtn">전체 채점</button>
+          <button type="button" id="resetAllBtn">전체 초기화</button>
+          
+          <button type="button" id="viewModeBtn" title="보기 방식 변경">
+            <span id="viewModeIcon">▦ 가로 모드</span>
+          </button>
+          
+          <label class="toggle-label">
+            <input type="checkbox" id="showAnswersToggle" />
+            <span>정답 표시</span>
+          </label>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-text" id="progressText">0/16 완료</div>
+          <div class="progress-bar-bg">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap" id="contentWrap">
+      
+      <div class="passage-container">
+        
+        <section class="passage" id="p1" data-questions="p1g,p1n">
+          <div class="ptitle">
+            <h2>Q1. 회사 지각</h2>
+            <span class="tag">일상</span>
+          </div>
+          <div class="passage-text">
+            오늘 아침에 <span class="blank" data-qname="p1g" data-placeholder="( ㄱ )">( ㄱ )</span>. 그래서 회사에 늦지 않으려고 서둘렀습니다. 정류장에서 버스를 놓칠 뻔했지만, 뛰어가서 겨우 <span class="blank" data-qname="p1n" data-placeholder="( ㄴ )">( ㄴ )</span>. 하지만 버스를 잘못 탔습니다.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p1g" value="일찍 일어났습니다">일찍 일어났습니다</label>
+                <label class="opt"><input type="radio" name="p1g" value="늦잠을 잤습니다">늦잠을 잤습니다</label>
+                <label class="opt"><input type="radio" name="p1g" value="아침을 먹었습니다">아침을 먹었습니다</label>
+                <label class="opt"><input type="radio" name="p1g" value="운동을 했습니다">운동을 했습니다</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p1n" value="버스에서 내렸습니다">버스에서 내렸습니다</label>
+                <label class="opt"><input type="radio" name="p1n" value="버스를 놓쳤습니다">버스를 놓쳤습니다</label>
+                <label class="opt"><input type="radio" name="p1n" value="버스를 탔습니다">버스를 탔습니다</label>
+                <label class="opt"><input type="radio" name="p1n" value="버스표를 샀습니다">버스표를 샀습니다</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="passage" id="p2" data-questions="p2g,p2n">
+          <div class="ptitle">
+            <h2>Q2. 공과금 절약</h2>
+            <span class="tag">생활 정보</span>
+          </div>
+          <div class="passage-text">
+            공과금을 아끼려면 작은 것부터 <span class="blank" data-qname="p2g" data-placeholder="( ㄱ )">( ㄱ )</span>. 안 쓰는 전등 끄기, 플러그 뽑기 등 쉬운 방법이지만 습관이 중요합니다. 오늘부터 작은 것부터 <span class="blank" data-qname="p2n" data-placeholder="( ㄴ )">( ㄴ )</span>.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p2g" value="더 많이 내야 합니다">더 많이 내야 합니다</label>
+                <label class="opt"><input type="radio" name="p2g" value="계속 켜야 합니다">계속 켜야 합니다</label>
+                <label class="opt"><input type="radio" name="p2g" value="버려야 합니다">버려야 합니다</label>
+                <label class="opt"><input type="radio" name="p2g" value="아껴야 합니다">아껴야 합니다</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p2n" value="포기합시다">포기합시다</label>
+                <label class="opt"><input type="radio" name="p2n" value="실천합시다">실천합시다</label>
+                <label class="opt"><input type="radio" name="p2n" value="기다립시다">기다립시다</label>
+                <label class="opt"><input type="radio" name="p2n" value="잊읍시다">잊읍시다</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="passage" id="p3" data-questions="p3g,p3n">
+          <div class="ptitle">
+            <h2>Q3. 부산 여행</h2>
+            <span class="tag">여행</span>
+          </div>
+          <div class="passage-text">
+            부산은 바다와 도시가 어우러져 다양한 경치를 <span class="blank" data-qname="p3g" data-placeholder="( ㄱ )">( ㄱ )</span>. 다만 지하철 노선이 서울만큼 <span class="blank" data-qname="p3n" data-placeholder="( ㄴ )">( ㄴ )</span> 이동 시 버스를 함께 이용하면 편리합니다.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p3g" value="즐길 수 있습니다">즐길 수 있습니다</label>
+                <label class="opt"><input type="radio" name="p3g" value="즐기고 있다">즐기고 있다</label>
+                <label class="opt"><input type="radio" name="p3g" value="즐길 수 있다">즐길 수 있다</label>
+                <label class="opt"><input type="radio" name="p3g" value="즐겼다">즐겼다</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p3n" value="넓어서">넓어서</label>
+                <label class="opt"><input type="radio" name="p3n" value="깨끗해서">깨끗해서</label>
+                <label class="opt"><input type="radio" name="p3n" value="비싸서">비싸서</label>
+                <label class="opt"><input type="radio" name="p3n" value="많지 않아서">많지 않아서</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="passage" id="p4" data-questions="p4g,p4n">
+          <div class="ptitle">
+            <h2>Q4. 피아노 연주</h2>
+            <span class="tag">음악</span>
+          </div>
+          <div class="passage-text">
+            피아노는 사람들이 자주 <span class="blank" data-qname="p4g" data-placeholder="( ㄱ )">( ㄱ )</span> 악기입니다. 건반을 손가락으로 <span class="blank" data-qname="p4n" data-placeholder="( ㄴ )">( ㄴ )</span> 소리를 냅니다.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p4g" value="잠자는">잠자는</label>
+                <label class="opt"><input type="radio" name="p4g" value="연주하는">연주하는</label>
+                <label class="opt"><input type="radio" name="p4g" value="씻는">씻는</label>
+                <label class="opt"><input type="radio" name="p4g" value="걷는">걷는</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p4n" value="불어서">불어서</label>
+                <label class="opt"><input type="radio" name="p4n" value="당겨서">당겨서</label>
+                <label class="opt"><input type="radio" name="p4n" value="눌러서">눌러서</label>
+                <label class="opt"><input type="radio" name="p4n" value="튕겨서">튕겨서</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="passage" id="p5" data-questions="p5g,p5n">
+          <div class="ptitle">
+            <h2>Q5. 가계부 쓰기</h2>
+            <span class="tag">경제</span>
+          </div>
+          <div class="passage-text">
+            부자가 되려면 작은 돈부터 <span class="blank" data-qname="p5g" data-placeholder="( ㄱ )">( ㄱ )</span>. 영수증을 모으고 쓸데없는 지출을 줄이는 습관을 지금 바로 <span class="blank" data-qname="p5n" data-placeholder="( ㄴ )">( ㄴ )</span>.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p5g" value="마음대로 써야 합니다">마음대로 써야 합니다</label>
+                <label class="opt"><input type="radio" name="p5g" value="아껴 써야 합니다">아껴 써야 합니다</label>
+                <label class="opt"><input type="radio" name="p5g" value="버려야 합니다">버려야 합니다</label>
+                <label class="opt"><input type="radio" name="p5g" value="남에게 줘야 합니다">남에게 줘야 합니다</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p5n" value="실천합시다">실천합시다</label>
+                <label class="opt"><input type="radio" name="p5n" value="포기합시다">포기합시다</label>
+                <label class="opt"><input type="radio" name="p5n" value="늦춥시다">늦춥시다</label>
+                <label class="opt"><input type="radio" name="p5n" value="잊읍시다">잊읍시다</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+        
+        <section class="passage" id="p6" data-questions="p6g,p6n">
+          <div class="ptitle">
+            <h2>Q6. 기타 연주</h2>
+            <span class="tag">음악</span>
+          </div>
+          <div class="passage-text">
+            기타는 사람들이 자주 <span class="blank" data-qname="p6g" data-placeholder="( ㄱ )">( ㄱ )</span> 악기입니다. 목 부분이 길고 6개의 줄이 있는데, 이 줄을 손으로 <span class="blank" data-qname="p6n" data-placeholder="( ㄴ )">( ㄴ )</span> 연주합니다.
+          </div>
+          <form class="quiz">
+            <fieldset>
+              <legend>1. (ㄱ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p6g" value="연주하는">연주하는</label>
+                <label class="opt"><input type="radio" name="p6g" value="입는">입는</label>
+                <label class="opt"><input type="radio" name="p6g" value="읽는">읽는</label>
+                <label class="opt"><input type="radio" name="p6g" value="요리하는">요리하는</label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>2. (ㄴ)에 알맞은 말은?</legend>
+              <div class="opts">
+                <label class="opt"><input type="radio" name="p6n" value="눌러서">눌러서</label>
+                <label class="opt"><input type="radio" name="p6n" value="두드려서">두드려서</label>
+                <label class="opt"><input type="radio" name="p6n" value="튕겨서">튕겨서</label>
+                <label class="opt"><input type="radio" name="p6n" value="불어서">불어서</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="controls">
+            <div class="feedback">미채점</div>
+            <div>
+              <button type="button" class="resetBtn">초기화</button>
+              <button type="button" class="gradeBtn">채점</button>
+            </div>
+          </div>
+        </section>
+
+      </div> <p class="mini-tip">
+        Tip: 우측 상단 '정답 표시'를 켜면 학습 모드로 전환됩니다.
+      </p>
+
+    </div>
+  </main>
+
+  <script>
+    /* --- Data & Constants --- */
+    const ANSWER_KEY = {
+      p1g: "늦잠을 잤습니다", p1n: "버스를 탔습니다",
+      p2g: "아껴야 합니다", p2n: "실천합시다",
+      p3g: "즐길 수 있습니다", p3n: "많지 않아서",
+      p4g: "연주하는", p4n: "눌러서",
+      p5g: "아껴 써야 합니다", p5n: "실천합시다",
+      p6g: "연주하는", p6n: "튕겨서"
+    };
+
+    const ALL_QNAMES = Object.keys(ANSWER_KEY);
+
+    /* --- Core Logic --- */
+    function markCorrectOptions() {
+      for (const [qname, correctValue] of Object.entries(ANSWER_KEY)) {
+        const inputs = document.querySelectorAll(`input[name="${qname}"]`);
+        inputs.forEach(input => {
+          if (input.value === correctValue) {
+            const label = input.closest("label.opt");
+            if (label) {
+              label.dataset.correct = "true";
+              if (!label.querySelector(".answer-tag")) {
+                const tag = document.createElement("span");
+                tag.className = "answer-tag";
+                tag.textContent = "정답";
+                label.appendChild(tag);
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function setBlankText(qname, text, stateClass) {
+      const blank = document.querySelector(`.blank[data-qname="${qname}"]`);
+      if (!blank) return;
+      blank.textContent = text ?? blank.dataset.placeholder ?? "(   )";
+      blank.classList.add("blank-filled");
+      blank.classList.remove("blank-correct", "blank-wrong");
+      // Trigger reflow for animation
+      if (stateClass === "blank-wrong") {
+        void blank.offsetWidth;
+      }
+      if (stateClass) blank.classList.add(stateClass);
+    }
+
+    function resetBlank(qname) {
+      const blank = document.querySelector(`.blank[data-qname="${qname}"]`);
+      if (!blank) return;
+      blank.textContent = blank.dataset.placeholder ?? "(   )";
+      blank.classList.remove("blank-filled", "blank-correct", "blank-wrong");
+    }
+
+    function evaluatePassage(section) {
+      const qnames = (section.dataset.questions || "").split(",").map(s => s.trim()).filter(Boolean);
+      let correctCount = 0;
+      let allAnswered = true;
+
+      qnames.forEach(qname => {
+        const correct = ANSWER_KEY[qname];
+        const checked = section.querySelector(`input[name="${qname}"]:checked`);
+        const val = checked ? checked.value : null;
+
+        // Reset styling first
+        section.querySelectorAll(`input[name="${qname}"]`).forEach(inp => {
+          inp.closest("label.opt").classList.remove("opt-correct", "opt-wrong");
+        });
+
+        if (val) {
+          setBlankText(qname, val, val === correct ? "blank-correct" : "blank-wrong");
+          
+          // Mark options
+          section.querySelectorAll(`input[name="${qname}"]`).forEach(inp => {
+            const label = inp.closest("label.opt");
+            if (inp.value === correct) label.classList.add("opt-correct");
+            else if (inp.checked) label.classList.add("opt-wrong");
+          });
+
+          if (val === correct) correctCount++;
+        } else {
+          allAnswered = false;
+          resetBlank(qname);
+        }
+      });
+
+      // Feedback Text
+      const fb = section.querySelector(".feedback");
+      if (fb) {
+        if (!allAnswered && correctCount === 0) {
+          fb.innerHTML = `<span style="color:var(--warn)">모든 문제를 풀어주세요.</span>`;
+        } else {
+          fb.innerHTML = `<strong>${correctCount} / ${qnames.length}</strong> 정답`;
+        }
+      }
+      updateProgress();
+    }
+
+    function resetPassage(section) {
+      const qnames = (section.dataset.questions || "").split(",").map(s => s.trim()).filter(Boolean);
+      qnames.forEach(qname => {
+        const checked = section.querySelector(`input[name="${qname}"]:checked`);
+        if (checked) checked.checked = false;
+        
+        section.querySelectorAll(`input[name="${qname}"]`).forEach(inp => {
+          inp.closest("label.opt").classList.remove("opt-correct", "opt-wrong");
+        });
+        resetBlank(qname);
+      });
+      const fb = section.querySelector(".feedback");
+      if (fb) fb.textContent = "미채점";
+      updateProgress();
+    }
+
+    function updateProgress() {
+      let answered = 0;
+      let total = ALL_QNAMES.length;
+      
+      ALL_QNAMES.forEach(qname => {
+        if (document.querySelector(`input[name="${qname}"]:checked`)) answered++;
+      });
+
+      const pct = Math.round((answered / total) * 100);
+      document.getElementById("progressFill").style.width = pct + "%";
+      document.getElementById("progressText").textContent = `${answered} / ${total} 완료`;
+    }
+
+    /* --- View Mode Toggle (PC) --- */
+    function toggleViewMode() {
+      const wrap1 = document.getElementById("mainWrap");
+      const wrap2 = document.getElementById("contentWrap");
+      const icon = document.getElementById("viewModeIcon");
+      const isGrid = wrap1.classList.contains("grid-mode");
+
+      if (isGrid) {
+        wrap1.classList.remove("grid-mode");
+        wrap2.classList.remove("grid-mode");
+        icon.textContent = "▦ 가로 모드";
+      } else {
+        wrap1.classList.add("grid-mode");
+        wrap2.classList.add("grid-mode");
+        icon.textContent = "▤ 세로 모드";
+      }
+    }
+
+    /* --- Init --- */
+    document.addEventListener("DOMContentLoaded", () => {
+      markCorrectOptions();
+
+      // Events: Live Text Update
+      document.querySelectorAll("input[type=radio]").forEach(inp => {
+        inp.addEventListener("change", () => {
+          setBlankText(inp.name, inp.value, null);
+          updateProgress();
+        });
+      });
+
+      // Events: Buttons
+      document.querySelectorAll(".gradeBtn").forEach(btn => {
+        btn.addEventListener("click", e => evaluatePassage(e.target.closest("section")));
+      });
+      document.querySelectorAll(".resetBtn").forEach(btn => {
+        btn.addEventListener("click", e => resetPassage(e.target.closest("section")));
+      });
+
+      document.getElementById("gradeAllBtn").addEventListener("click", () => {
+        document.querySelectorAll("section.passage").forEach(evaluatePassage);
+      });
+      document.getElementById("resetAllBtn").addEventListener("click", () => {
+        document.querySelectorAll("section.passage").forEach(resetPassage);
+      });
+
+      document.getElementById("showAnswersToggle").addEventListener("change", (e) => {
+        document.body.classList.toggle("show-answers", e.target.checked);
+      });
+
+      // View Mode Event
+      const viewBtn = document.getElementById("viewModeBtn");
+      if (viewBtn) viewBtn.addEventListener("click", toggleViewMode);
+    });
+  </script>
+</body>
+</html>
